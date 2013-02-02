@@ -20,8 +20,8 @@ class ModelTest(TestCase):
         self.assertTrue(album.is_user_member(self.amanda.id))
         self.assertFalse(album.is_user_member(self.barney.id))
 
-        self.assertEqual(Album.objects.get_user_albums(self.amanda.id)[0], album)
-        self.assertFalse(Album.objects.get_user_albums(self.barney.id))
+        self.assertEqual(list(Album.objects.get_user_albums(self.amanda.id)), [album])
+        self.assertEqual(list(Album.objects.get_user_albums(self.barney.id)), [])
 
         photo_id = Photo.objects.upload_request(self.amanda)
         self.assertTrue(PendingPhoto.objects.filter(photo_id=photo_id).exists())
@@ -34,3 +34,5 @@ class ModelTest(TestCase):
         # These are the dummy values that are currently hardcoded:
         self.assertEqual(new_photo.width, 640)
         self.assertEqual(new_photo.height, 480)
+
+        self.assertEqual(list(album.get_photos()), [new_photo])
