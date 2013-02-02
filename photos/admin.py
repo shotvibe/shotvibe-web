@@ -1,5 +1,6 @@
 from django.contrib import admin
-from models import Album, Photo
+
+from photos.models import Album, Photo
 
 class PhotoAdminInline(admin.TabularInline):
     model = Photo
