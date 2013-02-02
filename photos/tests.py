@@ -36,3 +36,17 @@ class ModelTest(TestCase):
         self.assertEqual(new_photo.height, 480)
 
         self.assertEqual(list(album.get_photos()), [new_photo])
+
+    def test_album_last_updated_photo_upload(self):
+        create_date = datetime.datetime(2010, 1, 1, tzinfo=utc)
+
+        the_album = Album.objects.create_album(self.amanda, 'Ski Trip', create_date)
+        self.assertEqual(the_album.last_updated, create_date)
+
+        update_date = datetime.datetime(2010, 1, 2, tzinfo=utc)
+
+        photo_id = Photo.objects.upload_request(self.amanda)
+        # Pretend that the photo was uploaded
+        Photo.objects.upload_to_album(photo_id, the_album, update_date)
+
+        self.assertEqual(the_album.last_updated, update_date)

@@ -85,6 +85,9 @@ class PhotoManager(models.Manager):
 
         pending_photo.delete()
 
+        album.last_updated = date_created
+        album.save(update_fields=['last_updated'])
+
         return new_photo
 
 class Photo(models.Model):
