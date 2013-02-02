@@ -10,6 +10,7 @@ urlpatterns = patterns('',
     url(r'^albums/(?P<pk>\d+)/$', views.AlbumDetail.as_view(), name='album-detail'),
     url(r'^users/$', views.UserList.as_view(), name='user-list'),
     url(r'^users/(?P<pk>\d+)/$', views.UserDetail.as_view(), name='user-detail'),
+    url(r'^photos/upload_request/$', views.photos_upload_request, name='photos-upload-request'),
 )
 
 # Format suffixes

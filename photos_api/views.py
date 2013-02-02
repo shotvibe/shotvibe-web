@@ -3,14 +3,14 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 
 from rest_framework import generics
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.reverse import reverse
 from rest_framework.response import Response
 #from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import BasePermission, IsAdminUser, IsAuthenticated
 from rest_framework import status
 
-from photos.models import Album
+from photos.models import Album, Photo
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, UserSerializer, AlbumUpdateSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
@@ -22,6 +22,7 @@ def api_root(request, format=None):
     response_data = {
         'all_albums': reverse('album-list', request=request),
         'all_users': reverse('user-list', request=request),
+        'upload_photos': reverse('photos-upload-request', request=request),
     }
     return Response(response_data)
 
@@ -113,3 +114,18 @@ class Albums(generics.ListAPIView):
 
     def get_queryset(self):
         return self.albums
+
+@api_view(['POST'])
+@permission_classes((IsAuthenticated, ))
+def photos_upload_request(request, format=None):
+    """
+    Use the GET parameter `num_photos` to specify how many photos you would
+    like to upload
+    """
+    num_photos = int(request.GET.get('num_photos', 1))
+
+    response_data = []
+    for i in xrange(num_photos):
+        response_data.append({ 'photo_id': Photo.objects.upload_request(request.user) })
+
+    return Response(response_data)
