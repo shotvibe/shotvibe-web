@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
-from photos.image_processing import process_uploaded_image
+from photos.image_uploads import process_uploaded_image
 
 class AlbumManager(models.Manager):
     def create_album(self, creator, name, date_created):

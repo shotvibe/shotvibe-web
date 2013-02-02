@@ -10,7 +10,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import BasePermission, IsAdminUser, IsAuthenticated
 from rest_framework import status
 
-from photos.models import Album, Photo
+from photos.image_uploads import handle_file_upload
+from photos.models import Album, Photo, PendingPhoto
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, UserSerializer, AlbumUpdateSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
@@ -22,7 +23,7 @@ def api_root(request, format=None):
     response_data = {
         'all_albums': reverse('album-list', request=request),
         'all_users': reverse('user-list', request=request),
-        'upload_photos': reverse('photos-upload-request', request=request),
+        'upload_photos_request': reverse('photos-upload-request', request=request),
     }
     return Response(response_data)
 
@@ -126,6 +127,25 @@ def photos_upload_request(request, format=None):
 
     response_data = []
     for i in xrange(num_photos):
-        response_data.append({ 'photo_id': Photo.objects.upload_request(request.user) })
+        photo_id = Photo.objects.upload_request(request.user)
+        response_data.append({
+            'photo_id': photo_id,
+            'upload_url': reverse('photo-upload', [photo_id], request=request)
+            })
 
     return Response(response_data)
+
+@api_view(['POST'])
+@permission_classes((IsAuthenticated, ))
+def photo_upload(request, photo_id, format=None):
+    pending_photo = get_object_or_404(PendingPhoto, pk=photo_id)
+    if pending_photo.author != request.user:
+        return Response(status=403)
+
+    location, directory = pending_photo.bucket.split(':')
+    if location != 'local':
+        raise ValueError('Unknown photo bucket location: ' + location)
+
+    handle_file_upload(directory, photo_id, request.FILES['photo'].chunks())
+
+    return Response()

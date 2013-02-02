@@ -11,6 +11,7 @@ urlpatterns = patterns('',
     url(r'^users/$', views.UserList.as_view(), name='user-list'),
     url(r'^users/(?P<pk>\d+)/$', views.UserDetail.as_view(), name='user-detail'),
     url(r'^photos/upload_request/$', views.photos_upload_request, name='photos-upload-request'),
+    url(r'^photos/upload/(?P<photo_id>[\w-]+)/$', views.photo_upload, name='photo-upload'),
 )
 
 # Format suffixes
