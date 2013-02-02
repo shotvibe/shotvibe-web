@@ -1,6 +1,6 @@
 import datetime
 
-from django.contrib.auth.models import User
+from django.contrib import auth
 from django.test import TestCase
 from django.utils.timezone import utc
 
@@ -10,8 +10,8 @@ class ModelTest(TestCase):
     fixtures = ['tests/test_users']
 
     def setUp(self):
-        self.amanda = User.objects.get(username='amanda')
-        self.barney = User.objects.get(username='barney')
+        self.amanda = auth.get_user_model().objects.get(username='amanda')
+        self.barney = auth.get_user_model().objects.get(username='barney')
 
     def test_create_new_album(self):
         the_date = datetime.datetime(2010, 1, 1, tzinfo=utc)
