@@ -107,6 +107,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'rest_framework',
     'photos',
+    'photos_api',
 )
 
 # A sample logging configuration. The only tangible logging
