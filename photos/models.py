@@ -13,7 +13,8 @@ class AlbumManager(models.Manager):
                 date_created = date_created,
                 name = name,
                 creator = creator,
-                last_updated = date_created
+                last_updated = date_created,
+                revision_number = 0
                 )
         album.members.add(creator.id)
         return album
@@ -27,6 +28,7 @@ class Album(models.Model):
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='+')
     members = models.ManyToManyField(settings.AUTH_USER_MODEL)
     last_updated = models.DateTimeField()
+    revision_number = models.IntegerField()
 
     objects = AlbumManager()
 
@@ -38,6 +40,9 @@ class Album(models.Model):
 
     def is_user_member(self, user_id):
         return self.members.filter(id=user_id).exists()
+
+    def get_etag(self):
+        return u'{0}'.format(self.revision_number)
 
 all_photo_buckets = (
         'local:photos01',
@@ -86,6 +91,7 @@ class PhotoManager(models.Manager):
         pending_photo.delete()
 
         album.last_updated = date_created
+        Album.objects.filter(pk=album.id).update(revision_number=models.F('revision_number')+1)
         album.save(update_fields=['last_updated'])
 
         return new_photo

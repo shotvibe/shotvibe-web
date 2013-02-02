@@ -30,9 +30,11 @@ class AlbumSerializer(serializers.ModelSerializer):
 class AlbumNameSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Album
-        fields = ('id', 'url', 'name', 'last_updated')
+        fields = ('id', 'url', 'name', 'last_updated', 'etag')
 
     id = serializers.IntegerField(source='id')
+
+    etag = serializers.IntegerField(source='get_etag')
 
     id.read_only = True
 

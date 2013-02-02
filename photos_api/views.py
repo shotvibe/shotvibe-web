@@ -12,7 +12,7 @@ from rest_framework import status
 
 from photos.models import Album
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, UserSerializer, AlbumUpdateSerializer
-from photos_api.last_modified import supports_last_modified
+from photos_api.check_modified import supports_last_modified, supports_etag
 
 @api_view(['GET'])
 def api_root(request, format=None):
@@ -41,7 +41,7 @@ class IsUserInAlbum(BasePermission):
         album = get_object_or_404(Album, pk=album_id)
         return album.is_user_member(request.user.id)
 
-@supports_last_modified
+@supports_etag
 class AlbumDetail(generics.RetrieveAPIView):
     model = Album
     serializer_class = AlbumSerializer
@@ -51,8 +51,8 @@ class AlbumDetail(generics.RetrieveAPIView):
         self.album = get_object_or_404(Album, pk=pk)
         return super(AlbumDetail, self).initial(request, pk, *args, **kwargs)
 
-    def last_modified(self, request, pk):
-        return self.album.last_updated
+    def get_etag(self, request, pk):
+        return self.album.get_etag()
 
     def post(self, request, pk):
         serializer = AlbumUpdateSerializer(data=request.DATA)
