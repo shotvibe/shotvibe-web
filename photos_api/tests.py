@@ -240,3 +240,28 @@ class PhotoUpload(BaseTestCase):
         self.assertEqual(len(album_json['members']), 2)
         self.assertIn(2, album_json['members']) # amanda
         self.assertIn(3, album_json['members']) # barney
+
+class MembersTests(BaseTestCase):
+    def setUp(self):
+        self.client.login(username='amanda', password='amanda')
+
+    def test_add_members(self):
+        album_before_response = self.client.get('/albums/9/')
+        members_before = json.loads(album_before_response.content)['members']
+        etag = album_before_response['etag']
+
+        add_members = { 'add_members': [
+            { 'user_id': 3 },
+            { 'user_id': 4 },
+            { 'user_id': 12 }
+            ] }
+
+        add_response = self.client.post('/albums/9/', content_type='application/json', data=json.dumps(add_members))
+        self.assertEqual(add_response.status_code, 200)
+
+        album_after_response = self.client.get('/albums/9/', HTTP_IF_NONE_MATCH=etag)
+        self.assertEqual(album_after_response.status_code, 200)
+
+        members_after = json.loads(album_after_response.content)['members']
+
+        self.assertEqual(set(members_before + [3, 4, 12]), set(members_after))

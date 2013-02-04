@@ -65,6 +65,12 @@ class AlbumDetail(generics.RetrieveAPIView):
         for photo_id in serializer.object.add_photos:
             # TODO Catch exception
             Photo.objects.upload_to_album(photo_id, self.album, now)
+        add_member_ids = []
+        for member in serializer.object.add_members:
+            if member.user_id:
+                add_member_ids.append(member.user_id)
+        self.album.add_members(add_member_ids, now)
+
         return self.get(request, pk)
 
 class UserList(generics.ListCreateAPIView):

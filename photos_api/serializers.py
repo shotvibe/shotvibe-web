@@ -65,16 +65,6 @@ class PhotoListField(serializers.WritableField):
             result.append(p['photo_id'])
         return result
 
-class AlbumUpdate(object):
-    def __init__(self, add_photos=None):
-        self.add_photos = add_photos or []
-
-class AlbumUpdateSerializer(serializers.Serializer):
-    add_photos = PhotoListField()
-
-    def restore_object(self, attrs, instance=None):
-        return AlbumUpdate(add_photos=attrs['add_photos'])
-
 class MemberIdentifier(object):
     def __init__(self, user_id=None, phone_number=None, default_country=None):
         self.user_id = user_id
@@ -97,6 +87,18 @@ class MemberIdentifierSerializer(serializers.Serializer):
             return MemberIdentifier(user_id=attrs['user_id'])
         else:
             return MemberIdentifier(phone_number=attrs['phone_number'], default_country=attrs['default_country'])
+
+class AlbumUpdate(object):
+    def __init__(self, add_photos=None, add_members=None):
+        self.add_photos = add_photos or []
+        self.add_members = add_members or []
+
+class AlbumUpdateSerializer(serializers.Serializer):
+    add_photos = PhotoListField(required=False)
+    add_members = ListField(MemberIdentifierSerializer, required=False)
+
+    def restore_object(self, attrs, instance=None):
+        return AlbumUpdate(add_photos=attrs.get('add_photos'), add_members=attrs.get('add_members'))
 
 class AlbumAdd(object):
     def __init__(self, album_name=None, members=None, photos=None):

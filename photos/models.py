@@ -32,6 +32,15 @@ class Album(models.Model):
 
     objects = AlbumManager()
 
+    def save_revision(self, revision_date):
+        self.last_updated = revision_date
+        Album.objects.filter(pk=self.id).update(revision_number=models.F('revision_number')+1)
+        self.save(update_fields=['last_updated'])
+
+    def add_members(self, user_ids, date_added):
+        self.members.add(*user_ids)
+        self.save_revision(date_added)
+
     def __unicode__(self):
         return u'{0} {1}'.format(self.id, self.name)
 
@@ -90,9 +99,7 @@ class PhotoManager(models.Manager):
 
         pending_photo.delete()
 
-        album.last_updated = date_created
-        Album.objects.filter(pk=album.id).update(revision_number=models.F('revision_number')+1)
-        album.save(update_fields=['last_updated'])
+        album.save_revision(date_created)
 
         return new_photo
 
