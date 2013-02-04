@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 #from django.http import HttpResponseNotModified
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
@@ -60,7 +61,10 @@ class AlbumDetail(generics.RetrieveAPIView):
         serializer = AlbumUpdateSerializer(data=request.DATA)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        self.album.add_photos(serializer.object.add_photos, request.user)
+        now = timezone.now()
+        for photo_id in serializer.object.add_photos:
+            # TODO Catch exception
+            Photo.objects.upload_to_album(photo_id, self.album, now)
         return self.get(request, pk)
 
 class UserList(generics.ListCreateAPIView):

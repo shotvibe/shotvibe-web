@@ -56,26 +56,3 @@ class AlbumUpdateSerializer(serializers.Serializer):
 
     def restore_object(self, attrs, instance=None):
         return AlbumUpdate(add_photos=attrs['add_photos'])
-
-class PhotoSerializer(serializers.Serializer):
-    photo_id = serializers.CharField(max_length=128)
-
-    def restore_object(self, attrs, instance=None):
-        return attrs['photo_id']
-
-class PhotoListSerializer(serializers.Serializer):
-    add_photos = PhotoListField()
-
-    def restore_object(self, attrs, instance=None):
-        print 'restore_object'
-        print attrs
-        return attrs['add_photos']
-
-
-#    def restore_object(self, attrs, instance=None):
-#        if instance is not None:
-#            instance.title = attrs['title']
-#            instance.content = attrs['content']
-#            instance.created = attrs['created']
-#            return instance
-#        return None
