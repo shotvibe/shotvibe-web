@@ -3,6 +3,24 @@ from rest_framework import serializers
 
 from photos.models import Album, Photo
 
+class ListField(serializers.WritableField):
+    """
+    Utility class for a field that is a list of serializable elements
+    """
+    def __init__(self, element_serializer_type, *args, **kwargs):
+        super(ListField, self).__init__(*args, **kwargs)
+        self.element_serializer_type = element_serializer_type
+
+    def from_native(self, data):
+        result = []
+        for e in data:
+            serializer = self.element_serializer_type(data=e)
+            if not serializer.is_valid():
+                # TODO better error handling
+                raise serializer.errors
+            result.append(serializer.object)
+        return result
+
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
@@ -79,3 +97,17 @@ class MemberIdentifierSerializer(serializers.Serializer):
             return MemberIdentifier(user_id=attrs['user_id'])
         else:
             return MemberIdentifier(phone_number=attrs['phone_number'], default_country=attrs['default_country'])
+
+class AlbumAdd(object):
+    def __init__(self, album_name=None, members=None, photos=None):
+        self.album_name = album_name
+        self.members = members
+        self.photos = photos
+
+class AlbumAddSerializer(serializers.Serializer):
+    album_name = serializers.CharField()
+    members = ListField(MemberIdentifierSerializer)
+    photos = PhotoListField()
+
+    def restore_object(self, attrs, instance=None):
+        return AlbumAdd(album_name=attrs['album_name'], members=attrs['members'], photos=attrs['photos'])
