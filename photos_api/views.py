@@ -13,7 +13,7 @@ from rest_framework import status
 
 from photos.image_uploads import handle_file_upload
 from photos.models import Album, Photo, PendingPhoto
-from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, UserSerializer, AlbumUpdateSerializer
+from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
 @api_view(['GET'])
@@ -119,6 +119,22 @@ class Albums(generics.ListAPIView):
 
     def get_queryset(self):
         return self.albums
+
+    def post(self, request):
+        serializer = AlbumAddSerializer(data=request.DATA)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        now = timezone.now()
+        album = Album.objects.create_album(self.request.user, serializer.object.album_name, now)
+        for member in serializer.object.members:
+            if member.user_id:
+                album.members.add(member.user_id)
+            else:
+                # TODO Add members from phone number
+                pass
+        for photo_id in serializer.object.photos:
+            Photo.objects.upload_to_album(photo_id, album, now)
+        return Response(status=status.HTTP_302_FOUND, headers={ 'Location': reverse('album-detail', [album.id], request=request) })
 
 @api_view(['POST'])
 @permission_classes((IsAuthenticated, ))

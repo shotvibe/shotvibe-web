@@ -205,3 +205,38 @@ class PhotoUpload(BaseTestCase):
 
         all_album_photos = [x['photo_id'] for x in album_json['photos']]
         self.assertIn(photo_id, all_album_photos)
+
+    def test_create_album(self):
+        upload_request_response = self.client.post('/photos/upload_request/')
+        self.assertEqual(upload_request_response.status_code, 200)
+        upload_request_json = json.loads(upload_request_response.content)
+
+        photo_id = upload_request_json[0]['photo_id']
+        upload_url = upload_request_json[0]['upload_url']
+
+        test_photo_path = 'photos/test_photos/death-valley-sand-dunes.jpg'
+
+        with open(test_photo_path, 'rb') as f:
+            upload_response = self.client.post(upload_url, { 'photo': f })
+        self.assertEqual(upload_response.status_code, 200)
+
+        members = [ { 'user_id': 3 } ] # barney
+
+        new_album_data = {
+                'album_name': 'My New Album',
+                'members': members,
+                'photos': [
+                    { 'photo_id': photo_id }
+                    ]
+                }
+
+        create_response = self.client.post('/albums/', content_type='application/json', data=json.dumps(new_album_data), follow=True)
+        self.assertEqual(create_response.status_code, 200)
+
+        album_json = json.loads(create_response.content)
+        self.assertEqual(album_json['name'], 'My New Album')
+        self.assertEqual(len(album_json['photos']), 1)
+        self.assertEqual(album_json['photos'][0]['photo_id'], photo_id)
+        self.assertEqual(len(album_json['members']), 2)
+        self.assertIn(2, album_json['members']) # amanda
+        self.assertIn(3, album_json['members']) # barney
