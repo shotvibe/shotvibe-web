@@ -11,7 +11,7 @@ from django.utils import timezone
 
 from photos.models import Album, Photo, PendingPhoto
 
-from photos_api.serializers import AlbumUpdateSerializer
+from photos_api.serializers import AlbumUpdateSerializer, MemberIdentifier, MemberIdentifierSerializer
 
 class BaseTestCase(TestCase):
     fixtures = ['tests/test_users', 'tests/test_albums']
@@ -105,6 +105,25 @@ class Serializers(TestCase):
         if not serializer.is_valid():
             self.fail(serializer.errors)
         self.assertEqual(serializer.object.add_photos, ['test_photo_1', 'test_photo_2'])
+
+    def test_member_identifier_user_id(self):
+        test_data = {
+                'user_id': 3
+                }
+        serializer = MemberIdentifierSerializer(data=test_data)
+        if not serializer.is_valid():
+            self.fail(serializer.errors)
+        self.assertEqual(serializer.object, MemberIdentifier(user_id=3))
+
+    def test_member_identifier_phone_number(self):
+        test_data = {
+                'phone_number': '212-718-9999',
+                'default_country': 'US'
+                }
+        serializer = MemberIdentifierSerializer(data=test_data)
+        if not serializer.is_valid():
+            self.fail(serializer.errors)
+        self.assertEqual(serializer.object, MemberIdentifier(phone_number='212-718-9999', default_country='US'))
 
 @override_settings(LOCAL_PHOTO_BUCKETS_BASE_PATH='.tmp_photo_buckets')
 class PhotoUpload(BaseTestCase):

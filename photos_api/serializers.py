@@ -56,3 +56,26 @@ class AlbumUpdateSerializer(serializers.Serializer):
 
     def restore_object(self, attrs, instance=None):
         return AlbumUpdate(add_photos=attrs['add_photos'])
+
+class MemberIdentifier(object):
+    def __init__(self, user_id=None, phone_number=None, default_country=None):
+        self.user_id = user_id
+        self.phone_number = phone_number
+        self.default_country = default_country
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def __repr__(self):
+        return repr(self.__dict__)
+
+class MemberIdentifierSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField(required=False)
+    phone_number = serializers.CharField(required=False)
+    default_country = serializers.CharField(required=False, min_length=2, max_length=2)
+
+    def restore_object(self, attrs, instance=None):
+        if 'user_id' in attrs:
+            return MemberIdentifier(user_id=attrs['user_id'])
+        else:
+            return MemberIdentifier(phone_number=attrs['phone_number'], default_country=attrs['default_country'])
