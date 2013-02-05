@@ -1,12 +1,91 @@
+import abc
+from PIL import Image
+
 from django.conf import settings
 
 import os, errno
 
-def process_uploaded_image(bucket, photo_id):
-    # TODO open the image and resize it to all sizes
+class ImageDimensions(object):
+    __metaclass__ = abc.ABCMeta
 
-    # return temporary dummy width and height:
-    return (640, 480)
+    @abc.abstractmethod
+    def get_image_dimensions(self, width, height):
+        """
+        Returns a (width, height) tuple of the dimensions that the image should
+        be resized to
+        """
+        return
+
+class BoxMixin(object):
+    def __init__(self, box_width, box_height):
+        self.box_width = box_width
+        self.box_height = box_height
+
+class BoxFitExpanded(ImageDimensions, BoxMixin):
+    def get_image_dimensions(self, width, height):
+        if width * self.box_height > self.box_width * height:
+            new_height = self.box_height
+            new_width = new_height * width / height
+        else:
+            new_width = self.box_width
+            new_height = new_width * height / width
+        return (new_width, new_height)
+
+class BoxFitWithRotation(ImageDimensions, BoxMixin):
+    def fit(self, width, height):
+        if width * self.box_height > self.box_width * height:
+            new_width = self.box_width
+            new_height = new_width * height / width
+        else:
+            new_height = self.box_height
+            new_width = new_height * width / height
+        return (new_width, new_height)
+
+    def get_image_dimensions(self, width, height):
+        landscape_width, landscape_height = self.fit(width, height)
+        portrait_width, portrait_height = self.fit(height, width)
+
+        if landscape_width > portrait_width or landscape_height > portrait_height:
+            return (landscape_width, landscape_height)
+        else:
+            return (portrait_width, portrait_height)
+
+class BoxFitWithRotationOnlyShrink(BoxFitWithRotation):
+    def get_image_dimensions(self, width, height):
+        (new_width, new_height) = super(BoxFitWithRotationOnlyShrink, self).get_image_dimensions(width, height)
+        if new_width <= width and new_height <= height:
+            return (new_width, new_height)
+        else:
+            return (width, height)
+
+image_sizes = {
+        'thumb75': BoxFitExpanded(75, 75),
+        'iphone3': BoxFitWithRotationOnlyShrink(480, 320),
+        'iphone4': BoxFitWithRotationOnlyShrink(960, 640),
+        'iphone5': BoxFitWithRotationOnlyShrink(1136, 640)
+        }
+
+def process_uploaded_image(bucket, photo_id):
+    location, directory = bucket.split(':')
+    if location != 'local':
+        raise ValueError('Unknown photo bucket location: ' + location)
+
+    bucket_directory = os.path.join(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, directory)
+    img_file_path = os.path.join(bucket_directory, photo_id + '.jpg')
+
+    img = Image.open(img_file_path)
+    (img_width, img_height) = (img.size[0], img.size[1])
+
+    # TODO Optimization: If multiple image targets happen to have the same
+    # dimensions then re-use the result, either by copying the file, or using a
+    # symlink
+
+    for image_size_str, image_dimensions_calculator in image_sizes.iteritems():
+        (new_width, new_height) = image_dimensions_calculator.get_image_dimensions(img_width, img_height)
+        new_img = img.resize((new_width, new_height), Image.ANTIALIAS)
+        new_img.save(os.path.join(bucket_directory, photo_id + '_' + image_size_str + '.jpg'))
+
+    return (img_width, img_height)
 
 def handle_file_upload(directory, photo_id, chunks):
     bucket_directory = os.path.join(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, directory)

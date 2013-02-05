@@ -4,15 +4,14 @@ import os
 import shutil
 
 from django.conf import settings
-from django.contrib import auth
 from django.test import TestCase
 from django.test.utils import override_settings
-from django.utils import timezone
 
-from photos.models import Album, Photo, PendingPhoto
+from photos.models import PendingPhoto
 
 from photos_api.serializers import AlbumUpdateSerializer, MemberIdentifier, MemberIdentifierSerializer, AlbumAddSerializer
 
+@override_settings(LOCAL_PHOTO_BUCKETS_BASE_PATH='.tmp_photo_buckets')
 class BaseTestCase(TestCase):
     fixtures = ['tests/test_users', 'tests/test_albums']
     urls = 'photos_api.urls'
@@ -65,10 +64,19 @@ class NotModifiedTest(BaseTestCase):
         self.assertEqual(second_response.status_code, 304)
 
         # Add a new photo to the album
-        album = Album.objects.get(pk=8)
-        barney = auth.get_user_model().objects.get(username='barney')
-        photo_id = Photo.objects.upload_request(barney)
-        Photo.objects.upload_to_album(photo_id, album, timezone.now())
+        upload_request_response = self.client.post('/photos/upload_request/')
+        upload_request_json = json.loads(upload_request_response.content)
+
+        photo_id = upload_request_json[0]['photo_id']
+        upload_url = upload_request_json[0]['upload_url']
+
+        test_photo_path = 'photos/test_photos/death-valley-sand-dunes.jpg'
+
+        with open(test_photo_path, 'rb') as f:
+            self.client.post(upload_url, { 'photo': f })
+
+        photo_list = { 'add_photos': [ { 'photo_id': photo_id } ] }
+        self.client.post('/albums/8/', content_type='application/json', data=json.dumps(photo_list))
 
         # Album is changed so server must return a full response
         third_response = self.client.get('/albums/8/', HTTP_IF_NONE_MATCH=etag)
@@ -86,10 +94,19 @@ class NotModifiedTest(BaseTestCase):
         self.assertEqual(second_response.status_code, 304)
 
         # Add a new photo to the album
-        album = Album.objects.get(pk=8)
-        barney = auth.get_user_model().objects.get(username='barney')
-        photo_id = Photo.objects.upload_request(barney)
-        Photo.objects.upload_to_album(photo_id, album, timezone.now())
+        upload_request_response = self.client.post('/photos/upload_request/')
+        upload_request_json = json.loads(upload_request_response.content)
+
+        photo_id = upload_request_json[0]['photo_id']
+        upload_url = upload_request_json[0]['upload_url']
+
+        test_photo_path = 'photos/test_photos/death-valley-sand-dunes.jpg'
+
+        with open(test_photo_path, 'rb') as f:
+            self.client.post(upload_url, { 'photo': f })
+
+        photo_list = { 'add_photos': [ { 'photo_id': photo_id } ] }
+        self.client.post('/albums/8/', content_type='application/json', data=json.dumps(photo_list))
 
         # An album is changed so server must return a full response
         third_response = self.client.get('/albums/', HTTP_IF_MODIFIED_SINCE=date)
@@ -151,7 +168,6 @@ class Serializers(TestCase):
             ])
         self.assertEqual(serializer.object.photos, ['test_photo_1', 'test_photo_2'])
 
-@override_settings(LOCAL_PHOTO_BUCKETS_BASE_PATH='.tmp_photo_buckets')
 class PhotoUpload(BaseTestCase):
     def setUp(self):
         self.client.login(username='amanda', password='amanda')

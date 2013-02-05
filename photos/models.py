@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
-from photos.image_uploads import process_uploaded_image
+from photos import image_uploads
 
 class AlbumManager(models.Manager):
     def create_album(self, creator, name, date_created):
@@ -86,7 +86,7 @@ class PhotoManager(models.Manager):
         pending_photo = PendingPhoto.objects.get(photo_id=photo_id)
 
         # TODO catch exception:
-        width, height = process_uploaded_image(pending_photo.bucket, photo_id)
+        width, height = image_uploads.process_uploaded_image(pending_photo.bucket, photo_id)
 
         new_photo = Photo.objects.create(
                 photo_id=photo_id,
@@ -123,6 +123,14 @@ class Photo(models.Model):
             return settings.LOCAL_PHOTO_BUCKET_URL_FORMAT_STR.format(directory, self.photo_id)
         else:
             raise ValueError('Unknown photo bucket location: ' + location)
+
+    def get_image_dimensions(self, image_size_str=None):
+        if not image_size_str:
+            # Original Image dimensions
+            return (self.width, self.height)
+
+        image_dimensions_calculator = image_uploads.image_sizes[image_size_str]
+        return image_dimensions_calculator.get_image_dimensions(self.width, self.height)
 
 class PendingPhoto(models.Model):
     photo_id = models.CharField(primary_key=True, max_length=128)
