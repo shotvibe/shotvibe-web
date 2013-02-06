@@ -173,7 +173,7 @@ class PhotoUpload(BaseTestCase):
         self.client.login(username='amanda', password='amanda')
 
     def tearDown(self):
-        shutil.rmtree(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH)
+        shutil.rmtree(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, ignore_errors=True)
 
     def test_upload_single(self):
         upload_request_response = self.client.post('/photos/upload_request/')
