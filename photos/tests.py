@@ -1,5 +1,7 @@
 import datetime
+import shutil
 
+from django.conf import settings
 from django.contrib import auth
 from django.test import TestCase
 from django.utils.timezone import utc
@@ -27,6 +29,9 @@ class ModelTest(TestCase):
     def setUp(self):
         self.amanda = auth.get_user_model().objects.get(username='amanda')
         self.barney = auth.get_user_model().objects.get(username='barney')
+
+    def tearDown(self):
+        shutil.rmtree(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, ignore_errors=True)
 
     def test_create_new_album(self):
         the_date = datetime.datetime(2010, 1, 1, tzinfo=utc)
