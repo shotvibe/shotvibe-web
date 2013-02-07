@@ -3,11 +3,15 @@ import datetime
 
 from django.utils.http import http_date, parse_http_date_safe
 from django.utils.http import parse_etags, quote_etag
+from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework import status
 from rest_framework.response import Response
 
 def supports_last_modified(View):
+    # Note: session based authentication is explicitly CSRF validated,
+    # all other authentication is CSRF exempt.
+    @csrf_exempt
     def dispatch(self, request, *args, **kwargs):
         def get_not_modified_response():
             if not request.method in ('GET', 'HEAD'):
@@ -68,6 +72,9 @@ def supports_last_modified(View):
     return View
 
 def supports_etag(View):
+    # Note: session based authentication is explicitly CSRF validated,
+    # all other authentication is CSRF exempt.
+    @csrf_exempt
     def dispatch(self, request, *args, **kwargs):
         def get_not_modified_response(resource_etag):
             if not request.method in ('GET', 'HEAD'):
