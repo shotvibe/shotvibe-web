@@ -17,17 +17,17 @@ class BaseTestCase(TestCase):
     urls = 'photos_api.urls'
 
 class AnonymousTest(BaseTestCase):
-    def verify_403(self, url):
+    def verify_401(self, url):
         status = self.client.get(url).status_code
-        self.assertEqual(status, 403)
+        self.assertEqual(status, 401)
 
     def test_albums(self):
-        self.verify_403('/albums/')
+        self.verify_401('/albums/')
 
     def test_album_detail(self):
-        self.verify_403('/albums/1/')
-        self.verify_403('/albums/2/')
-        self.verify_403('/albums/3/')
+        self.verify_401('/albums/1/')
+        self.verify_401('/albums/2/')
+        self.verify_401('/albums/3/')
 
         status = self.client.get('/albums/11/').status_code
         self.assertEqual(status, 404)

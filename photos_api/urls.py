@@ -6,6 +6,7 @@ from photos_api import views
 
 urlpatterns = patterns('',
     url(r'^$', views.api_root),
+    url(r'^auth/', include('phone_auth.urls')),
     url(r'^albums/$', views.Albums.as_view(), name='album-list'),
     url(r'^albums/(?P<pk>\d+)/$', views.AlbumDetail.as_view(), name='album-detail'),
     url(r'^users/$', views.UserList.as_view(), name='user-list'),

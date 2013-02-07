@@ -107,6 +107,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'rest_framework',
     'photos',
+    'phone_auth',
     'photos_api',
 )
 
@@ -137,6 +138,13 @@ LOGGING = {
             'propagate': True,
         },
     }
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'phone_auth.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    )
 }
 
 try:
