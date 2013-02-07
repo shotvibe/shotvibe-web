@@ -1,4 +1,4 @@
-import uuid
+import os
 import random
 
 from django.conf import settings
@@ -64,7 +64,7 @@ class PhotoManager(models.Manager):
     def upload_request(self, author):
         success = False
         while not success:
-            new_id = unicode(uuid.uuid4())
+            new_id = Photo.generate_photo_id()
 
             new_pending_photo = PendingPhoto.objects.create(
                     photo_id = new_id,
@@ -116,6 +116,11 @@ class Photo(models.Model):
 
     class Meta:
         get_latest_by = 'date_created'
+
+    @staticmethod
+    def generate_photo_id():
+        key_bitsize = 256
+        return ''.join(["{0:02x}".format(ord(c)) for c in os.urandom(key_bitsize / 8)])
 
     def get_photo_url(self):
         location, directory = self.bucket.split(':')
