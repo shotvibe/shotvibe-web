@@ -84,13 +84,20 @@ class ImageUploads(TestCase):
 
     def test_box_fit_with_rotation(self):
         self.assertEqual(image_uploads.BoxFitWithRotation(480, 320).get_image_dimensions(640, 480), (426, 320))
-        self.assertEqual(image_uploads.BoxFitWithRotation(480, 320).get_image_dimensions(480, 640), (426, 320))
+        self.assertEqual(image_uploads.BoxFitWithRotation(480, 320).get_image_dimensions(480, 640), (320, 426))
         self.assertEqual(image_uploads.BoxFitWithRotation(480, 320).get_image_dimensions(320, 240), (426, 320))
         self.assertEqual(image_uploads.BoxFitWithRotation(480, 320).get_image_dimensions(320, 240), (426, 320))
+        self.assertEqual(image_uploads.BoxFitWithRotation(480, 320).get_image_dimensions(1200, 1941), (296, 480))
+        self.assertEqual(image_uploads.BoxFitWithRotation(480, 320).get_image_dimensions(1941, 1200), (480, 296))
+        self.assertEqual(image_uploads.BoxFitWithRotation(960, 640).get_image_dimensions(1200, 1941), (593, 960))
+        self.assertEqual(image_uploads.BoxFitWithRotation(960, 640).get_image_dimensions(1941, 1200), (960, 593))
+        self.assertEqual(image_uploads.BoxFitWithRotation(1136, 640).get_image_dimensions(1200, 1941), (640, 1035))
+        self.assertEqual(image_uploads.BoxFitWithRotation(1136, 640).get_image_dimensions(1941, 1200), (1035, 640))
+
 
     def test_box_fit_with_rotation_only_shrink(self):
         self.assertEqual(image_uploads.BoxFitWithRotationOnlyShrink(480, 320).get_image_dimensions(640, 480), (426, 320))
-        self.assertEqual(image_uploads.BoxFitWithRotationOnlyShrink(480, 320).get_image_dimensions(480, 640), (426, 320))
+        self.assertEqual(image_uploads.BoxFitWithRotationOnlyShrink(480, 320).get_image_dimensions(480, 640), (320, 426))
         self.assertEqual(image_uploads.BoxFitWithRotationOnlyShrink(480, 320).get_image_dimensions(320, 240), (320, 240))
         self.assertEqual(image_uploads.BoxFitWithRotationOnlyShrink(480, 320).get_image_dimensions(320, 240), (320, 240))
         self.assertEqual(image_uploads.BoxFitWithRotationOnlyShrink(960, 640).get_image_dimensions(1024, 768), (853, 640))

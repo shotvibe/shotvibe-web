@@ -43,7 +43,7 @@ class BoxFitWithRotation(ImageDimensions, BoxMixin):
 
     def get_image_dimensions(self, width, height):
         landscape_width, landscape_height = self.fit(width, height)
-        portrait_width, portrait_height = self.fit(height, width)
+        portrait_height, portrait_width = self.fit(height, width)
 
         if landscape_width > portrait_width or landscape_height > portrait_height:
             return (landscape_width, landscape_height)
