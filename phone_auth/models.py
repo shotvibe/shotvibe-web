@@ -109,6 +109,9 @@ class PhoneNumber(models.Model):
 
     objects = PhoneNumberManager()
 
+    def __unicode__(self):
+        return self.phone_number
+
 # This table should be periodically garbage collected. Old rows should be
 # deleted.
 class PhoneNumberConfirmSMSCode(models.Model):
