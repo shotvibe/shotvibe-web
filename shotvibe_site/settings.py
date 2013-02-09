@@ -111,6 +111,7 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'rest_framework',
+    'frontend',
     'photos',
     'phone_auth',
     'photos_api',
