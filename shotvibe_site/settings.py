@@ -75,6 +75,7 @@ TEMPLATE_LOADERS = (
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
+    'subdomains.middleware.SubdomainURLRoutingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -84,6 +85,10 @@ MIDDLEWARE_CLASSES = (
 )
 
 ROOT_URLCONF = 'shotvibe_site.urls'
+
+SUBDOMAIN_URLCONFS = {
+    'api': 'photos_api.urls',
+}
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'shotvibe_site.wsgi.application'
