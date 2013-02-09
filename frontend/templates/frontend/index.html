@@ -1,8 +1,46 @@
-<html>
+{% load static %}
+{% load bootstrap_toolkit %}
+<!DOCTYPE html>
+<html lang="en">
   <head>
+    <meta charset="utf-8">
     <title>ShotVibe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="{% static "bootstrap/css/bootstrap.css" %}" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+    <script src="{% static "bootstrap/js/html5shiv.js" %}"></script>
+    <![endif]-->
+
+    <style type="text/css">
+      /* Main marketing message */
+      .jumbotron {
+        margin: 80px 0;
+        text-align: center;
+      }
+      .jumbotron h1 {
+        font-size: 100px;
+        line-height: 1;
+      }
+    </style>
   </head>
   <body>
-    <h1>ShotVibe</h1>
+
+    <div class="navbar navbar-static-top">
+      <div class="navbar-inner">
+        <a class="brand" href="/">ShotVibe</a>
+        <p class="navbar-text pull-right">
+        <a href="/" class="navbar-link">Login</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Jumbotron -->
+    <div class="jumbotron">
+      <h1>ShotVibe</h1>
+    </div>
   </body>
 </html>
