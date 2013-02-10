@@ -1,0 +1,77 @@
+{% extends "frontend/base.html" %}
+
+{% load static from staticfiles %}
+
+{% block title %}ShotVibe - {{ album.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+  <ul class="breadcrumb">
+    <li><a href="{% url "frontend.views.index" %}">Home</a> <span class="divider">/</span></li>
+    <li><a href="{% url "frontend.views.index" %}">My Photo Albums</a> <span class="divider">/</span></li>
+    <li><a href="{% url "frontend.views.album" album.id %}">{{ album.name }}</a> <span class="divider">/</span></li>
+    <li class="active">Members</li>
+  </ul>
+</div>
+
+<div class="row">
+  <h3>{{ album.name }}</h3>
+</div>
+
+<div class="row">
+
+  <div class="span1">
+  </div>
+
+  <div class="span4">
+    <h4>My Friends</h4>
+    <table class="table table-hover">
+      <tbody>
+        {% for member in others %}
+        <tr>
+          <td>
+            <div class="media">
+              <div class="pull-left">
+                <img class="media-object" src="{% static "frontend/img/ndt.png" %}" width="32" height="32" alt="">
+              </div>
+              <div class="media-body">
+                <strong>{{ member }}</strong>
+              </div>
+            </div>
+          </td>
+          <td>
+            <form method="post" action="{% url "frontend.views.album_members" album.id %}">
+              {% csrf_token %}
+              <input name="member_id" type="hidden" value="{{ member.id }}">
+              <input name="add_member" class="btn btn-primary pull-right" type="submit" value="Add">
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="span4">
+  </div>
+
+  <div class="span3">
+    <div class="well">
+      <h4>Current Members</h4>
+      <ul class="media-list">
+        {% for member in members %}
+        <li class="media">
+        <div class="pull-left">
+          <img class="media-object" src="{% static "frontend/img/ndt.png" %}" width="32" height="32" alt="">
+        </div>
+        <div class="media-body">
+          <strong>{{ member }}</strong>
+        </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

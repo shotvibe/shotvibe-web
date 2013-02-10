@@ -1,3 +1,4 @@
+from django.contrib import auth
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render_to_response
@@ -75,3 +76,39 @@ def photo(request, album_pk, photo_id):
             'members': album.members.all()
             }
     return render_to_response('frontend/photo.html', data, context_instance=RequestContext(request))
+
+def album_members(request, album_pk):
+    album = get_object_or_404(Album, pk=album_pk)
+    if not album.is_user_member(request.user.id):
+        # TODO ...
+        pass
+
+    if request.method == 'POST' and 'add_member' in request.POST:
+        try:
+            user = auth.get_user_model().objects.get(pk=request.POST.get('member_id', ''))
+        except auth.get_user_model().DoesNotExist:
+            # TODO ...
+            pass
+        now = timezone.now()
+        album.add_members([user.id], now)
+
+    members = album.members.all()
+
+    # Gather all of the friends of the user: anyone who is a member of a shared
+    # album
+    others = set()
+    for a in Album.objects.get_user_albums(request.user.id):
+        others.update(a.members.all())
+
+    # Remove anyone who is already in this album
+    others.difference_update(members)
+
+    # Remove myself
+    others.discard(request.user)
+
+    data = {
+            'album': album,
+            'members': members,
+            'others': others
+            }
+    return render_to_response('frontend/album_members.html', data, context_instance=RequestContext(request))

@@ -59,6 +59,9 @@
     <div class="well">
       <h4>Album Members</h4>
       <ul class="media-list">
+        <li class="text-center">
+        <a class="btn btn-primary" href="{% url "frontend.views.album_members" album.id %}">+ Add Friends</a>
+        </li>
         {% for member in members %}
         <li class="media">
         <div class="pull-left">
