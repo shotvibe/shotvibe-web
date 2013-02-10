@@ -47,6 +47,9 @@ class Album(models.Model):
     def get_photos(self):
         return self.photo_set.all()
 
+    def get_latest_photos(self):
+        return self.photo_set.order_by('-date_created')[:2]
+
     def is_user_member(self, user_id):
         return self.members.filter(id=user_id).exists()
 

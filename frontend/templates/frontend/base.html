@@ -4,7 +4,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>ShotVibe</title>
+    <title>{% block title %}ShotVibe{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -14,18 +14,6 @@
     <!--[if lt IE 9]>
     <script src="{% static "bootstrap/js/html5shiv.js" %}"></script>
     <![endif]-->
-
-    <style type="text/css">
-      /* Main marketing message */
-      .jumbotron {
-        margin: 80px 0;
-        text-align: center;
-      }
-      .jumbotron h1 {
-        font-size: 100px;
-        line-height: 1;
-      }
-    </style>
   </head>
   <body>
 
@@ -42,9 +30,13 @@
       </div>
     </div>
 
-    <!-- Jumbotron -->
-    <div class="jumbotron">
-      <h1>ShotVibe</h1>
+    <div class="container">
+      <div class="row">
+        &nbsp;
+      </div>
+
+      {% block content %}
+      {% endblock %}
     </div>
   </body>
 </html>

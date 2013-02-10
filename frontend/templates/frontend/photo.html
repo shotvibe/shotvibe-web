@@ -1,0 +1,43 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}ShotVibe - {{ album.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+  <ul class="breadcrumb">
+    <li><a href="{% url "frontend.views.index" %}">Home</a> <span class="divider">/</span></li>
+    <li><a href="{% url "frontend.views.index" %}">My Photo Albums</a> <span class="divider">/</span></li>
+    <li><a href="{% url "frontend.views.album" album.id %}">{{ album.name }}</a> <span class="divider">/</span></li>
+    <li class="active">Photo from {{ photo.date_created }}</li>
+  </ul>
+</div>
+
+<div class="row">
+  <a href="{% url "frontend.views.album" album.id %}"><h3>{{ album.name }}</h3></a>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <ul class="pager">
+      <li class="previous">
+      <a href="#">&larr; Previous</a>
+      </li>
+      <li class="next">
+      <a href="#">Next &rarr;</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="row">
+  <p class="text-center">
+  <img src="http://placehold.it/640x480" alt="">
+  </p>
+  <p class="text-center">
+  {{ photo.date_created }}
+  </p>
+  <p class="text-center">
+  Photo added by <strong>{{ photo.author }}</strong>
+  </p>
+</div>
+{% endblock %}
