@@ -34,7 +34,7 @@ class AnonymousTest(BaseTestCase):
 
 class UserTest(BaseTestCase):
     def setUp(self):
-        self.client.login(username=2, password='amanda')
+        self.client.login(username='2', password='amanda')
 
     def get_response_json(self, url):
         response = self.client.get(url)
@@ -51,7 +51,7 @@ class UserTest(BaseTestCase):
 
 class NotModifiedTest(BaseTestCase):
     def setUp(self):
-        self.client.login(username=2, password='amanda')
+        self.client.login(username='2', password='amanda')
 
     def test_single_album(self):
         # Get album 8
@@ -170,7 +170,7 @@ class Serializers(TestCase):
 
 class PhotoUpload(BaseTestCase):
     def setUp(self):
-        self.client.login(username=2, password='amanda')
+        self.client.login(username='2', password='amanda')
 
     def tearDown(self):
         shutil.rmtree(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, ignore_errors=True)
@@ -259,7 +259,7 @@ class PhotoUpload(BaseTestCase):
 
 class MembersTests(BaseTestCase):
     def setUp(self):
-        self.client.login(username=2, password='amanda')
+        self.client.login(username='2', password='amanda')
 
     def test_add_members(self):
         album_before_response = self.client.get('/albums/9/')

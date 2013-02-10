@@ -22,9 +22,9 @@
         <a class="brand" href="{% url "frontend.views.index" %}">ShotVibe</a>
         <p class="navbar-text pull-right">
         {% if user.is_authenticated %}
-        {{ user }} | <a href="/" class="navbar-link">Logout</a>
+        {{ user }} | <a href="{% url "django.contrib.auth.views.logout" %}" class="navbar-link">Logout</a>
         {% else %}
-        <a href="/" class="navbar-link">Login</a>
+        <a href="{% url "django.contrib.auth.views.login" %}" class="navbar-link">Login</a>
         {% endif %}
         </p>
       </div>

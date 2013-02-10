@@ -1,0 +1,19 @@
+{% extends "frontend/base.html" %}
+
+{% load bootstrap_toolkit %}
+
+{% block content %}
+
+<div class="row">
+  <div class="span4">
+  </div>
+  <form class="well span3" method="post" action="{% url 'django.contrib.auth.views.login' %}">
+    <h2>Login</h2>
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}" />
+    {% bootstrap_form form layout="vertical" %}
+    <input type="submit" class="btn btn-primary" value="Login" />
+  </form>
+</div>
+
+{% endblock %}

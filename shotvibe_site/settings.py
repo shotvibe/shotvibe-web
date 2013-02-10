@@ -118,7 +118,11 @@ INSTALLED_APPS = (
     'photos_api',
 )
 
+LOGIN_REDIRECT_URL = '/'
+
 AUTH_USER_MODEL = 'phone_auth.User'
+
+AUTHENTICATION_BACKENDS = ('phone_auth.backend.UserBackend',)
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
