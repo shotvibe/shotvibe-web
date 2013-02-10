@@ -53,7 +53,7 @@ class UserManager(auth.models.BaseUserManager):
 class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
     id = models.IntegerField(primary_key=True)
     nickname = models.CharField(max_length=128)
-    primary_email = models.ForeignKey('UserEmail', db_index=False, null=True, related_name='+')
+    primary_email = models.ForeignKey('UserEmail', db_index=False, null=True, blank=True, related_name='+', on_delete=models.SET_NULL)
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
     is_registered = models.BooleanField(default=False)
 
@@ -82,6 +82,16 @@ class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
 class UserEmail(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, db_index=True)
     email = models.EmailField(unique=True)
+
+    def save(self, *args, **kwargs):
+        result = super(UserEmail, self).save(*args, **kwargs)
+        if not self.user.primary_email:
+            self.user.primary_email = self
+            self.user.save(update_fields=['primary_email'])
+        return result
+
+    def __unicode__(self):
+        return self.email
 
 class AuthTokenManager(models.Manager):
     def get(self, *args, **kwargs):

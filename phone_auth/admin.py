@@ -2,7 +2,7 @@ from django import forms
 from django.contrib import admin, auth
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 
-from phone_auth.models import User, AuthToken, PhoneNumber, PhoneNumberConfirmSMSCode
+from phone_auth.models import User, UserEmail, AuthToken, PhoneNumber, PhoneNumberConfirmSMSCode
 
 class AuthTokenAdmin(admin.ModelAdmin):
     list_display = ('user', 'description', 'date_created', 'key')
@@ -67,6 +67,9 @@ class UserChangeForm(forms.ModelForm):
         # field does not have access to the initial value
         return self.initial["password"]
 
+class UserEmailInline(admin.TabularInline):
+    model = UserEmail
+
 class UserAdmin(auth.admin.UserAdmin):
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
@@ -92,6 +95,8 @@ class UserAdmin(auth.admin.UserAdmin):
     search_fields = ('nickname', 'primary_email',)
     ordering = ('id',)
     filter_horizontal = ('groups', 'user_permissions',)
+
+    inlines = [UserEmailInline]
 
 #admin.site.unregister(auth.models.Group)
 
