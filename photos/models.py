@@ -132,6 +132,12 @@ class Photo(models.Model):
         else:
             raise ValueError('Unknown photo bucket location: ' + location)
 
+    def get_photo_url_no_ext(self):
+        """
+        Returns the url without the ".jpg" suffix
+        """
+        return self.get_photo_url()[:-4]
+
     def get_image_dimensions(self, image_size_str=None):
         if not image_size_str:
             # Original Image dimensions

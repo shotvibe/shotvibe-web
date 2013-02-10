@@ -17,15 +17,41 @@
 
 <div class="row">
   <div class="span9">
+    {% if num_photos_added %}
+    <div class="alert alert-success">
+      Added {{ num_photos_added }} Photos
+    </div>
+    {% endif %}
     <ul class="thumbnails">
       {% for photo in photos %}
       <li>
       <a href="{% url "frontend.views.photo" album.id photo.photo_id %}" class="thumbnail">
-        <img src="http://placehold.it/140x140" alt="">
+        <img src="{{ photo.get_photo_url_no_ext }}_crop140.jpg" width="140" height="140" alt="">
       </a>
       </li>
       {% endfor %}
     </ul>
+
+    <form class="form-horizontal well" method="post" enctype="multipart/form-data" action="{% url "frontend.views.album" album.id %}">
+      {% csrf_token %}
+      <h3>Add Photos</h3>
+      <div class="control-group">
+        <label class="control-label" for="inputEmail"><strong>Step 1:</strong></label>
+        <div class="controls">
+          <input name="photo_files" type="file" multiple>
+          <span class="help-block">
+            To select multiple photos, hold down the <em>Shift</em> or <em>Control</em> key.
+          </span>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="inputEmail"><strong>Step 2:</strong></label>
+        <div class="controls">
+          <input name="add_photos" type="submit" class="btn" value="Upload">
+        </div>
+      </div>
+    </form>
+
   </div>
   <div class="span3">
     <div class="well">
@@ -34,7 +60,7 @@
         {% for member in members %}
         <li class="media">
         <div class="pull-left">
-          <img class="media-object" src="http://placehold.it/32x32" alt="">
+          <img class="media-object" src="http://placehold.it/32x32" width="32" height="32" alt="">
         </div>
         <div class="media-body">
           <strong>{{ member }}</strong>
