@@ -1,12 +1,15 @@
 import codecs
 import random
 import datetime
+import glob
 
 from django.contrib import auth
 from django.db import transaction
 from django.utils.timezone import utc
 
-from photos.models import Album, Photo
+from photos import image_uploads
+from photos.models import Album, Photo, PendingPhoto
+from photos.tests import read_in_chunks
 
 def generate_random_data(words_file='/usr/share/dict/words', num_albums=100, num_photos=1000, user_ids=None):
     if not user_ids:
@@ -17,6 +20,8 @@ def generate_random_data(words_file='/usr/share/dict/words', num_albums=100, num
         words = [line.strip() for line in f]
 
     base_time = datetime.datetime(2010, 1, 1, tzinfo=utc)
+
+    test_photos = glob.glob('photos/test_photos/*.jpg')
 
     with transaction.commit_on_success():
         albums = []
@@ -34,6 +39,14 @@ def generate_random_data(words_file='/usr/share/dict/words', num_albums=100, num
             date_created = album.last_updated + datetime.timedelta(seconds=random.randint(0, 60*60*24*30))
 
             photo_id = Photo.objects.upload_request(author)
+
+            location, directory = PendingPhoto.objects.get(photo_id=photo_id).bucket.split(':')
+            if location != 'local':
+                raise ValueError('Unknown photo bucket location: ' + location)
+
+            with open(random.choice(test_photos)) as f:
+                image_uploads.handle_file_upload(directory, photo_id, read_in_chunks(f))
+
             # Pretend that the photo was uploaded
             Photo.objects.upload_to_album(photo_id, album, date_created)
 
