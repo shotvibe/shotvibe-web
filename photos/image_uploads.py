@@ -1,5 +1,6 @@
 import abc
 from PIL import Image
+from PIL import ImageOps
 
 from django.conf import settings
 
@@ -31,6 +32,20 @@ class BoxFitExpanded(ImageDimensions, BoxMixin):
             new_height = new_width * height / width
         return (new_width, new_height)
 
+class BoxFitCrop(ImageDimensions, BoxMixin):
+    def get_image_dimensions(self, width, height):
+        return (self.box_width, self.box_height)
+
+class BoxFitConstrain(ImageDimensions, BoxMixin):
+    def get_image_dimensions(self, width, height):
+        if width * self.box_height > self.box_width * height:
+            new_width = self.box_width
+            new_height = new_width * height / width
+        else:
+            new_height = self.box_height
+            new_width = new_height * width / height
+        return (new_width, new_height)
+
 class BoxFitWithRotation(ImageDimensions, BoxMixin):
     def fit(self, width, height):
         if width * self.box_height > self.box_width * height:
@@ -50,19 +65,26 @@ class BoxFitWithRotation(ImageDimensions, BoxMixin):
         else:
             return (portrait_width, portrait_height)
 
-class BoxFitWithRotationOnlyShrink(BoxFitWithRotation):
-    def get_image_dimensions(self, width, height):
-        (new_width, new_height) = super(BoxFitWithRotationOnlyShrink, self).get_image_dimensions(width, height)
-        if new_width <= width and new_height <= height:
-            return (new_width, new_height)
-        else:
-            return (width, height)
+def only_shrink(image_dimensions_klass):
+    class OnlyShrink(image_dimensions_klass):
+        def get_image_dimensions(self, width, height):
+            (new_width, new_height) = super(OnlyShrink, self).get_image_dimensions(width, height)
+            if new_width <= width and new_height <= height:
+                return (new_width, new_height)
+            else:
+                return (width, height)
+    return OnlyShrink
+
+BoxFitWithRotationOnlyShrink = only_shrink(BoxFitWithRotation)
+BoxFitConstrainOnlyShrink = only_shrink(BoxFitConstrain)
 
 image_sizes = {
         'thumb75': BoxFitExpanded(75, 75),
         'iphone3': BoxFitWithRotationOnlyShrink(480, 320),
         'iphone4': BoxFitWithRotationOnlyShrink(960, 640),
-        'iphone5': BoxFitWithRotationOnlyShrink(1136, 640)
+        'iphone5': BoxFitWithRotationOnlyShrink(1136, 640),
+        'crop140': BoxFitCrop(140, 140),
+        '940x570': BoxFitConstrainOnlyShrink(940, 570)
         }
 
 def process_uploaded_image(bucket, photo_id):
@@ -82,7 +104,7 @@ def process_uploaded_image(bucket, photo_id):
 
     for image_size_str, image_dimensions_calculator in image_sizes.iteritems():
         (new_width, new_height) = image_dimensions_calculator.get_image_dimensions(img_width, img_height)
-        new_img = img.resize((new_width, new_height), Image.ANTIALIAS)
+        new_img = ImageOps.fit(img, (new_width, new_height), Image.ANTIALIAS, 0, (0.5, 0.5))
         new_img.save(os.path.join(bucket_directory, photo_id + '_' + image_size_str + '.jpg'))
 
     return (img_width, img_height)
