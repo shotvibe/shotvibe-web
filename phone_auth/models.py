@@ -3,8 +3,85 @@ import os
 
 from django.conf import settings
 from django.contrib import auth
-from django.db import models
+from django.db import models, IntegrityError
 from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
+
+class UserManager(auth.models.BaseUserManager):
+    def create_user(self, nickname=None, password=None):
+        if not nickname:
+            nickname = self.make_default_nickname()
+
+        done = False
+        while not done:
+            try:
+                user = self.create(
+                        id = self.make_user_id(),
+                        nickname = nickname)
+                done = True
+            except IntegrityError:
+                pass
+
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def make_user_id(self):
+        a,b,c,d = os.urandom(4)
+        a = ord(a)
+        b = ord(b)
+        c = ord(c)
+        d = ord(d)
+        a &= 0x7F
+        return (a << 24) | (b << 16) | (c << 8) | d
+
+    def make_default_nickname(self):
+        return 'noname'
+
+    def create_superuser(self, id, nickname, password):
+        # The given id is ignored
+        user = self.create_user(
+                nickname = nickname,
+                password = password
+                )
+        user.is_staff = True
+        user.is_superuser = True
+        user.is_registered = True
+        user.save(using=self._db)
+        return user
+
+class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
+    id = models.IntegerField(primary_key=True)
+    nickname = models.CharField(max_length=128)
+    primary_email = models.ForeignKey('UserEmail', db_index=False, null=True, related_name='+')
+    date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
+    is_registered = models.BooleanField(default=False)
+
+    is_staff = models.BooleanField(_('staff status'), default=False,
+        help_text=_('Designates whether the user can log into this admin '
+                    'site.'))
+
+    is_active = models.BooleanField(_('active'), default=True,
+        help_text=_('Designates whether this user should be treated as '
+                    'active. Unselect this instead of deleting accounts.'))
+
+    objects = UserManager()
+
+    USERNAME_FIELD = 'id'
+    REQUIRED_FIELDS = ['nickname']
+
+    def __unicode__(self):
+        return self.nickname
+
+    def get_full_name(self):
+        return self.nickname
+
+    def get_short_name(self):
+        return self.get_full_name()
+
+class UserEmail(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, db_index=True)
+    email = models.EmailField(unique=True)
 
 class AuthTokenManager(models.Manager):
     def get(self, *args, **kwargs):
@@ -39,18 +116,12 @@ class AuthToken(models.Model):
     def __unicode__(self):
         return unicode(self.user) + ': ' + self.description
 
-def create_new_user():
-    random_username = str(int(os.urandom(5).encode('hex'), 16))
-    # TODO Handle username collision and retry
-    user = auth.get_user_model().objects.create_user(random_username)
-    return user
-
 class PhoneNumberManager(models.Manager):
     def authorize_phone_number(self, phone_number_str):
         try:
             phone_number = PhoneNumber.objects.get(phone_number=phone_number_str)
         except PhoneNumber.DoesNotExist:
-            new_user = create_new_user()
+            new_user = User.objects.create_user()
             phone_number = self.create(
                     phone_number = phone_number_str,
                     user = new_user,

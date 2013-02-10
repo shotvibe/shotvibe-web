@@ -27,8 +27,8 @@ class ModelTest(TestCase):
     fixtures = ['tests/test_users']
 
     def setUp(self):
-        self.amanda = auth.get_user_model().objects.get(username='amanda')
-        self.barney = auth.get_user_model().objects.get(username='barney')
+        self.amanda = auth.get_user_model().objects.get(pk=2)
+        self.barney = auth.get_user_model().objects.get(pk=3)
 
     def tearDown(self):
         shutil.rmtree(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, ignore_errors=True)

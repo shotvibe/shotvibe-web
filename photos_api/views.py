@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib import auth
 #from django.http import HttpResponseNotModified
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -77,14 +77,14 @@ class UserList(generics.ListCreateAPIView):
     """
     API endpoint that represents a list of users.
     """
-    model = User
+    model = auth.get_user_model()
     serializer_class = UserSerializer
 
 class UserDetail(generics.RetrieveAPIView):
     """
     API endpoint that represents a single user.
     """
-    model = User
+    model = auth.get_user_model()
     serializer_class = UserSerializer
 
 class IsSameUser(BasePermission):

@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib import auth
 from rest_framework import serializers
 
 from photos.models import Album, Photo
@@ -23,8 +23,8 @@ class ListField(serializers.WritableField):
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = User
-        fields = ('id', 'url', 'username')
+        model = auth.get_user_model()
+        fields = ('id', 'url', 'nickname')
 
     id = serializers.IntegerField(source='id')
 

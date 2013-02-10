@@ -5,23 +5,19 @@ from django.contrib import auth
 from django.test import TestCase
 from django.utils.timezone import utc
 
-from phone_auth.models import AuthToken, create_new_user, PhoneNumber, PhoneNumberConfirmSMSCode
+from phone_auth.models import AuthToken, PhoneNumber, PhoneNumberConfirmSMSCode
 
 class ModelTests(TestCase):
     fixtures = ['tests/test_users']
 
     def test_create_auth_token(self):
-        amanda = auth.get_user_model().objects.get(username='amanda')
+        amanda = auth.get_user_model().objects.get(pk=2)
         the_date = datetime.datetime(2010, 1, 1, tzinfo=utc)
         token = AuthToken.objects.create_auth_token(amanda, 'iPhone 3GS', the_date)
         self.assertEqual(token.user, amanda)
         self.assertEqual(token.description, 'iPhone 3GS')
         self.assertEqual(token.date_created, the_date)
         self.assertEqual(token.last_access, the_date)
-
-    def test_create_new_user(self):
-        user = create_new_user()
-        self.assertTrue(user.is_active)
 
     def test_authorize_phone_number_new(self):
         before_users = auth.get_user_model().objects.all().count()
