@@ -1,3 +1,5 @@
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.utils import timezone
@@ -12,6 +14,16 @@ def index(request):
         return render_to_response('frontend/index.html', {}, context_instance=RequestContext(request))
 
 def home(request):
+    if request.method == 'POST' and 'create_album' in request.POST:
+        album_name = request.POST.get('album_name', '').strip()
+        if album_name:
+            now = timezone.now()
+            album = Album.objects.create_album(
+                    creator = request.user,
+                    name = album_name,
+                    date_created = now)
+            return HttpResponseRedirect(reverse('frontend.views.album', args=[album.id]))
+
     albums = Album.objects.get_user_albums(request.user.id).order_by('-last_updated')
     data = {
             'albums': albums

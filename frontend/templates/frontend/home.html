@@ -17,6 +17,17 @@
 <div class="row">
   <table class="table table-hover">
     <tbody>
+      <tr>
+        <td>
+        </td>
+        <td>
+          <form class="form-inline well" method="post" action="{% url "frontend.views.index" %}">
+            {% csrf_token %}
+            <input type="text" name="album_name" class="span5" placeholder="New Album">
+            <input type="submit" name="create_album" class="btn pull-right" value="Create Album">
+          </form>
+        </td>
+      </tr>
       {% for album in albums %}
       <tr>
         <td>
