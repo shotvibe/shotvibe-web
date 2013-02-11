@@ -56,8 +56,6 @@ class AlbumNameSerializer(serializers.HyperlinkedModelSerializer):
 
     id.read_only = True
 
-    blah = serializers.IntegerField()
-
 class PhotoListField(serializers.WritableField):
     def from_native(self, data):
         result = []
