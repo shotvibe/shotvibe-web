@@ -79,6 +79,10 @@ class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
     def get_short_name(self):
         return self.get_full_name()
 
+    def get_avatar_url(self):
+        # TODO Temporary test image!
+        return u'https://static.shotvibe.com/frontend/img/ndt.png'
+
 class UserEmail(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, db_index=True)
     email = models.EmailField(unique=True)
