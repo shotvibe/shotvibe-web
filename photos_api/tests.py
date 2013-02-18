@@ -254,8 +254,9 @@ class PhotoUpload(BaseTestCase):
         self.assertEqual(len(album_json['photos']), 1)
         self.assertEqual(album_json['photos'][0]['photo_id'], photo_id)
         self.assertEqual(len(album_json['members']), 2)
-        self.assertIn(2, album_json['members']) # amanda
-        self.assertIn(3, album_json['members']) # barney
+        members_ids = [u['id'] for u in album_json['members']]
+        self.assertIn(2, members_ids) # amanda
+        self.assertIn(3, members_ids) # barney
 
 class MembersTests(BaseTestCase):
     def setUp(self):
@@ -280,4 +281,6 @@ class MembersTests(BaseTestCase):
 
         members_after = json.loads(album_after_response.content)['members']
 
-        self.assertEqual(set(members_before + [3, 4, 12]), set(members_after))
+        members_ids_before = [u['id'] for u in members_before]
+        members_ids_after = [u['id'] for u in members_after]
+        self.assertEqual(set(members_ids_before + [3, 4, 12]), set(members_ids_after))
