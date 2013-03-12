@@ -1,5 +1,6 @@
 from django.contrib import auth
 #from django.http import HttpResponseNotModified
+from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
@@ -10,6 +11,7 @@ from rest_framework.response import Response
 #from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import BasePermission, IsAdminUser, IsAuthenticated
 from rest_framework import status
+from rest_framework.views import APIView
 
 from photos.image_uploads import handle_file_upload
 from photos.models import Album, Photo, PendingPhoto
@@ -161,7 +163,8 @@ def photos_upload_request(request, format=None):
 
     return Response(response_data)
 
-@api_view(['POST'])
+
+@api_view(['POST', 'PUT'])
 @permission_classes((IsAuthenticated, ))
 def photo_upload(request, photo_id, format=None):
     pending_photo = get_object_or_404(PendingPhoto, pk=photo_id)
@@ -172,6 +175,55 @@ def photo_upload(request, photo_id, format=None):
     if location != 'local':
         raise ValueError('Unknown photo bucket location: ' + location)
 
-    handle_file_upload(directory, photo_id, request.FILES['photo'].chunks())
+    # TODO: Raise proper exception if there is no 'photo'
+
+    file_chunks = request.FILES.get('photo', ContentFile('')).chunks()
+    # if request.method == 'PUT':
+    #     uploaded_file = SocketFile(request.environ['wsgi.input'], request.META.get('CONTENT_LENGTH', 0))
+    #     file_chunks = uploaded_file.chunks()
+    # else:
+    #     file_chunks = request.FILES.get('photo', ContentFile('')).chunks()
+
+    handle_file_upload(directory, photo_id, file_chunks)
 
     return Response()
+
+class PhotoUploadView(APIView):
+    permission_classes = (IsAuthenticated, )
+
+    def put(self, request, format=None, **kwargs):
+
+        photo_id = kwargs.get('photo_id')
+
+        pending_photo = get_object_or_404(PendingPhoto, pk=photo_id)
+        if pending_photo.author != request.user:
+            return Response(status=403)
+
+        location, directory = pending_photo.bucket.split(':')
+        if location != 'local':
+            raise ValueError('Unknown photo bucket location: ' + location)
+
+        # TODO: Raise proper exception if there is no 'photo'
+        file_chunks = request.FILES.get('photo', ContentFile('')).chunks()
+        handle_file_upload(directory, photo_id, file_chunks)
+        return Response()
+
+
+
+    def post(self, request, format=None, **kwargs):
+
+        photo_id = kwargs.get('photo_id')
+
+        pending_photo = get_object_or_404(PendingPhoto, pk=photo_id)
+        if pending_photo.author != request.user:
+            return Response(status=403)
+
+        location, directory = pending_photo.bucket.split(':')
+        if location != 'local':
+            raise ValueError('Unknown photo bucket location: ' + location)
+
+        # TODO: Raise proper exception if there is no 'photo'
+
+        file_chunks = request.FILES.get('photo', ContentFile('')).chunks()
+        handle_file_upload(directory, photo_id, file_chunks)
+        return Response()

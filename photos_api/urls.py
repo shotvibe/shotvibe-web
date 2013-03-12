@@ -3,6 +3,7 @@ from django.conf.urls import patterns, url, include
 from rest_framework.urlpatterns import format_suffix_patterns
 
 from photos_api import views
+from photos_api.views import PhotoUploadView
 
 urlpatterns = patterns('',
     url(r'^$', views.api_root),
@@ -12,7 +13,8 @@ urlpatterns = patterns('',
     url(r'^users/$', views.UserList.as_view(), name='user-list'),
     url(r'^users/(?P<pk>\d+)/$', views.UserDetail.as_view(), name='user-detail'),
     url(r'^photos/upload_request/$', views.photos_upload_request, name='photos-upload-request'),
-    url(r'^photos/upload/(?P<photo_id>[\w-]+)/$', views.photo_upload, name='photo-upload'),
+    # url(r'^photos/upload/(?P<photo_id>[\w-]+)/$', views.photo_upload, name='photo-upload'),
+    url(r'^photos/upload/(?P<photo_id>[\w-]+)/$', PhotoUploadView.as_view(), name='photo-upload'),
 )
 
 # Format suffixes
