@@ -3,6 +3,7 @@ import os
 
 from django.conf import settings
 from django.contrib import auth
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models, IntegrityError
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
@@ -50,7 +51,8 @@ class UserManager(auth.models.BaseUserManager):
         user.save(using=self._db)
         return user
 
-class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
+
+class User(AbstractBaseUser, PermissionsMixin):
     id = models.IntegerField(primary_key=True)
     nickname = models.CharField(max_length=128)
     primary_email = models.ForeignKey('UserEmail', db_index=False, null=True, blank=True, related_name='+', on_delete=models.SET_NULL)
