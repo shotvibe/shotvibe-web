@@ -161,9 +161,9 @@ REST_FRAMEWORK = {
 }
 
 try:
-    from local_settings import * # pyflakes.ignore
+    from .dev import *
 except ImportError as e:
-    print '*** There was an error importing local_settings module'
+    print '*** There was an error importing dev module'
     print '*** You probably forgot to create a local_settings.py file, or there is an error in it'
     print '*** Error message: ' + str(e)
     raise
