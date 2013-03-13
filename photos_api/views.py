@@ -1,8 +1,11 @@
+from io import BytesIO
 from django.contrib import auth
 #from django.http import HttpResponseNotModified
 from django.core.files.base import ContentFile
+from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.datastructures import MultiValueDict
 
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
@@ -15,6 +18,7 @@ from rest_framework.views import APIView
 
 from photos.image_uploads import handle_file_upload
 from photos.models import Album, Photo, PendingPhoto
+from photos_api import SocketFile
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
@@ -188,11 +192,46 @@ def photo_upload(request, photo_id, format=None):
 
     return Response()
 
+# This method has taken from HttpRequest from django.http.request (Django v1.5) to support file uploads
+# using HTTP PUT method. The only change is added 'PUT' in first `if` statement.
+# V.Prudnikov 13 March, 2013.
+def _load_post_and_files(self):
+    """Populate self._post and self._files if the content-type is a form type"""
+    if self.method not in ['POST','PUT']:
+        self._post, self._files = QueryDict('', encoding=self._encoding), MultiValueDict()
+        return
+    if self._read_started and not hasattr(self, '_body'):
+        self._mark_post_parse_error()
+        return
+
+    if self.META.get('CONTENT_TYPE', '').startswith('multipart/form-data'):
+        if hasattr(self, '_body'):
+            # Use already read data
+            data = BytesIO(self._body)
+        else:
+            data = self
+        try:
+            self._post, self._files = self.parse_file_upload(self.META, data)
+        except:
+            # An error occured while parsing POST data. Since when
+            # formatting the error the request handler might access
+            # self.POST, set self._post and self._file to prevent
+            # attempts to parse POST data again.
+            # Mark that an error occured. This allows self.__repr__ to
+            # be explicit about it instead of simply representing an
+            # empty POST
+            self._mark_post_parse_error()
+            raise
+    elif self.META.get('CONTENT_TYPE', '').startswith('application/x-www-form-urlencoded'):
+        self._post, self._files = QueryDict(self.body, encoding=self._encoding), MultiValueDict()
+    else:
+        self._post, self._files = QueryDict('', encoding=self._encoding), MultiValueDict()
+
+
 class PhotoUploadView(APIView):
     permission_classes = (IsAuthenticated, )
 
-    def put(self, request, format=None, **kwargs):
-
+    def _process_file_upload(self, request, format=None, **kwargs):
         photo_id = kwargs.get('photo_id')
 
         pending_photo = get_object_or_404(PendingPhoto, pk=photo_id)
@@ -203,27 +242,18 @@ class PhotoUploadView(APIView):
         if location != 'local':
             raise ValueError('Unknown photo bucket location: ' + location)
 
-        # TODO: Raise proper exception if there is no 'photo'
+        # TODO: Raise proper exception if there is no request.FILES['photo'] parameter.
+
         file_chunks = request.FILES.get('photo', ContentFile('')).chunks()
         handle_file_upload(directory, photo_id, file_chunks)
         return Response()
 
+
+    def put(self, request, format=None, **kwargs):
+        # Patch Request.
+        request._load_post_and_tiles = _load_post_and_files
+        return self._process_file_upload(request, format, **kwargs)
 
 
     def post(self, request, format=None, **kwargs):
-
-        photo_id = kwargs.get('photo_id')
-
-        pending_photo = get_object_or_404(PendingPhoto, pk=photo_id)
-        if pending_photo.author != request.user:
-            return Response(status=403)
-
-        location, directory = pending_photo.bucket.split(':')
-        if location != 'local':
-            raise ValueError('Unknown photo bucket location: ' + location)
-
-        # TODO: Raise proper exception if there is no 'photo'
-
-        file_chunks = request.FILES.get('photo', ContentFile('')).chunks()
-        handle_file_upload(directory, photo_id, file_chunks)
-        return Response()
+        return self._process_file_upload(request, format, **kwargs)
