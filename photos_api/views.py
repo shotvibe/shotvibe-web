@@ -161,7 +161,7 @@ def photos_upload_request(request, format=None):
 
     return Response(response_data)
 
-@api_view(['POST'])
+@api_view(['POST','PUT'])
 @permission_classes((IsAuthenticated, ))
 def photo_upload(request, photo_id, format=None):
     pending_photo = get_object_or_404(PendingPhoto, pk=photo_id)
