@@ -10,6 +10,7 @@ from rest_framework.response import Response
 #from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import BasePermission, IsAdminUser, IsAuthenticated
 from rest_framework import status
+from rest_framework import views
 
 from photos.image_uploads import handle_file_upload
 from photos.models import Album, Photo, PendingPhoto
@@ -161,17 +162,18 @@ def photos_upload_request(request, format=None):
 
     return Response(response_data)
 
-@api_view(['POST'])
-@permission_classes((IsAuthenticated, ))
-def photo_upload(request, photo_id, format=None):
-    pending_photo = get_object_or_404(PendingPhoto, pk=photo_id)
-    if pending_photo.author != request.user:
-        return Response(status=403)
+class PhotoUpload(views.APIView):
+    permission_classes = (IsAuthenticated,)
 
-    location, directory = pending_photo.bucket.split(':')
-    if location != 'local':
-        raise ValueError('Unknown photo bucket location: ' + location)
+    def post(self, request, photo_id, format=None):
+        pending_photo = get_object_or_404(PendingPhoto, pk=photo_id)
+        if pending_photo.author != request.user:
+            return Response(status=403)
 
-    handle_file_upload(directory, photo_id, request.FILES['photo'].chunks())
+        location, directory = pending_photo.bucket.split(':')
+        if location != 'local':
+            raise ValueError('Unknown photo bucket location: ' + location)
 
-    return Response()
+        handle_file_upload(directory, photo_id, request.FILES['photo'].chunks())
+
+        return Response()
