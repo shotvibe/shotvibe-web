@@ -258,6 +258,23 @@ class PhotoUpload(BaseTestCase):
         self.assertIn(2, members_ids) # amanda
         self.assertIn(3, members_ids) # barney
 
+    def test_create_empty_album(self):
+        new_album_data = {
+                'album_name': 'My New Album',
+                'members': [],
+                'photos': []
+                }
+
+        create_response = self.client.post('/albums/', content_type='application/json', data=json.dumps(new_album_data), follow=True)
+        self.assertEqual(create_response.status_code, 200)
+
+        album_json = json.loads(create_response.content)
+        self.assertEqual(album_json['name'], 'My New Album')
+        self.assertEqual(len(album_json['photos']), 0)
+        self.assertEqual(len(album_json['members']), 1)
+        members_ids = [u['id'] for u in album_json['members']]
+        self.assertIn(2, members_ids) # amanda
+
 class MembersTests(BaseTestCase):
     def setUp(self):
         self.client.login(username='2', password='amanda')
