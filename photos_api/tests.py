@@ -175,7 +175,7 @@ class PhotoUpload(BaseTestCase):
     def tearDown(self):
         shutil.rmtree(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, ignore_errors=True)
 
-    def test_upload_single(self):
+    def test_upload_single_post(self):
         upload_request_response = self.client.post('/photos/upload_request/')
         self.assertEqual(upload_request_response.status_code, 200)
         upload_request_json = json.loads(upload_request_response.content)
@@ -187,6 +187,26 @@ class PhotoUpload(BaseTestCase):
 
         with open(test_photo_path, 'rb') as f:
             upload_response = self.client.post(upload_url, { 'photo': f })
+
+        self.assertEqual(upload_response.status_code, 200)
+
+        photo_pending = PendingPhoto.objects.get(pk=photo_id)
+        directory = photo_pending.bucket.split(':')[1]
+        uploaded_photo_path = os.path.join(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, directory, photo_id + '.jpg')
+        self.assertTrue(filecmp.cmp(test_photo_path, uploaded_photo_path, shallow=False))
+
+    def test_upload_single_put(self):
+        upload_request_response = self.client.post('/photos/upload_request/')
+        self.assertEqual(upload_request_response.status_code, 200)
+        upload_request_json = json.loads(upload_request_response.content)
+
+        photo_id = upload_request_json[0]['photo_id']
+        upload_url = upload_request_json[0]['upload_url']
+
+        test_photo_path = 'photos/test_photos/death-valley-sand-dunes.jpg'
+
+        with open(test_photo_path, 'rb') as f:
+            upload_response = self.client.put(upload_url, f.read(), 'application/octet-stream')
 
         self.assertEqual(upload_response.status_code, 200)
 

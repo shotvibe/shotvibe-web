@@ -2,6 +2,7 @@ from django.contrib import auth
 #from django.http import HttpResponseNotModified
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.core.files import File
 
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
@@ -11,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import BasePermission, IsAdminUser, IsAuthenticated
 from rest_framework import status
 from rest_framework import views
+from rest_framework.parsers import BaseParser
 
 from photos.image_uploads import handle_file_upload
 from photos.models import Album, Photo, PendingPhoto
@@ -162,10 +164,20 @@ def photos_upload_request(request, format=None):
 
     return Response(response_data)
 
+class PhotoUploadParser(BaseParser):
+
+    # Accept any Content-Type
+    media_type = '*/*'
+
+    def parse(self, stream, media_type=None, parser_context=None):
+        return File(stream)
+
 class PhotoUpload(views.APIView):
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request, photo_id, format=None):
+    parser_classes = (PhotoUploadParser,)
+
+    def process_upload_request(self, request, photo_id, uploaded_chunks):
         pending_photo = get_object_or_404(PendingPhoto, pk=photo_id)
         if pending_photo.author != request.user:
             return Response(status=403)
@@ -174,6 +186,12 @@ class PhotoUpload(views.APIView):
         if location != 'local':
             raise ValueError('Unknown photo bucket location: ' + location)
 
-        handle_file_upload(directory, photo_id, request.FILES['photo'].chunks())
+        handle_file_upload(directory, photo_id, uploaded_chunks)
 
         return Response()
+
+    def post(self, request, photo_id, format=None):
+        return self.process_upload_request(request, photo_id, request.FILES['photo'].chunks())
+
+    def put(self, request, photo_id, format=None):
+        return self.process_upload_request(request, photo_id, request.DATA.chunks())
