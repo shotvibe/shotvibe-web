@@ -1,8 +1,8 @@
-from django.contrib import auth
+import django.contrib.auth.backends
 
 from phone_auth.models import User, UserEmail
 
-class UserBackend(auth.backends.ModelBackend):
+class UserBackend(django.contrib.auth.backends.ModelBackend):
     def authenticate(self, username=None, password=None):
         if '@' in username:
             try:
