@@ -36,6 +36,7 @@ class PhotoSerializer(serializers.ModelSerializer):
         fields = ('photo_id', 'photo_url', 'date_created', 'author')
 
     photo_url = serializers.CharField(source='get_photo_url')
+    author = UserSerializer(source='author')
 
 class AlbumSerializer(serializers.ModelSerializer):
     class Meta:
