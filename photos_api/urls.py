@@ -3,10 +3,13 @@ from django.conf.urls import patterns, url, include
 from rest_framework.urlpatterns import format_suffix_patterns
 
 from photos_api import views
+from photos_api import device_push
 
 urlpatterns = patterns('',
     url(r'^$', views.api_root),
     url(r'^auth/', include('phone_auth.urls')),
+    url(r'^gcm/devices/(?P<device_id>[\w-]+)/$', device_push.GcmDevice.as_view(), name='gcm-device'),
+    url(r'^apns/devices/(?P<device_id>[\w-]+)/$', device_push.ApnsDevice.as_view(), name='apns-device'),
     url(r'^albums/$', views.Albums.as_view(), name='album-list'),
     url(r'^albums/(?P<pk>\d+)/$', views.AlbumDetail.as_view(), name='album-detail'),
     url(r'^users/$', views.UserList.as_view(), name='user-list'),

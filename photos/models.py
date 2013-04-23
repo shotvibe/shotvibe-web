@@ -6,6 +6,7 @@ from django.db import models
 from django.utils import timezone
 
 from photos import image_uploads
+from photos_api import device_push
 
 class AlbumManager(models.Manager):
     def create_album(self, creator, name, date_created):
@@ -55,6 +56,20 @@ class Album(models.Model):
 
     def get_etag(self):
         return u'{0}'.format(self.revision_number)
+
+    def add_photos(self, author, photo_ids):
+        now = timezone.now()
+        for photo_id in photo_ids:
+            # TODO Catch exception
+            Photo.objects.upload_to_album(photo_id, self, now)
+
+        device_push.broadcast_photos_added(
+                album_id = self.id,
+                author_id = author.id,
+                album_name = self.name,
+                author_name = author.nickname,
+                num_photos = len(photo_ids),
+                user_ids = [u.id for u in self.members.all()])
 
 all_photo_buckets = (
         'local:photos01',

@@ -42,7 +42,7 @@ def album(request, pk):
 
     if request.POST:
         if 'add_photos' in request.POST:
-            now = timezone.now()
+            photo_ids = []
             for f in request.FILES.getlist('photo_files'):
                 photo_id = Photo.objects.upload_request(request.user)
                 pending_photo = PendingPhoto.objects.get(photo_id=photo_id)
@@ -51,8 +51,11 @@ def album(request, pk):
                     raise ValueError('Unknown photo bucket location: ' + location)
 
                 image_uploads.handle_file_upload(directory, photo_id, f.chunks())
-                Photo.objects.upload_to_album(photo_id, album, now)
+                photo_ids.append(photo_id)
                 num_photos_added += 1
+
+            if photo_ids:
+                album.add_photos(request.user, photo_ids)
 
     data = {
             'album': album,

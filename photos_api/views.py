@@ -64,14 +64,15 @@ class AlbumDetail(generics.RetrieveAPIView):
         serializer = AlbumUpdateSerializer(data=request.DATA)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        now = timezone.now()
-        for photo_id in serializer.object.add_photos:
-            # TODO Catch exception
-            Photo.objects.upload_to_album(photo_id, self.album, now)
+
+        if serializer.object.add_photos:
+            self.album.add_photos(request.user, serializer.object.add_photos)
+
         add_member_ids = []
         for member in serializer.object.add_members:
             if member.user_id:
                 add_member_ids.append(member.user_id)
+        now = timezone.now()
         self.album.add_members(add_member_ids, now)
 
         return self.get(request, pk)
