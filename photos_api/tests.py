@@ -266,7 +266,7 @@ class PhotoUpload(BaseTestCase):
                     ]
                 }
 
-        create_response = self.client.post('/albums/', content_type='application/json', data=json.dumps(new_album_data), follow=True)
+        create_response = self.client.post('/albums/', content_type='application/json', data=json.dumps(new_album_data))
         self.assertEqual(create_response.status_code, 200)
 
         album_json = json.loads(create_response.content)
@@ -285,7 +285,7 @@ class PhotoUpload(BaseTestCase):
                 'photos': []
                 }
 
-        create_response = self.client.post('/albums/', content_type='application/json', data=json.dumps(new_album_data), follow=True)
+        create_response = self.client.post('/albums/', content_type='application/json', data=json.dumps(new_album_data))
         self.assertEqual(create_response.status_code, 200)
 
         album_json = json.loads(create_response.content)

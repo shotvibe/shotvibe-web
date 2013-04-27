@@ -75,7 +75,8 @@ class AlbumDetail(generics.RetrieveAPIView):
         now = timezone.now()
         self.album.add_members(add_member_ids, now)
 
-        return self.get(request, pk)
+        responseSerializer = AlbumSerializer(self.album)
+        return Response(responseSerializer.data)
 
 class UserList(generics.ListCreateAPIView):
     """
@@ -144,7 +145,9 @@ class Albums(generics.ListAPIView):
                 pass
         for photo_id in serializer.object.photos:
             Photo.objects.upload_to_album(photo_id, album, now)
-        return Response(status=status.HTTP_302_FOUND, headers={ 'Location': reverse('album-detail', [album.id], request=request) })
+
+        responseSerializer = AlbumSerializer(album)
+        return Response(responseSerializer.data)
 
 @api_view(['POST'])
 @permission_classes((IsAuthenticated, ))
