@@ -90,13 +90,16 @@ class UserAdmin(auth.admin.UserAdmin):
     )
     form = UserChangeForm
     add_form = UserCreationForm
-    list_display = ('id', 'nickname', 'is_registered', 'primary_email', 'is_staff')
+    list_display = ('id', 'nickname', 'is_registered', 'primary_email', 'first_phone_number', 'is_staff')
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'is_registered', 'groups')
     search_fields = ('nickname', 'primary_email',)
     ordering = ('id',)
     filter_horizontal = ('groups', 'user_permissions',)
 
     inlines = [UserEmailInline]
+
+    def first_phone_number(self, instance):
+        return instance.phonenumber_set.all()[:1].get()
 
 #admin.site.unregister(auth.models.Group)
 
