@@ -79,10 +79,23 @@ BoxFitWithRotationOnlyShrink = only_shrink(BoxFitWithRotation)
 BoxFitConstrainOnlyShrink = only_shrink(BoxFitConstrain)
 
 image_sizes = {
+        'r_qvga' : BoxFitWithRotationOnlyShrink(320, 240),
+        'r_hvga' : BoxFitWithRotationOnlyShrink(480, 320),
+        'r_vga'  : BoxFitWithRotationOnlyShrink(640, 480),
+        'r_wvga' : BoxFitWithRotationOnlyShrink(800, 480),
+        'r_qhd'  : BoxFitWithRotationOnlyShrink(960, 540),
+        'r_dvga' : BoxFitWithRotationOnlyShrink(960, 640),
+        'r_dvgax': BoxFitWithRotationOnlyShrink(1136, 640),
+        'r_hd'   : BoxFitWithRotationOnlyShrink(1280, 720),
+        'r_xga'  : BoxFitWithRotationOnlyShrink(1024, 768),
+        'r_wxga' : BoxFitWithRotationOnlyShrink(1280, 800),
+        'r_fhd'  : BoxFitWithRotationOnlyShrink(1920, 1080),
+        'r_qxga' : BoxFitWithRotationOnlyShrink(2048, 1536),
+        'r_wqxga': BoxFitWithRotationOnlyShrink(2560, 1600),
         'thumb75': BoxFitExpanded(75, 75),
-        'iphone3': BoxFitWithRotationOnlyShrink(480, 320),
-        'iphone4': BoxFitWithRotationOnlyShrink(960, 640),
-        'iphone5': BoxFitWithRotationOnlyShrink(1136, 640),
+        'iphone3': BoxFitWithRotationOnlyShrink(480, 320), # TODO Delete: Deprecated by r_hvgq
+        'iphone4': BoxFitWithRotationOnlyShrink(960, 640), # TODO Delete: Deprecated by r_dvga
+        'iphone5': BoxFitWithRotationOnlyShrink(1136, 640), # TODO Delete: Deprecated by r_dvgax
         'crop140': BoxFitCrop(140, 140),
         '940x570': BoxFitConstrainOnlyShrink(940, 570)
         }
