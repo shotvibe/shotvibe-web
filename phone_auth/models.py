@@ -71,7 +71,7 @@ class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
     REQUIRED_FIELDS = ['nickname']
 
     def __unicode__(self):
-        return self.nickname
+        return u'{0} ({1})'.format(self.id, self.nickname)
 
     def get_full_name(self):
         return self.nickname
