@@ -15,6 +15,8 @@ class PhoneNumberAdmin(admin.ModelAdmin):
     list_display = ('phone_number', 'user', 'date_created', 'verified')
     list_display_links = list_display
 
+    readonly_fields = ('user', 'date_created')
+
     inlines = [PhoneNumberConfirmSMSCodeInline]
 
 class PhoneNumberConfirmSMSCodeAdmin(admin.ModelAdmin):
@@ -94,10 +96,13 @@ class UserAdmin(auth.admin.UserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
     list_display = ('id', 'nickname', 'is_registered', 'primary_email', 'first_phone_number', 'is_staff')
+    list_display_links = list_display
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'is_registered', 'groups')
     search_fields = ('nickname', 'primary_email',)
     ordering = ('id',)
     filter_horizontal = ('groups', 'user_permissions',)
+
+    readonly_fields = ('primary_email',)
 
     inlines = [UserEmailInline, PhoneNumberInline]
 
