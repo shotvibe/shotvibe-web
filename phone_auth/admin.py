@@ -70,6 +70,9 @@ class UserChangeForm(forms.ModelForm):
 class UserEmailInline(admin.TabularInline):
     model = UserEmail
 
+class PhoneNumberInline(admin.TabularInline):
+    model = PhoneNumber
+
 class UserAdmin(auth.admin.UserAdmin):
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
@@ -96,7 +99,7 @@ class UserAdmin(auth.admin.UserAdmin):
     ordering = ('id',)
     filter_horizontal = ('groups', 'user_permissions',)
 
-    inlines = [UserEmailInline]
+    inlines = [UserEmailInline, PhoneNumberInline]
 
     def first_phone_number(self, instance):
         return instance.phonenumber_set.all()[:1].get()
