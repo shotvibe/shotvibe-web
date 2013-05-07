@@ -1,6 +1,8 @@
 import django.contrib.auth.backends
 
-from phone_auth.models import User, UserEmail
+import phonenumbers
+
+from phone_auth.models import User, UserEmail, PhoneNumber
 
 class UserBackend(django.contrib.auth.backends.ModelBackend):
     def authenticate(self, username=None, password=None):
@@ -11,8 +13,13 @@ class UserBackend(django.contrib.auth.backends.ModelBackend):
                 return None
             user = user_email.user
         elif '+' in username:
-            # TODO Authenticate phone number ...
-            return None
+            number = phonenumbers.parse(username, None)
+            canonical_number = phonenumbers.format_number(number, phonenumbers.PhoneNumberFormat.E164)
+            try:
+                user_phone_number = PhoneNumber.objects.get(phone_number=canonical_number)
+            except PhoneNumber.DoesNotExist:
+                return None
+            user = user_phone_number.user
         else:
             try:
                 i = int(username)
