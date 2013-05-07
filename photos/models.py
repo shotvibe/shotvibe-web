@@ -43,7 +43,7 @@ class Album(models.Model):
         self.save_revision(date_added)
 
     def __unicode__(self):
-        return u'{0} {1}'.format(self.id, self.name)
+        return self.name
 
     def get_photos(self):
         return self.photo_set.order_by('date_created', 'photo_id')
@@ -134,6 +134,9 @@ class Photo(models.Model):
 
     class Meta:
         get_latest_by = 'date_created'
+
+    def __unicode__(self):
+        return self.photo_id
 
     @staticmethod
     def generate_photo_id():
