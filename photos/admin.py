@@ -23,6 +23,8 @@ class AlbumAdmin(admin.ModelAdmin):
 
     readonly_fields = ('creator', 'revision_number', 'last_updated', 'date_created')
 
+    filter_horizontal = ('members',)
+
     inlines = [PhotoAdminInline]
 
 class PhotoAdmin(admin.ModelAdmin):
