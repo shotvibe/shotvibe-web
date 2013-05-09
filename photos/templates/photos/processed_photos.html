@@ -1,0 +1,33 @@
+<html>
+  <head>
+    <title>Processed Photos</title>
+  </head>
+  <body>
+    <form method="post">
+      {% csrf_token %}
+      Process first
+      <input type="text" name="num_photos" value="10">
+      unprocessed photos:
+      <input type="submit" name="process_photos" value="Go">
+    </form>
+    <h2>Unprocessed Photos</h2>
+    <ol>
+      {% for photo in unprocessed_photos %}
+      <li><a href="{{ photo.get_photo_url }}">{{ photo }}</a></li>
+      {% endfor %}
+    </ol>
+    <h2>Now Processed Photos</h2>
+    <ol>
+      {% for photo in now_processed_photos %}
+      <li><a href="{{ photo.get_photo_url }}">{{ photo }}</a></li>
+      {% endfor %}
+    </ol>
+    <h2>Already Processed Photos</h2>
+    <ol>
+      {% for photo in already_processed_photos %}
+      <li><a href="{{ photo.get_photo_url }}">{{ photo }}</a></li>
+      {% endfor %}
+    </ol>
+  </body>
+</html>
+

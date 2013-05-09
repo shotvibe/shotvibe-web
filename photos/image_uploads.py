@@ -100,6 +100,26 @@ image_sizes = {
         '940x570': BoxFitConstrainOnlyShrink(940, 570)
         }
 
+def photo_is_processed(bucket, photo_id):
+    location, directory = bucket.split(':')
+    if location != 'local':
+        raise ValueError('Unknown photo bucket location: ' + location)
+
+    bucket_directory = os.path.join(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, directory)
+
+    # Check that the original file exists
+    img_file_path = os.path.join(bucket_directory, photo_id + '.jpg')
+    if not os.path.isfile(img_file_path):
+        return False
+
+    # Check that all the processed resized images exist
+    for image_size_str in image_sizes.iterkeys():
+        resized_img_file_path = os.path.join(bucket_directory, photo_id + '_' + image_size_str + '.jpg')
+        if not os.path.isfile(resized_img_file_path):
+            return False
+
+    return True
+
 def process_uploaded_image(bucket, photo_id):
     location, directory = bucket.split(':')
     if location != 'local':
