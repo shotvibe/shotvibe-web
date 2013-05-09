@@ -1,4 +1,6 @@
+from django import forms
 from django.contrib import admin
+from django.db import models
 from django.utils.html import format_html
 
 from photos.models import Album, Photo
@@ -6,10 +8,23 @@ from photos.models import Album, Photo
 class PhotoAdminInline(admin.TabularInline):
     model = Photo
 
-    fields = ('bucket', 'date_created', 'author', 'album', 'photo_thumbnail', 'width', 'height')
+    fields = ('photo_id', 'bucket', 'date_created', 'author', 'album', 'photo_thumbnail', 'width', 'height')
     readonly_fields = ('bucket', 'date_created', 'author', 'album', 'photo_thumbnail', 'width', 'height')
 
     ordering = ['date_created', 'photo_id']
+
+    # This inline suffers from the following Django bug:
+    # https://code.djangoproject.com/ticket/19888
+    #
+    # The bug is that the primary key ('photo_id') must be in 'fields' and must
+    # not be in 'readonly_fields'
+    #
+    # But we don't want the user to be able to actually change the value, so
+    # the ugly (and also sadly insecure) workaround here is to use an HTML form
+    # 'readonly' attribute to prevent editing
+    formfield_overrides = {
+            models.CharField: { 'widget': forms.TextInput(attrs={'readonly':'readonly'}) }
+            }
 
     extra = 0
     max_num = 0
