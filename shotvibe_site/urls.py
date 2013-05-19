@@ -18,6 +18,7 @@ urlpatterns = patterns('',
     url(r'^', include(frontend.urls)),
 
     url(r'^admin/processed_photos/', 'photos.views.processed_photos'),
+    url(r'^admin/upp_status/', 'photos_api.device_push.upp_status'),
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),

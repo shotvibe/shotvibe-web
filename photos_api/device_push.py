@@ -3,6 +3,7 @@ import requests
 
 from django.conf import settings
 from django.core import mail
+from django.http import HttpResponse
 
 from rest_framework import views
 from rest_framework.permissions import IsAuthenticated
@@ -22,6 +23,10 @@ class GcmDevice(views.APIView):
 
 class ApnsDevice(views.APIView):
     pass
+
+def upp_status(request):
+    r = requests.get(settings.UNIVERSAL_PUSH_PROVIDER_URL + '/status.html')
+    return HttpResponse(r.text)
 
 def in_testing_mode():
     # An evil hack to detect if we are running unit tests
