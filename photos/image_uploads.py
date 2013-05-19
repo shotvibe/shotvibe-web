@@ -1,4 +1,5 @@
 import abc
+from PIL import ExifTags
 from PIL import Image
 from PIL import ImageOps
 
@@ -120,6 +121,38 @@ def photo_is_processed(bucket, photo_id):
 
     return True
 
+"""
+Takes into account EXIF Orientation metadata
+"""
+def load_image_correct_orientation(img_file_path):
+    # Values for the "Orientation" tag from the EXIF Standard
+    # See <http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/EXIF.html>
+    EXIF_ORIENTATION_DEGREES = {
+            3 : 180, # Rotated 180
+            6 : 270, # Rotated 90 CW
+            8 : 90 } # Rotated 90 CCW
+
+    # Helper function
+    def get_tag_value(exif, tag_name):
+        if not exif:
+            return None
+
+        for tag, value in exif.items():
+            decoded = ExifTags.TAGS.get(tag, tag)
+            if decoded == tag_name:
+                return value
+
+        return None
+
+    # Actual execution starts here:
+    img = Image.open(img_file_path)
+    orientation_value = get_tag_value(img._getexif(), 'Orientation')
+    degrees = EXIF_ORIENTATION_DEGREES.get(orientation_value)
+    if not (degrees is None):
+        return img.rotate(degrees)
+    else:
+        return img
+
 def process_uploaded_image(bucket, photo_id):
     location, directory = bucket.split(':')
     if location != 'local':
@@ -128,7 +161,7 @@ def process_uploaded_image(bucket, photo_id):
     bucket_directory = os.path.join(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, directory)
     img_file_path = os.path.join(bucket_directory, photo_id + '.jpg')
 
-    img = Image.open(img_file_path)
+    img = load_image_correct_orientation(img_file_path)
     (img_width, img_height) = (img.size[0], img.size[1])
 
     # TODO Optimization: If multiple image targets happen to have the same
