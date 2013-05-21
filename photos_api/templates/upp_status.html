@@ -1,0 +1,124 @@
+<html>
+  <head>
+    <title>upp status</title>
+    <style>
+      body {
+        background-color: #ffffff;
+        color: #000000;
+      }
+
+      h1 {
+        text-align: center;
+        border-bottom: 1px solid black;
+      }
+
+      h2 {
+        margin-top: 3em;
+      }
+
+      table.devices {
+        border-collapse: collapse;
+      }
+
+      table.devices > tbody > tr > td {
+        padding: 1em;
+      }
+
+      table.devices > tbody > tr:nth-child(odd) {
+        background-color: #ddddff;
+      }
+
+      table.devices > tbody > tr:nth-child(even) {
+        background-color: #ccccff;
+      }
+
+      table.devices tr {
+        border: 1px solid gray;
+      }
+
+      table.devices input {
+        background: transparent;
+        border: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>upp status</h1>
+    <h2>Database Info</h2>
+    <table>
+      <tbody>
+        <tr>
+          <th>Driver Name:</th>
+          <td>{{ database_info.driver_name }}</td>
+        </tr>
+        <tr>
+          <th>Client Version:</th>
+          <td>{{ database_info.client_version }}</td>
+        </tr>
+        <tr>
+          <th>Proxied Client Name:</th>
+          <td>{{ database_info.proxied_client_name }}</td>
+        </tr>
+        <tr>
+          <th>Proxied Client Version:</th>
+          <td>{{ database_info.proxied_client_version }}</td>
+        </tr>
+        <tr>
+          <th>Database Server Version:</th>
+          <td>{{ database_info.database_server_version }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <h2>GCM Config</h2>
+    <form method="post">
+      {% csrf_token %}
+      <label>API Key:</label>
+      <input type="text" name="gcm_api_key" size="80" value="{{ gcm_config.api_key }}">
+      <input type="submit" name="gcm_config_set" value="Set">
+    </form>
+    {% if unknown_user_ids %}
+    <h2>Unknown User IDs</h2>
+    <ul>
+      {% for id in unknown_user_ids %}
+      <li>{{ id }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    <h2>User Devices</h2>
+    <form method="post">
+      {% csrf_token %}
+      <table class="devices">
+        <thead>
+          <tr>
+            <th>Select</th>
+            <th>User</th>
+            <th>Device IDs</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user, devices in user_devices.iteritems %}
+          <tr>
+            <td><input type="checkbox" name="user_id" value="{{ user.id }}"></td>
+            <td>{{ user }}</td>
+            <td>
+              <table>
+                <tbody>
+                  {% for id in devices.gcm %}
+                  <tr>
+                    <th>GCM</th>
+                    <td><input value="{{ id }}" size="100" readonly="readonly"></td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <h3>Send Test Push Message to Selected Users</h3>
+      <input type="text" size="60" name="message_text" value="Hi, This is a test">
+      <input type="submit" name="send_push_message" value="Send">
+    </form>
+  </body>
+</html>

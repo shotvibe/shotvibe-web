@@ -2,8 +2,12 @@ import json
 import requests
 
 from django.conf import settings
+from django.contrib import admin
+from django.contrib import auth
 from django.core import mail
-from django.http import HttpResponse
+from django.shortcuts import render_to_response
+from django.template import RequestContext
+from django.core.exceptions import ObjectDoesNotExist
 
 from rest_framework import views
 from rest_framework.permissions import IsAuthenticated
@@ -24,9 +28,55 @@ class GcmDevice(views.APIView):
 class ApnsDevice(views.APIView):
     pass
 
+@admin.site.admin_view
 def upp_status(request):
-    r = requests.get(settings.UNIVERSAL_PUSH_PROVIDER_URL + '/status.html')
-    return HttpResponse(r.text)
+    if 'gcm_config_set' in request.POST:
+        api_key = request.POST['gcm_api_key']
+        rq = { 'api_key' : api_key }
+        r = requests.put(settings.UNIVERSAL_PUSH_PROVIDER_URL + '/gcm/api_key', data=json.dumps(rq))
+        r.raise_for_status()
+
+    if 'send_push_message' in request.POST:
+        user_ids = request.POST.getlist('user_id')
+        message = request.POST['message_text']
+        rq = {
+                'user_ids' : user_ids,
+                'gcm' : {
+                    'data' : {
+                        'type' : 'test_message',
+                        'message' : message
+                        }
+                    },
+                'apns' : {
+                    'aps' : {
+                        'alert' : 'Test Message: ' + message
+                        }
+                    }
+                }
+        r = requests.post(settings.UNIVERSAL_PUSH_PROVIDER_URL + '/send', data=json.dumps(rq))
+        r.raise_for_status()
+
+    r = requests.get(settings.UNIVERSAL_PUSH_PROVIDER_URL + '/status')
+    status = json.loads(r.text)
+
+    user_devices = {}
+    unknown_user_ids = []
+
+    for user_id, registration_ids in status['gcm_devices'].iteritems():
+        try:
+            user = auth.get_user_model().objects.get(pk=user_id)
+            user_devices[user] = { 'gcm' : registration_ids }
+        except ObjectDoesNotExist:
+            unknown_user_ids.append(user_id)
+
+    data = {
+            'database_info': status['database_info'],
+            'gcm_config': status['gcm_config'],
+            'user_devices': user_devices,
+            'unknown_user_ids': unknown_user_ids
+            }
+
+    return render_to_response('upp_status.html', data, context_instance=RequestContext(request))
 
 def in_testing_mode():
     # An evil hack to detect if we are running unit tests
