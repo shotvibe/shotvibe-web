@@ -57,6 +57,15 @@
       }
 
     </style>
+    <!--
+    The following hack removes the address bar from the window.
+    http://mobile.tutsplus.com/tutorials/mobile-web-apps/remove-address-bar/
+    -->
+    <script>
+      window.addEventListener('load', function() {
+        setTimeout(function(){ window.scrollTo(0, 1); }, 1);
+      }, false);
+    </script>
   </head>
   <body>
     <h1><strong>{{ inviting_user.get_full_name }}</strong> has shared these photos with you!</h1>
