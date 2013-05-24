@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hello</title>
+    <style>
+
+      html {
+        background-color: #fff;
+        color: #000;
+      }
+
+      body {
+        margin: 0;
+        font-family: sans-serif;
+      }
+
+      h1 {
+        text-align: center;
+        font-size: 24px;
+        font-weight: normal;
+      }
+
+      .photos img {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 16px;
+        margin-bottom: 16px;
+        width: 80%;
+        border: 2px solid #eee;
+      }
+
+      .detail {
+        margin-left: 32px;
+        margin-right: 32px;
+        font-size: 20px;
+        text-align: center;
+      }
+
+      .detail a {
+        text-decoration: none;
+        color: #000;
+      }
+
+      .detail a strong {
+        color: #00f;
+        text-decoration: underline;
+      }
+
+      .detail .badge {
+        margin: 28px;
+      }
+
+      .footer {
+        margin-top: 64px;
+      }
+
+      .debug {
+        background-color: #000;
+        color: #050;
+      }
+
+    </style>
+  </head>
+  <body>
+    <h1><strong>{{ inviting_user.get_full_name }}</strong> has shared these photos with you!</h1>
+    <div class="photos">
+      {% for photo in album.get_latest_photos %}
+      <img src="{{ photo.get_photo_url_no_ext }}_940x570.jpg" alt="">
+      {% endfor %}
+    </div>
+    <div class="detail">
+      <a href="{{ app_url }}">Install the <strong>ShotVibe</strong> App to see the rest, and to share your own photos!</a>
+      <div class="badge">
+        <a href="{{ app_url }}"><img alt="Android app on Google Play" src="//developer.android.com/images/brand/en_app_rgb_wo_60.png"></a>
+      </div>
+    </div>
+    <div class="footer">
+    </div>
+    <div class="debug">
+      <h3>DEBUG INFO</h3>
+      <strong>User Agent:</strong> {{ full_user_agent }}
+    </div>
+  </body>
+</html>
