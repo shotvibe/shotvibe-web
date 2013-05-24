@@ -70,12 +70,23 @@
       <img src="{{ photo.get_photo_url_no_ext }}_940x570.jpg" alt="">
       {% endfor %}
     </div>
+    {% if device == "android" or device == "iphone" %}
     <div class="detail">
       <a href="{{ app_url }}">Install the <strong>ShotVibe</strong> App to see the rest, and to share your own photos!</a>
       <div class="badge">
+        {% if device == "android" %}
         <a href="{{ app_url }}"><img alt="Android app on Google Play" src="//developer.android.com/images/brand/en_app_rgb_wo_60.png"></a>
+        {% elif device == "iphone" %}
+        <a href="{{ app_url }}"><img alt="Download on the App Store" src="//linkmaker.itunes.apple.com/htmlResources/assets/images/web/linkmaker/badge_appstore-lrg.png"></a>
+        {% endif %}
       </div>
     </div>
+    {% else %}
+    <div class="detail">
+      <p>Unfortunately, your device is not yet supported. We only have apps for Android and iPhone.</p>
+      <p>For more information, please visit <a href="https://www.shotvibe.com"><strong>ShotVibe</strong></a></p>
+    </div>
+    {% endif %}
     <div class="footer">
     </div>
     <div class="debug">
