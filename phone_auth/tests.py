@@ -291,3 +291,23 @@ class InviteTests(TestCase):
 
         self.assertEqual(PhoneNumberLinkCode.objects.filter(invite_code=invite_code).count(), 0)
         self.assertNotIn('phone_number', self.client.session)
+
+    def test_app_init_phone_verified(self):
+        later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
+        self.party_album.invite_phone_number(self.tom, '+12127184000', later_on)
+
+        new_user = self.party_album.members.exclude(id=self.tom.id)[0]
+        link_code_object = PhoneNumberLinkCode.objects.get(user=new_user)
+
+        self.assertEqual(PhoneNumber.objects.get(phone_number='+12127184000').verified, False)
+
+        # Visit the invite_page so that the session data is associated with the client
+        self.client.get(reverse(invite_page, args=(link_code_object.invite_code,)))
+
+        self.assertEqual(PhoneNumber.objects.get(phone_number='+12127184000').verified, False)
+
+        r = self.client.get(reverse(app_init) + '?app=android&device_description=test')
+        self.assertEqual(r.status_code, 302)
+
+        self.assertEqual(PhoneNumber.objects.get(phone_number='+12127184000').verified, True)
+

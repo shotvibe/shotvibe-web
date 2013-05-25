@@ -88,6 +88,9 @@ def app_init(request):
 
     device_description = request.GET.get('device_description', 'unknown')
 
+    phone_number.verified = True
+    phone_number.save(update_fields=['verified'])
+
     auth_token = AuthToken.objects.create_auth_token(user, device_description, timezone.now())
 
     PhoneNumberLinkCode.objects.filter(user=user).delete()
