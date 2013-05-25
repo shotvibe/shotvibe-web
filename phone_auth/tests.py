@@ -156,6 +156,43 @@ class ViewTests(TestCase):
         confirm_response = self.client.post('/confirm_sms_code/{0}/'.format(confirmation_key), content_type='application/json', data=json.dumps(confirm))
         self.assertEqual(confirm_response.status_code, 403)
 
+    def test_phone_number_verified(self):
+        number = {
+                'phone_number': '212-718-4000',
+                'default_country': 'US'
+                }
+        auth_response = self.client.post('/authorize_phone_number/', content_type='application/json', data=json.dumps(number))
+        confirmation_key = json.loads(auth_response.content)['confirmation_key']
+
+        self.assertEqual(PhoneNumber.objects.get(phone_number='+12127184000').verified, False)
+
+        confirm = {
+                'confirmation_code': '6666', # Default code currently used for testing
+                'device_description': 'iPhone 3GS'
+                }
+        self.client.post('/confirm_sms_code/{0}/'.format(confirmation_key), content_type='application/json', data=json.dumps(confirm))
+
+        self.assertEqual(PhoneNumber.objects.get(phone_number='+12127184000').verified, True)
+
+    def test_phone_number_not_verified(self):
+        number = {
+                'phone_number': '212-718-4000',
+                'default_country': 'US'
+                }
+        auth_response = self.client.post('/authorize_phone_number/', content_type='application/json', data=json.dumps(number))
+        confirmation_key = json.loads(auth_response.content)['confirmation_key']
+
+        self.assertEqual(PhoneNumber.objects.get(phone_number='+12127184000').verified, False)
+
+        confirm = {
+                'confirmation_code': 'wrong-code',
+                'device_description': 'iPhone 3GS'
+                }
+        self.client.post('/confirm_sms_code/{0}/'.format(confirmation_key), content_type='application/json', data=json.dumps(confirm))
+
+        self.assertEqual(PhoneNumber.objects.get(phone_number='+12127184000').verified, False)
+
+
 class InviteTests(TestCase):
     def setUp(self):
         self.tom = User.objects.create_user(nickname='tom')

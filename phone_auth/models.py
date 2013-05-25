@@ -176,6 +176,11 @@ class PhoneNumberManager(models.Manager):
             result.incorrect_code = True
             return result
 
+        # Confirmation successful
+
+        confirm_obj.phone_number.verified = True
+        confirm_obj.phone_number.save(update_fields=['verified'])
+
         user = confirm_obj.phone_number.user
 
         auth_token = AuthToken.objects.create_auth_token(user, device_description, timezone.now())
