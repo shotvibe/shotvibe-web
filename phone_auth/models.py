@@ -1,9 +1,11 @@
 import collections
 import os
+import string
 
 from django.conf import settings
 from django.contrib import auth
 from django.db import models, IntegrityError
+from django.utils import crypto
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
@@ -205,6 +207,34 @@ class PhoneNumberConfirmSMSCode(models.Model):
     phone_number = models.ForeignKey(PhoneNumber)
     date_created = models.DateTimeField(db_index=True)
 
-#class PhoneNumberLinkCode(models.Model):
-#    link_code = models.CharField(max_length=12, primary_key=True)
-#    user = models.ForeignKey(settings.AUTH_USER_MODEL, unique=True)
+class PhoneNumberLinkCodeManager(models.Manager):
+    # phone_number must not exist in PhoneNumber model
+    def invite_phone_number(self, phone_number_str, inviter, date_invited):
+        new_user = User.objects.create_user()
+        PhoneNumber.objects.create(
+                phone_number = phone_number_str,
+                user = new_user,
+                date_created = date_invited,
+                verified = False)
+
+        link_code_object = PhoneNumberLinkCode.objects.create(
+                invite_code = PhoneNumberLinkCode.generate_invite_code(),
+                user = new_user,
+                inviting_user = inviter,
+                date_created = date_invited)
+
+        # TODO Send SMS to phone_number with invite_code link
+
+        return link_code_object
+
+class PhoneNumberLinkCode(models.Model):
+    invite_code = models.CharField(max_length=32, primary_key=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, unique=True, related_name='+')
+    inviting_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='+')
+    date_created = models.DateTimeField(db_index=True)
+
+    objects = PhoneNumberLinkCodeManager()
+
+    @staticmethod
+    def generate_invite_code():
+        return crypto.get_random_string(26, string.ascii_letters + string.digits)

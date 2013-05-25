@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
+from phone_auth.models import PhoneNumberLinkCode
 from photos import image_uploads
 from photos_api import device_push
 
@@ -41,6 +42,10 @@ class Album(models.Model):
     def add_members(self, user_ids, date_added):
         self.members.add(*user_ids)
         self.save_revision(date_added)
+
+    def invite_phone_number(self, inviter, phone_number_str, date_invited):
+        link_code_object = PhoneNumberLinkCode.objects.invite_phone_number(phone_number_str, inviter, date_invited)
+        self.add_members([link_code_object.user.id], date_invited)
 
     def __unicode__(self):
         return self.name

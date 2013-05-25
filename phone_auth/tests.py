@@ -2,10 +2,13 @@ import datetime
 import json
 
 from django.contrib import auth
+from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.utils.timezone import utc
 
-from phone_auth.models import AuthToken, PhoneNumber, PhoneNumberConfirmSMSCode
+from phone_auth.models import AuthToken, User, PhoneNumber, PhoneNumberConfirmSMSCode, PhoneNumberLinkCode
+from photos.models import Album
+from frontend.mobile_views import invite_page
 
 class ModelTests(TestCase):
     fixtures = ['tests/test_users']
@@ -150,3 +153,42 @@ class ViewTests(TestCase):
                 }
         confirm_response = self.client.post('/confirm_sms_code/{0}/'.format(confirmation_key), content_type='application/json', data=json.dumps(confirm))
         self.assertEqual(confirm_response.status_code, 403)
+
+class InviteTests(TestCase):
+    def setUp(self):
+        self.tom = User.objects.create_user(nickname='tom')
+        the_date = datetime.datetime(2010, 1, 1, tzinfo=utc)
+        self.party_album = Album.objects.create_album(self.tom, 'Party', the_date)
+
+    def test_album_invite_phone(self):
+        later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
+        self.party_album.invite_phone_number(self.tom, '+12127184000', later_on)
+
+        self.assertEqual(len(self.party_album.members.all()), 2)
+
+        new_user = self.party_album.members.exclude(id=self.tom.id)[0]
+
+        new_user_phone_numbers = new_user.phonenumber_set.all()
+        self.assertEqual(len(new_user_phone_numbers), 1)
+
+        new_user_phone_number = new_user_phone_numbers[0]
+        self.assertEqual(new_user_phone_number.phone_number, '+12127184000')
+        self.assertEqual(new_user_phone_number.date_created, later_on)
+        self.assertEqual(new_user_phone_number.verified, False)
+
+        link_code_object = PhoneNumberLinkCode.objects.get(user=new_user)
+        self.assertEqual(link_code_object.inviting_user, self.tom)
+        self.assertEqual(link_code_object.date_created, later_on)
+
+    def test_mobile_invite_page(self):
+        later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
+        self.party_album.invite_phone_number(self.tom, '+12127184000', later_on)
+        new_user = self.party_album.members.exclude(id=self.tom.id)[0]
+        link_code_object = PhoneNumberLinkCode.objects.get(user=new_user)
+
+        r = self.client.get(reverse(invite_page, args=(link_code_object.invite_code,)))
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.context['inviting_user'], self.tom)
+        self.assertEqual(r.context['album'], self.party_album)
+
+        self.assertEqual(self.client.session['phone_number'], '+12127184000')
