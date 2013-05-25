@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.http import HttpResponseNotFound, HttpResponse
 from django.utils import timezone
 
@@ -7,7 +8,7 @@ from rest_framework.views import APIView
 
 from phone_auth.serializers import AuthorizePhoneNumberSerializer, ConfirmSMSCodeSerializer
 
-from phone_auth.models import AuthToken, PhoneNumber
+from phone_auth.models import AuthToken, PhoneNumber, PhoneNumberLinkCode
 
 class AuthorizePhoneNumber(APIView):
     serializer_class = AuthorizePhoneNumberSerializer
@@ -89,8 +90,19 @@ def app_init(request):
 
     auth_token = AuthToken.objects.create_auth_token(user, device_description, timezone.now())
 
-    # TODO Probably should PhoneNumberLinkCode.objects.get(user=user).delete()
-    # and also the 'phone_number' session data
+    PhoneNumberLinkCode.objects.filter(user=user).delete()
+    if len(request.session.keys()) > 1:
+        # There is some other session data besides 'phone_number', so only
+        # selectively delete
+        del request.session['phone_number']
+    else:
+        # Only 'phone_number' was in the session data, so we can delete the
+        # entire session
+        response.delete_cookie(
+                settings.SESSION_COOKIE_NAME,
+                settings.SESSION_COOKIE_PATH,
+                settings.SESSION_COOKIE_DOMAIN)
+        request.session.delete()
 
     if app == 'android':
         response['Location'] = 'shotvibe://shotvibe/start_with_auth/?country_code=' + country_code + '&auth_token=' + auth_token.key + '&user_id=' + str(user.id)

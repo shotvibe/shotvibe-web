@@ -238,3 +238,19 @@ class InviteTests(TestCase):
         auth_token = AuthToken.objects.get(key=query['auth_token'][0])
         self.assertEqual(auth_token.description, 'test')
         self.assertEqual(auth_token.user, new_user)
+
+    def test_app_init_deletes_data(self):
+        later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
+        self.party_album.invite_phone_number(self.tom, '+12127184000', later_on)
+        new_user = self.party_album.members.exclude(id=self.tom.id)[0]
+        link_code_object = PhoneNumberLinkCode.objects.get(user=new_user)
+        invite_code = link_code_object.invite_code
+
+        # Visit the invite_page so that the session data is associated with the client
+        self.client.get(reverse(invite_page, args=(invite_code,)))
+
+        r = self.client.get(reverse(app_init) + '?app=android&device_description=test')
+        self.assertEqual(r.status_code, 302)
+
+        self.assertEqual(PhoneNumberLinkCode.objects.filter(invite_code=invite_code).count(), 0)
+        self.assertNotIn('phone_number', self.client.session)
