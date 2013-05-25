@@ -1,5 +1,6 @@
 import datetime
 import json
+import urlparse
 
 from django.contrib import auth
 from django.core.urlresolvers import reverse
@@ -7,6 +8,7 @@ from django.test import TestCase
 from django.utils.timezone import utc
 
 from phone_auth.models import AuthToken, User, PhoneNumber, PhoneNumberConfirmSMSCode, PhoneNumberLinkCode
+from phone_auth.views import app_init
 from photos.models import Album
 from frontend.mobile_views import invite_page
 
@@ -192,3 +194,47 @@ class InviteTests(TestCase):
         self.assertEqual(r.context['album'], self.party_album)
 
         self.assertEqual(self.client.session['phone_number'], '+12127184000')
+
+    def test_app_init_no_session(self):
+        r = self.client.get(reverse(app_init) + '?app=android&device_description=test')
+        self.assertEqual(r.status_code, 302)
+        url = urlparse.urlparse(r['Location'])
+        query_str = url.query
+        if not query_str:
+            # Python's urlparse module sometimes will not parse the query
+            # string for schemes that it doesn't like, so we have to extract it
+            # manually
+            query_str = url.path[url.path.find('?')+1:]
+        self.assertEqual(url.scheme, 'shotvibe')
+        query = urlparse.parse_qs(query_str, strict_parsing=True)
+        self.assertEqual(len(query['country_code'][0]), 2)
+
+        # Make sure that there is no 'user_id' and 'auth_token'
+        self.assertNotIn('user_id', query)
+        self.assertNotIn('auth_token', query)
+
+    def test_app_init_with_session(self):
+        later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
+        self.party_album.invite_phone_number(self.tom, '+12127184000', later_on)
+        new_user = self.party_album.members.exclude(id=self.tom.id)[0]
+        link_code_object = PhoneNumberLinkCode.objects.get(user=new_user)
+
+        # Visit the invite_page so that the session data is associated with the client
+        self.client.get(reverse(invite_page, args=(link_code_object.invite_code,)))
+
+        r = self.client.get(reverse(app_init) + '?app=android&device_description=test')
+        self.assertEqual(r.status_code, 302)
+        url = urlparse.urlparse(r['Location'])
+        query_str = url.query
+        if not query_str:
+            # Python's urlparse module sometimes will not parse the query
+            # string for schemes that it doesn't like, so we have to extract it
+            # manually
+            query_str = url.path[url.path.find('?')+1:]
+        self.assertEqual(url.scheme, 'shotvibe')
+        query = urlparse.parse_qs(query_str, strict_parsing=True)
+        self.assertEqual(len(query['country_code'][0]), 2)
+        self.assertEqual(int(query['user_id'][0]), new_user.id)
+        auth_token = AuthToken.objects.get(key=query['auth_token'][0])
+        self.assertEqual(auth_token.description, 'test')
+        self.assertEqual(auth_token.user, new_user)
