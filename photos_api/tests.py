@@ -4,9 +4,12 @@ import os
 import shutil
 
 from django.conf import settings
+from django.contrib import auth
 from django.test import TestCase
 from django.test.utils import override_settings
+from django.utils import timezone
 
+from phone_auth.models import PhoneNumber
 from photos.models import PendingPhoto
 
 from photos_api.serializers import AlbumUpdateSerializer, MemberIdentifier, MemberIdentifierSerializer, AlbumAddSerializer
@@ -321,3 +324,117 @@ class MembersTests(BaseTestCase):
         members_ids_before = [u['id'] for u in members_before]
         members_ids_after = [u['id'] for u in members_after]
         self.assertEqual(set(members_ids_before + [3, 4, 12]), set(members_ids_after))
+
+    def test_add_new_phone(self):
+        album_before_response = self.client.get('/albums/9/')
+        members_before = json.loads(album_before_response.content)['members']
+        etag = album_before_response['etag']
+
+        add_members = { 'add_members': [
+            {
+                'phone_number': '212-718-4000',
+                'default_country': 'US' }
+            ] }
+
+        add_response = self.client.post('/albums/9/', content_type='application/json', data=json.dumps(add_members))
+        self.assertEqual(add_response.status_code, 200)
+
+        album_after_response = self.client.get('/albums/9/', HTTP_IF_NONE_MATCH=etag)
+        self.assertEqual(album_after_response.status_code, 200)
+
+        members_after = json.loads(album_after_response.content)['members']
+
+        members_ids_before = [u['id'] for u in members_before]
+        members_ids_after = [u['id'] for u in members_after]
+
+        added = set(members_ids_after) - set(members_ids_before)
+
+        self.assertEqual(len(added), 1)
+
+        user = auth.get_user_model().objects.get(pk=added.pop())
+        user_phone = user.phonenumber_set.all()[0]
+
+        self.assertEqual(user_phone.phone_number, '+12127184000')
+        self.assertEqual(user_phone.verified, False)
+        self.assertEqual(user_phone.should_send_invite(), False)
+
+    def test_add_existing_phone(self):
+        barney = auth.get_user_model().objects.get(pk=3)
+        barney_phone = PhoneNumber.objects.create(
+                phone_number='+12127184000',
+                user=barney,
+                date_created=timezone.now(),
+                verified=True)
+
+        self.assertEqual(barney_phone.should_send_invite(), False)
+
+        album_before_response = self.client.get('/albums/9/')
+        members_before = json.loads(album_before_response.content)['members']
+        etag = album_before_response['etag']
+
+        add_members = { 'add_members': [
+            {
+                'phone_number': '212-718-4000',
+                'default_country': 'US' }
+            ] }
+
+        add_response = self.client.post('/albums/9/', content_type='application/json', data=json.dumps(add_members))
+        self.assertEqual(add_response.status_code, 200)
+
+        album_after_response = self.client.get('/albums/9/', HTTP_IF_NONE_MATCH=etag)
+        self.assertEqual(album_after_response.status_code, 200)
+
+        members_after = json.loads(album_after_response.content)['members']
+
+        members_ids_before = [u['id'] for u in members_before]
+        members_ids_after = [u['id'] for u in members_after]
+
+        self.assertEqual(set(members_ids_before + [3]), set(members_ids_after))
+
+        self.assertEqual(barney_phone.should_send_invite(), False)
+
+    def test_add_dangling_phone(self):
+        number = {
+                'phone_number': '212-718-4000',
+                'default_country': 'US'
+                }
+        r = self.client.post('/auth/authorize_phone_number/', content_type='application/json', data=json.dumps(number))
+        self.assertEqual(r.status_code, 200)
+
+        self.assertEqual(PhoneNumber.objects.get(phone_number='+12127184000').verified, False)
+        self.assertEqual(PhoneNumber.objects.get(phone_number='+12127184000').should_send_invite(), True)
+
+        album_before_response = self.client.get('/albums/9/')
+        members_before = json.loads(album_before_response.content)['members']
+        etag = album_before_response['etag']
+
+        add_members = { 'add_members': [
+            {
+                'phone_number': '212-718-4000',
+                'default_country': 'US' }
+            ] }
+
+        add_response = self.client.post('/albums/9/', content_type='application/json', data=json.dumps(add_members))
+        self.assertEqual(add_response.status_code, 200)
+
+        self.assertEqual(PhoneNumber.objects.get(phone_number='+12127184000').verified, False)
+        self.assertEqual(PhoneNumber.objects.get(phone_number='+12127184000').should_send_invite(), False)
+
+        album_after_response = self.client.get('/albums/9/', HTTP_IF_NONE_MATCH=etag)
+        self.assertEqual(album_after_response.status_code, 200)
+
+        members_after = json.loads(album_after_response.content)['members']
+
+        members_ids_before = [u['id'] for u in members_before]
+        members_ids_after = [u['id'] for u in members_after]
+
+        added = set(members_ids_after) - set(members_ids_before)
+
+        self.assertEqual(len(added), 1)
+
+        user = auth.get_user_model().objects.get(pk=added.pop())
+        user_phone = user.phonenumber_set.all()[0]
+
+        self.assertEqual(user_phone.phone_number, '+12127184000')
+        self.assertEqual(user_phone.verified, False)
+        self.assertEqual(user_phone.should_send_invite(), False)

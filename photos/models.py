@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
-from phone_auth.models import PhoneNumberLinkCode
+from phone_auth.models import PhoneNumber, PhoneNumberLinkCode
 from photos import image_uploads
 from photos_api import device_push
 
@@ -39,13 +39,19 @@ class Album(models.Model):
         Album.objects.filter(pk=self.id).update(revision_number=models.F('revision_number')+1)
         self.save(update_fields=['last_updated'])
 
-    def add_members(self, user_ids, date_added):
+    def add_members(self, inviter, user_ids, phone_number_strs, date_added):
         self.members.add(*user_ids)
-        self.save_revision(date_added)
+        for phone_number_str in phone_number_strs:
+            try:
+                phone_number = PhoneNumber.objects.get(phone_number=phone_number_str)
+                if phone_number.should_send_invite():
+                    PhoneNumberLinkCode.objects.invite_existing_phone_number(phone_number, inviter, date_added)
+                self.members.add(phone_number.user.id)
+            except PhoneNumber.DoesNotExist:
+                link_code_object = PhoneNumberLinkCode.objects.invite_new_phone_number(phone_number_str, inviter, date_added)
+                self.members.add(link_code_object.user.id)
 
-    def invite_phone_number(self, inviter, phone_number_str, date_invited):
-        link_code_object = PhoneNumberLinkCode.objects.invite_phone_number(phone_number_str, inviter, date_invited)
-        self.add_members([link_code_object.user.id], date_invited)
+        self.save_revision(date_added)
 
     def __unicode__(self):
         return self.name

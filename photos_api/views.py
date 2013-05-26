@@ -14,6 +14,8 @@ from rest_framework import status
 from rest_framework import views
 from rest_framework.parsers import BaseParser
 
+import phonenumbers
+
 from photos.image_uploads import handle_file_upload
 from photos.models import Album, Photo, PendingPhoto
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer
@@ -47,6 +49,17 @@ class IsUserInAlbum(BasePermission):
         album = get_object_or_404(Album, pk=album_id)
         return album.is_user_member(request.user.id)
 
+def parse_phone_number(phone_number, default_country):
+    try:
+        number = phonenumbers.parse(phone_number, default_country)
+    except phonenumbers.phonenumberutil.NumberParseException:
+        return None
+
+    if not phonenumbers.is_possible_number(number):
+        return None
+
+    return phonenumbers.format_number(number, phonenumbers.PhoneNumberFormat.E164)
+
 @supports_etag
 class AlbumDetail(generics.RetrieveAPIView):
     model = Album
@@ -69,11 +82,17 @@ class AlbumDetail(generics.RetrieveAPIView):
             self.album.add_photos(request.user, serializer.object.add_photos)
 
         add_member_ids = []
+        add_member_phones = []
         for member in serializer.object.add_members:
             if member.user_id:
                 add_member_ids.append(member.user_id)
+            else:
+                number = parse_phone_number(member.phone_number, member.default_country)
+                if number:
+                    add_member_phones.append(number)
+
         now = timezone.now()
-        self.album.add_members(add_member_ids, now)
+        self.album.add_members(request.user, add_member_ids, add_member_phones, now)
 
         responseSerializer = AlbumSerializer(self.album)
         return Response(responseSerializer.data)

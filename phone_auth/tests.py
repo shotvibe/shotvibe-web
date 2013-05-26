@@ -201,7 +201,7 @@ class InviteTests(TestCase):
 
     def test_album_invite_phone(self):
         later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
-        self.party_album.invite_phone_number(self.tom, '+12127184000', later_on)
+        self.party_album.add_members(self.tom, [], ['+12127184000'], later_on)
 
         self.assertEqual(len(self.party_album.members.all()), 2)
 
@@ -221,7 +221,7 @@ class InviteTests(TestCase):
 
     def test_mobile_invite_page(self):
         later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
-        self.party_album.invite_phone_number(self.tom, '+12127184000', later_on)
+        self.party_album.add_members(self.tom, [], ['+12127184000'], later_on)
         new_user = self.party_album.members.exclude(id=self.tom.id)[0]
         link_code_object = PhoneNumberLinkCode.objects.get(user=new_user)
 
@@ -252,7 +252,7 @@ class InviteTests(TestCase):
 
     def test_app_init_with_session(self):
         later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
-        self.party_album.invite_phone_number(self.tom, '+12127184000', later_on)
+        self.party_album.add_members(self.tom, [], ['+12127184000'], later_on)
         new_user = self.party_album.members.exclude(id=self.tom.id)[0]
         link_code_object = PhoneNumberLinkCode.objects.get(user=new_user)
 
@@ -278,7 +278,7 @@ class InviteTests(TestCase):
 
     def test_app_init_deletes_data(self):
         later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
-        self.party_album.invite_phone_number(self.tom, '+12127184000', later_on)
+        self.party_album.add_members(self.tom, [], ['+12127184000'], later_on)
         new_user = self.party_album.members.exclude(id=self.tom.id)[0]
         link_code_object = PhoneNumberLinkCode.objects.get(user=new_user)
         invite_code = link_code_object.invite_code
@@ -294,7 +294,7 @@ class InviteTests(TestCase):
 
     def test_app_init_phone_verified(self):
         later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
-        self.party_album.invite_phone_number(self.tom, '+12127184000', later_on)
+        self.party_album.add_members(self.tom, [], ['+12127184000'], later_on)
 
         new_user = self.party_album.members.exclude(id=self.tom.id)[0]
         link_code_object = PhoneNumberLinkCode.objects.get(user=new_user)

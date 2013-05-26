@@ -201,6 +201,12 @@ class PhoneNumber(models.Model):
 
     objects = PhoneNumberManager()
 
+    def should_send_invite(self):
+        if self.verified:
+            return False
+
+        return PhoneNumberLinkCode.objects.filter(user=self.user).count() == 0
+
     def __unicode__(self):
         return self.phone_number
 
@@ -214,17 +220,20 @@ class PhoneNumberConfirmSMSCode(models.Model):
 
 class PhoneNumberLinkCodeManager(models.Manager):
     # phone_number must not exist in PhoneNumber model
-    def invite_phone_number(self, phone_number_str, inviter, date_invited):
+    def invite_new_phone_number(self, phone_number_str, inviter, date_invited):
         new_user = User.objects.create_user()
-        PhoneNumber.objects.create(
+        phone_number = PhoneNumber.objects.create(
                 phone_number = phone_number_str,
                 user = new_user,
                 date_created = date_invited,
                 verified = False)
 
+        return self.invite_existing_phone_number(phone_number, inviter, date_invited)
+
+    def invite_existing_phone_number(self, phone_number, inviter, date_invited):
         link_code_object = PhoneNumberLinkCode.objects.create(
                 invite_code = PhoneNumberLinkCode.generate_invite_code(),
-                user = new_user,
+                user = phone_number.user,
                 inviting_user = inviter,
                 date_created = date_invited)
 
