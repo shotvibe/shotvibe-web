@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.http import HttpResponseNotFound, HttpResponse
 from django.utils import timezone
+from django.views.decorators.cache import never_cache
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -52,6 +53,7 @@ class ConfirmSMSCode(APIView):
 
 # This view is called from the mobile app, after it has been installed, and is
 # being run for the first time
+@never_cache
 def app_init(request):
     app = request.GET.get('app', 'unknown')
 
