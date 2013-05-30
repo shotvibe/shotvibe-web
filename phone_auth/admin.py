@@ -2,7 +2,7 @@ from django import forms
 from django.contrib import admin, auth
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 
-from phone_auth.models import User, UserEmail, AuthToken, PhoneNumber, PhoneNumberConfirmSMSCode
+from phone_auth.models import User, UserEmail, AuthToken, PhoneNumber, PhoneNumberConfirmSMSCode, PhoneNumberLinkCode
 
 class AuthTokenAdmin(admin.ModelAdmin):
     list_display = ('user', 'description', 'date_created', 'key')
@@ -115,3 +115,4 @@ admin.site.register(User, UserAdmin)
 admin.site.register(AuthToken, AuthTokenAdmin)
 admin.site.register(PhoneNumber, PhoneNumberAdmin)
 admin.site.register(PhoneNumberConfirmSMSCode, PhoneNumberConfirmSMSCodeAdmin)
+admin.site.register(PhoneNumberLinkCode)
