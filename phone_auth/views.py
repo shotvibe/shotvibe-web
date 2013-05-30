@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.gis.geoip import GeoIP, GeoIPException
 from django.http import HttpResponseNotFound, HttpResponse
 from django.utils import timezone
 from django.views.decorators.cache import never_cache
@@ -62,8 +63,16 @@ def app_init(request):
         # TODO Maybe log this or something
         return HttpResponseNotFound('Unknown app', content_type='text/plain')
 
-    # TODO This should determine the user's country using a GeoIP lookup
-    country_code = 'US'
+    country_code = None
+    try:
+        g = GeoIP()
+        country_code = g.country_code(request.META.get('REMOTE_ADDR'))
+        del g
+    except GeoIPException:
+        pass
+
+    if country_code is None:
+        country_code = 'US'
 
     response = HttpResponse(status=302)
 
