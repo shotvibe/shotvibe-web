@@ -11,6 +11,22 @@ from django.conf import settings
 
 COUNTRY_CODE_ISRAEL = 972
 
+def send_sms(destination_phone, message):
+    """
+    destination_phone must be formatted as international E164
+    """
+    p = phonenumbers.parse(destination_phone)
+
+    default_sender = send_sms_twilio
+    country_overrides = {
+        COUNTRY_CODE_ISRAEL: send_sms_smartsms
+        }
+
+    sender = country_overrides.get(p.country_code, default_sender)
+    sender(p, message)
+
+    # TODO Log that the SMS was sent
+
 def send_sms_twilio(phone, message):
     if not isinstance(phone, phonenumbers.phonenumber.PhoneNumber):
         raise ValueError('phone must be a PhoneNumber object')
