@@ -11,11 +11,30 @@ from django.conf import settings
 
 COUNTRY_CODE_ISRAEL = 972
 
+def is_test_number(phone):
+    if phone.country_code == 1:
+        e164 = phonenumbers.format_number(phone, phonenumbers.PhoneNumberFormat.E164)
+
+        # Numbers of the form +1-212-718-xxxx are not issued, and are used as
+        # test numbers
+        #
+        # Reference:
+        # http://en.wikipedia.org/wiki/North_American_Numbering_Plan#Fictional_telephone_numbers
+        # http://en.wikipedia.org/wiki/Fictitious_telephone_number#North_American_Numbering_Plan
+        if e164[0:8] == '+1212718':
+            return True
+
+    return False
+
 def send_sms(destination_phone, message):
     """
     destination_phone must be formatted as international E164
     """
     p = phonenumbers.parse(destination_phone)
+
+    # Don't actually send any SMS messages for test numbers
+    if is_test_number(p):
+        return
 
     default_sender = send_sms_twilio
     country_overrides = {
