@@ -8,6 +8,7 @@ from twilio import TwilioException
 from twilio.rest import TwilioRestClient
 
 from django.conf import settings
+from django.core import mail
 
 COUNTRY_CODE_ISRAEL = 972
 
@@ -26,11 +27,20 @@ def is_test_number(phone):
 
     return False
 
+def in_testing_mode():
+    # An evil hack to detect if we are running unit tests
+    # http://stackoverflow.com/questions/6957016/detect-django-testing-mode
+    return hasattr(mail, 'outbox')
+
 def send_sms(destination_phone, message):
     """
     destination_phone must be formatted as international E164
     """
     p = phonenumbers.parse(destination_phone)
+
+    # Don't actually send any SMS messages during unit tests
+    if in_testing_mode():
+        return
 
     # Don't actually send any SMS messages for test numbers
     if is_test_number(p):
