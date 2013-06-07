@@ -9,6 +9,8 @@ from django.utils import crypto
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
+from phone_auth.sms_send import send_sms
+
 class UserManager(auth.models.BaseUserManager):
     def create_user(self, nickname=None, password=None):
         if not nickname:
@@ -154,7 +156,7 @@ class PhoneNumberManager(models.Manager):
                 date_created = timezone.now()
                 )
 
-        # TODO Send SMS code to phone
+        send_sms(phone_number.phone_number, 'ShotVibe SMS Verification Code: ' + confirmation_code)
 
         return confirmation_key
 
