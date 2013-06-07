@@ -1,11 +1,42 @@
 import HTMLParser
+import random
 
 import phonenumbers
 import requests
 
+from twilio import TwilioException
+from twilio.rest import TwilioRestClient
+
 from django.conf import settings
 
 COUNTRY_CODE_ISRAEL = 972
+
+def send_sms_twilio(phone, message):
+    if not isinstance(phone, phonenumbers.phonenumber.PhoneNumber):
+        raise ValueError('phone must be a PhoneNumber object')
+
+    account = settings.TWILIO_CREDENTIALS['account']
+    token = settings.TWILIO_CREDENTIALS['auth_token']
+    from_phone_numbers = settings.TWILIO_CREDENTIALS['phone_numbers']
+
+    # Sending is done from a random number
+    chosen_from_phone_number = random.choice(from_phone_numbers)
+
+    phone_e164 = phonenumbers.format_number(phone, phonenumbers.PhoneNumberFormat.E164)
+
+    def log_error(message):
+        # TODO Better logging ...
+        print message
+
+    client = TwilioRestClient(account, token)
+    try:
+        client.sms.messages.create(
+                to=phone_e164,
+                from_=chosen_from_phone_number,
+                body=message)
+    except TwilioException as e:
+        log_error(unicode(e))
+        return
 
 # Used to send SMS to phone numbers in Israel
 # http://www.smartsms.co.il
