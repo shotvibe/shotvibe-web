@@ -153,6 +153,44 @@ def load_image_correct_orientation(img_file_path):
     else:
         return img
 
+def create_mipmaps(img):
+    (img_width, img_height) = (img.size[0], img.size[1])
+    def calc_min_dimensions():
+        target_sizes = [d.get_image_dimensions(img_width, img_height) for d in image_sizes.itervalues()]
+
+        min_width = 9999999
+        min_height = 9999999
+        for w,h in target_sizes:
+            if w < min_width:
+                min_width = w
+            if h < min_height:
+                min_height = h
+        return (min_width, min_height)
+
+    min_width, min_height = calc_min_dimensions()
+
+    w = img_width
+    h = img_height
+
+    mipmaps = [((w, h), img)]
+
+    while w >= min_width*2 and h >= min_height*2:
+        w //= 2
+        h //= 2
+
+        m = mipmaps[-1][1].resize((w, h), Image.BILINEAR)
+        mipmaps.append(((w, h), m))
+
+    mipmaps.reverse()
+    return mipmaps
+
+def get_best_mipmap(mipmaps, width, height):
+    for ((w, h), m) in mipmaps:
+        if w >= width and h >= height:
+            return m
+    # No matches found, return the largest mipmap (will be the original image):
+    return mipmaps[-1][1]
+
 def process_uploaded_image(bucket, photo_id):
     location, directory = bucket.split(':')
     if location != 'local':
@@ -168,9 +206,17 @@ def process_uploaded_image(bucket, photo_id):
     # dimensions then re-use the result, either by copying the file, or using a
     # symlink
 
+    mipmaps = create_mipmaps(img)
+
     for image_size_str, image_dimensions_calculator in image_sizes.iteritems():
         (new_width, new_height) = image_dimensions_calculator.get_image_dimensions(img_width, img_height)
-        new_img = ImageOps.fit(img, (new_width, new_height), Image.ANTIALIAS, 0, (0.5, 0.5))
+        mipmap = get_best_mipmap(mipmaps, new_width, new_height)
+        if new_width == mipmap.size[0] and new_height == mipmap.size[1]:
+            new_img = mipmap
+        elif new_height * img_width // img_height == new_width or new_width * img_height // img_width == new_height:
+            new_img = mipmap.resize((new_width, new_height), Image.BILINEAR)
+        else:
+            new_img = ImageOps.fit(mipmap, (new_width, new_height), Image.BILINEAR, 0, (0.5, 0.5))
         new_img.save(os.path.join(bucket_directory, photo_id + '_' + image_size_str + '.jpg'))
 
     return (img_width, img_height)
