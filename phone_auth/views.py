@@ -5,6 +5,8 @@ from django.utils import timezone
 from django.views.decorators.cache import never_cache
 
 from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -51,6 +53,14 @@ class ConfirmSMSCode(APIView):
             'user_id': result.user.id,
             'auth_token': result.auth_token
             })
+
+@api_view(['POST'])
+@permission_classes((IsAuthenticated,))
+def logout(request):
+    assert isinstance(request.auth, AuthToken)
+    request.auth.logout()
+
+    return Response()
 
 # This view is called from the mobile app, after it has been installed, and is
 # being run for the first time

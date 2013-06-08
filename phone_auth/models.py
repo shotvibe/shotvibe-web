@@ -135,6 +135,9 @@ class AuthToken(models.Model):
     def __unicode__(self):
         return unicode(self.user) + ': ' + self.description
 
+    def logout(self):
+        self.delete()
+
 class PhoneNumberManager(models.Manager):
     def authorize_phone_number(self, phone_number_str):
         try:

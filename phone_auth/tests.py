@@ -192,6 +192,28 @@ class ViewTests(TestCase):
 
         self.assertEqual(PhoneNumber.objects.get(phone_number='+12127184000').verified, False)
 
+    def test_logout(self):
+        number = {
+                'phone_number': '212-718-4000',
+                'default_country': 'US'
+                }
+        auth_response = self.client.post('/authorize_phone_number/', content_type='application/json', data=json.dumps(number))
+        confirmation_key = json.loads(auth_response.content)['confirmation_key']
+
+        confirm = {
+                'confirmation_code': '6666', # Default code currently used for testing
+                'device_description': 'iPhone 3GS'
+                }
+        confirm_response = self.client.post('/confirm_sms_code/{0}/'.format(confirmation_key), content_type='application/json', data=json.dumps(confirm))
+        auth_token = json.loads(confirm_response.content)['auth_token']
+
+        self.assertTrue(AuthToken.objects.filter(key=auth_token).exists())
+
+        r = self.client.post('/logout/', content_type='application/json', HTTP_AUTHORIZATION='Token ' + auth_token)
+        self.assertEqual(r.status_code, 200)
+
+        self.assertFalse(AuthToken.objects.filter(key=auth_token).exists())
+
 
 class InviteTests(TestCase):
     def setUp(self):
