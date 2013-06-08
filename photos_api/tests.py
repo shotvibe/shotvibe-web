@@ -52,6 +52,14 @@ class UserTest(BaseTestCase):
         first_album_response = self.client.get(first_album_url)
         self.assertEqual(first_album_response.status_code, 200)
 
+    def test_delete(self):
+        self.assertTrue(auth.get_user_model().objects.filter(id=2).exists())
+
+        r = self.client.post('/delete_account/')
+        self.assertEqual(r.status_code, 200)
+
+        self.assertFalse(auth.get_user_model().objects.filter(id=2).exists())
+
 class NotModifiedTest(BaseTestCase):
     def setUp(self):
         self.client.login(username='2', password='amanda')
