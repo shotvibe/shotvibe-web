@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib import admin, auth
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from django.utils.html import format_html
 
 from phone_auth.models import User, UserEmail, AuthToken, PhoneNumber, PhoneNumberConfirmSMSCode, PhoneNumberLinkCode
 
@@ -111,8 +112,21 @@ class UserAdmin(auth.admin.UserAdmin):
 
 #admin.site.unregister(auth.models.Group)
 
+class PhoneNumberLinkCodeAdmin(admin.ModelAdmin):
+    list_display = ('phone_number', 'inviting_user', 'date_created', 'invite_code')
+    list_display_links = list_display
+
+    fields = ('phone_number', 'user', 'inviting_user', 'date_created', 'invite_link',)
+    readonly_fields = ('phone_number', 'user', 'inviting_user', 'date_created', 'invite_link',)
+
+    def phone_number(self, instance):
+        return instance.user.phonenumber_set.all()[:1].get()
+
+    def invite_link(self, instance):
+        return format_html(u'<a href="{0}">{1}</a>', instance.get_invite_page(), instance.invite_code)
+
 admin.site.register(User, UserAdmin)
 admin.site.register(AuthToken, AuthTokenAdmin)
 admin.site.register(PhoneNumber, PhoneNumberAdmin)
 admin.site.register(PhoneNumberConfirmSMSCode, PhoneNumberConfirmSMSCodeAdmin)
-admin.site.register(PhoneNumberLinkCode)
+admin.site.register(PhoneNumberLinkCode, PhoneNumberLinkCodeAdmin)
