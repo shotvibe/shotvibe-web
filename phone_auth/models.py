@@ -208,7 +208,7 @@ class PhoneNumber(models.Model):
         if self.verified:
             return False
 
-        return PhoneNumberLinkCode.objects.filter(user=self.user).count() == 0
+        return not self.phonenumberlinkcode_set.exists()
 
     def __unicode__(self):
         return self.phone_number
@@ -239,7 +239,7 @@ class PhoneNumberLinkCodeManager(models.Manager):
     def invite_existing_phone_number(self, phone_number, inviter, date_invited):
         link_code_object = PhoneNumberLinkCode.objects.create(
                 invite_code = PhoneNumberLinkCode.generate_invite_code(),
-                user = phone_number.user,
+                phone_number = phone_number,
                 inviting_user = inviter,
                 date_created = date_invited)
 
@@ -250,7 +250,7 @@ class PhoneNumberLinkCodeManager(models.Manager):
 
 class PhoneNumberLinkCode(models.Model):
     invite_code = models.CharField(max_length=32, primary_key=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, unique=True, related_name='+')
+    phone_number = models.ForeignKey(PhoneNumber, unique=True)
     inviting_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='+')
     date_created = models.DateTimeField(db_index=True)
 
@@ -261,7 +261,7 @@ class PhoneNumberLinkCode(models.Model):
         return crypto.get_random_string(26, string.ascii_letters + string.digits)
 
     def __unicode__(self):
-        return self.invite_code + ': ' + unicode(self.user.phonenumber_set.all()[:1].get())
+        return self.invite_code + ': ' + unicode(self.phone_number)
 
     def get_invite_page(self, url_prefix=None):
         import frontend.urls

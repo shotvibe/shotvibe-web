@@ -14,13 +14,11 @@ def invite_page(request, invite_code):
         return HttpResponseNotFound()
 
     # For showing the album, just grab the first album that the user belongs to
-    album = Album.objects.get_user_albums(link_code_object.user.id)[0]
+    album = Album.objects.get_user_albums(link_code_object.phone_number.user.id)[0]
 
     device = get_device(request.META.get('HTTP_USER_AGENT', '').lower())
 
-    all_phone_numbers = link_code_object.user.phonenumber_set.all()
-    assert len(all_phone_numbers) == 1
-    request.session['phone_number'] = all_phone_numbers[0].phone_number
+    request.session['phone_number'] = link_code_object.phone_number.phone_number
 
     if device == 'android':
         test_app_url = 'market://details?id=com.urbandictionary.android'

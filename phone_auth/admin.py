@@ -116,11 +116,8 @@ class PhoneNumberLinkCodeAdmin(admin.ModelAdmin):
     list_display = ('phone_number', 'inviting_user', 'date_created', 'invite_code')
     list_display_links = list_display
 
-    fields = ('phone_number', 'user', 'inviting_user', 'date_created', 'invite_link',)
-    readonly_fields = ('phone_number', 'user', 'inviting_user', 'date_created', 'invite_link',)
-
-    def phone_number(self, instance):
-        return instance.user.phonenumber_set.all()[:1].get()
+    fields = ('phone_number', 'inviting_user', 'date_created', 'invite_link',)
+    readonly_fields = ('phone_number', 'inviting_user', 'date_created', 'invite_link',)
 
     def invite_link(self, instance):
         return format_html(u'<a href="{0}">{1}</a>', instance.get_invite_page(), instance.invite_code)

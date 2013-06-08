@@ -104,7 +104,7 @@ def app_init(request):
 
     auth_token = AuthToken.objects.create_auth_token(user, device_description, timezone.now())
 
-    PhoneNumberLinkCode.objects.filter(user=user).delete()
+    PhoneNumberLinkCode.objects.filter(phone_number=phone_number).delete()
     if len(request.session.keys()) > 1:
         # There is some other session data besides 'phone_number', so only
         # selectively delete

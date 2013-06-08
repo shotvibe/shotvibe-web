@@ -49,7 +49,7 @@ class Album(models.Model):
                 self.members.add(phone_number.user.id)
             except PhoneNumber.DoesNotExist:
                 link_code_object = PhoneNumberLinkCode.objects.invite_new_phone_number(phone_number_str, inviter, date_added)
-                self.members.add(link_code_object.user.id)
+                self.members.add(link_code_object.phone_number.user.id)
 
         self.save_revision(date_added)
 

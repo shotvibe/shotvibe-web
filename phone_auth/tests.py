@@ -215,7 +215,7 @@ class InviteTests(TestCase):
         self.assertEqual(new_user_phone_number.date_created, later_on)
         self.assertEqual(new_user_phone_number.verified, False)
 
-        link_code_object = PhoneNumberLinkCode.objects.get(user=new_user)
+        link_code_object = PhoneNumberLinkCode.objects.get(phone_number=new_user_phone_number)
         self.assertEqual(link_code_object.inviting_user, self.tom)
         self.assertEqual(link_code_object.date_created, later_on)
 
@@ -223,7 +223,7 @@ class InviteTests(TestCase):
         later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
         self.party_album.add_members(self.tom, [], ['+12127184000'], later_on)
         new_user = self.party_album.members.exclude(id=self.tom.id)[0]
-        link_code_object = PhoneNumberLinkCode.objects.get(user=new_user)
+        link_code_object = PhoneNumberLinkCode.objects.get(phone_number=new_user.phonenumber_set.all()[0])
 
         r = self.client.get(reverse(invite_page, args=(link_code_object.invite_code,)))
         self.assertEqual(r.status_code, 200)
@@ -254,7 +254,7 @@ class InviteTests(TestCase):
         later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
         self.party_album.add_members(self.tom, [], ['+12127184000'], later_on)
         new_user = self.party_album.members.exclude(id=self.tom.id)[0]
-        link_code_object = PhoneNumberLinkCode.objects.get(user=new_user)
+        link_code_object = PhoneNumberLinkCode.objects.get(phone_number=new_user.phonenumber_set.all()[0])
 
         # Visit the invite_page so that the session data is associated with the client
         self.client.get(reverse(invite_page, args=(link_code_object.invite_code,)))
@@ -280,7 +280,7 @@ class InviteTests(TestCase):
         later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
         self.party_album.add_members(self.tom, [], ['+12127184000'], later_on)
         new_user = self.party_album.members.exclude(id=self.tom.id)[0]
-        link_code_object = PhoneNumberLinkCode.objects.get(user=new_user)
+        link_code_object = PhoneNumberLinkCode.objects.get(phone_number=new_user.phonenumber_set.all()[0])
         invite_code = link_code_object.invite_code
 
         # Visit the invite_page so that the session data is associated with the client
@@ -297,7 +297,7 @@ class InviteTests(TestCase):
         self.party_album.add_members(self.tom, [], ['+12127184000'], later_on)
 
         new_user = self.party_album.members.exclude(id=self.tom.id)[0]
-        link_code_object = PhoneNumberLinkCode.objects.get(user=new_user)
+        link_code_object = PhoneNumberLinkCode.objects.get(phone_number=new_user.phonenumber_set.all()[0])
 
         self.assertEqual(PhoneNumber.objects.get(phone_number='+12127184000').verified, False)
 
