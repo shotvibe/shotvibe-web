@@ -221,6 +221,9 @@ class PhoneNumberConfirmSMSCode(models.Model):
     phone_number = models.ForeignKey(PhoneNumber)
     date_created = models.DateTimeField(db_index=True)
 
+    def __unicode__(self):
+        return self.confirmation_key + ': ' + unicode(self.phone_number.phone_number)
+
 class PhoneNumberLinkCodeManager(models.Manager):
     # phone_number must not exist in PhoneNumber model
     def invite_new_phone_number(self, phone_number_str, inviter, date_invited):
@@ -256,6 +259,9 @@ class PhoneNumberLinkCode(models.Model):
     @staticmethod
     def generate_invite_code():
         return crypto.get_random_string(26, string.ascii_letters + string.digits)
+
+    def __unicode__(self):
+        return self.invite_code + ': ' + unicode(self.user.phonenumber_set.all()[:1].get())
 
     def get_invite_page(self, url_prefix=None):
         import frontend.urls
