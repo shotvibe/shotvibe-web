@@ -4,6 +4,7 @@ import string
 
 from django.conf import settings
 from django.contrib import auth
+from django.core.urlresolvers import reverse
 from django.db import models, IntegrityError
 from django.utils import crypto
 from django.utils import timezone
@@ -239,7 +240,8 @@ class PhoneNumberLinkCodeManager(models.Manager):
                 inviting_user = inviter,
                 date_created = date_invited)
 
-        # TODO Send SMS to phone_number with invite_code link
+        invite_url_prefix = 'https://www.shotvibe.com'
+        send_sms(phone_number.phone_number, inviter.nickname + ' has shared photos with you!\n' + link_code_object.get_invite_page(invite_url_prefix))
 
         return link_code_object
 
@@ -254,3 +256,11 @@ class PhoneNumberLinkCode(models.Model):
     @staticmethod
     def generate_invite_code():
         return crypto.get_random_string(26, string.ascii_letters + string.digits)
+
+    def get_invite_page(self, url_prefix=None):
+        import frontend.urls
+        from frontend.mobile_views import invite_page
+
+        if not url_prefix:
+            url_prefix = ''
+        return url_prefix + reverse(invite_page, urlconf=frontend.urls, args=(self.invite_code,))
