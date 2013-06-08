@@ -202,14 +202,26 @@ def process_uploaded_image(bucket, photo_id):
     img = load_image_correct_orientation(img_file_path)
     (img_width, img_height) = (img.size[0], img.size[1])
 
-    # TODO Optimization: If multiple image targets happen to have the same
-    # dimensions then re-use the result, either by copying the file, or using a
-    # symlink
-
     mipmaps = create_mipmaps(img)
+
+    saved_images = []
+
+    def get_matching_saved_image(width, height):
+        for (w, h), filename in saved_images:
+            if w == new_width and h == new_height:
+                return filename
+        return None
 
     for image_size_str, image_dimensions_calculator in image_sizes.iteritems():
         (new_width, new_height) = image_dimensions_calculator.get_image_dimensions(img_width, img_height)
+
+        filename = photo_id + '_' + image_size_str + '.jpg'
+
+        saved_image = get_matching_saved_image(new_width, new_height)
+        if saved_image:
+            os.symlink(saved_image, os.path.join(bucket_directory, filename))
+            continue
+
         mipmap = get_best_mipmap(mipmaps, new_width, new_height)
         if new_width == mipmap.size[0] and new_height == mipmap.size[1]:
             new_img = mipmap
@@ -217,7 +229,8 @@ def process_uploaded_image(bucket, photo_id):
             new_img = mipmap.resize((new_width, new_height), Image.BILINEAR)
         else:
             new_img = ImageOps.fit(mipmap, (new_width, new_height), Image.BILINEAR, 0, (0.5, 0.5))
-        new_img.save(os.path.join(bucket_directory, photo_id + '_' + image_size_str + '.jpg'))
+        new_img.save(os.path.join(bucket_directory, filename))
+        saved_images.append(((new_width, new_height), filename))
 
     return (img_width, img_height)
 
