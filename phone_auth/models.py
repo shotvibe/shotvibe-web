@@ -191,6 +191,8 @@ class PhoneNumberManager(models.Manager):
         # TODO maybe confirm_obj.delete(), or maybe better to wait for it to be
         # garbage collected automatically
 
+        # TODO Also maybe delete a PhoneNumberLinkCode if it exists for this phone_number
+
         result.success = True
         result.user = user
         result.auth_token = auth_token.key
