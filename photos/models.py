@@ -1,3 +1,4 @@
+from django.contrib import auth
 import os
 import random
 
@@ -18,17 +19,43 @@ class AlbumManager(models.Manager):
                 last_updated = date_created,
                 revision_number = 0
                 )
-        album.members.add(creator.id)
+
+        membership = AlbumMember.objects.create(
+            user = creator,
+            album = album,
+            datetime_added = timezone.now(),
+            added_by_member = None
+        )
+
         return album
 
     def get_user_albums(self, user_id):
         return self.filter(members__id=user_id)
 
+
+class AlbumMember(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="album_membership")
+    album = models.ForeignKey("Album")
+
+    # Self references because this model can't have more than one reference to the User model.
+    # https://docs.djangoproject.com/en/1.1/topics/db/models/#extra-fields-on-many-to-many-relationships
+    # Default is `None` for album creators.
+    added_by_member = models.ForeignKey('self', related_name="created_album_memberships",
+                                        null=True, default=None, blank=True)
+    datetime_added = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "photos_album_members"
+        unique_together = ('user', 'album')
+
+    def __unicode__(self):
+        return "Member {0} of album {1} (Membersip #{2})".format(self.user, self.album, self.pk)
+
 class Album(models.Model):
     date_created = models.DateTimeField()
     name = models.CharField(max_length=255)
-    creator = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='+')
-    members = models.ManyToManyField(settings.AUTH_USER_MODEL)
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_albums')
+    members = models.ManyToManyField(settings.AUTH_USER_MODEL, through=AlbumMember)
     last_updated = models.DateTimeField()
     revision_number = models.IntegerField()
 
@@ -39,17 +66,41 @@ class Album(models.Model):
         Album.objects.filter(pk=self.id).update(revision_number=models.F('revision_number')+1)
         self.save(update_fields=['last_updated'])
 
-    def add_members(self, inviter, user_ids, phone_number_strs, date_added):
-        self.members.add(*user_ids)
+    def add_members(self, inviter, user_ids, phone_number_strs=None, date_added=None):
+
+        if not phone_number_strs:
+            phone_number_strs = []
+
+        if not date_added:
+            date_added = timezone.now()
+
+        inviter_membership = AlbumMember.objects.get(user=inviter, album=self)
+
+        # List of users to add. Start with users from user_ids.
+        new_users = [auth.get_user_model().objects.get(pk=user_id) for user_id in user_ids]
+
+        # Add users that was requested by phone number
         for phone_number_str in phone_number_strs:
+
             try:
                 phone_number = PhoneNumber.objects.get(phone_number=phone_number_str)
                 if phone_number.should_send_invite():
                     PhoneNumberLinkCode.objects.invite_existing_phone_number(phone_number, inviter, date_added)
-                self.members.add(phone_number.user.id)
+                new_users.append(phone_number.user)
+
             except PhoneNumber.DoesNotExist:
                 link_code_object = PhoneNumberLinkCode.objects.invite_new_phone_number(phone_number_str, inviter, date_added)
-                self.members.add(link_code_object.phone_number.user.id)
+                new_users.append(link_code_object.phone_number.user)
+
+
+        # Create memberships
+        for new_user in new_users:
+            AlbumMember.objects.create(
+                user = new_user,
+                album = self,
+                added_by_member = inviter_membership,
+                datetime_added = timezone.now()
+            )
 
         self.save_revision(date_added)
 

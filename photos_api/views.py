@@ -17,7 +17,7 @@ from rest_framework.parsers import BaseParser
 import phonenumbers
 
 from photos.image_uploads import handle_file_upload
-from photos.models import Album, Photo, PendingPhoto
+from photos.models import Album, Photo, PendingPhoto, AlbumMember
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
@@ -43,6 +43,9 @@ def delete_account(request):
     - All photos added
     - All albums created, including all of the contained photos, even if other users added them!
     """
+    for membership in  AlbumMember.objects.filter(user=request.user):
+        membership.album.delete()
+        membership.delete()
     request.user.delete()
 
     return Response()
@@ -105,8 +108,7 @@ class AlbumDetail(generics.RetrieveAPIView):
                 if number:
                     add_member_phones.append(number)
 
-        now = timezone.now()
-        self.album.add_members(request.user, add_member_ids, add_member_phones, now)
+        self.album.add_members(request.user, add_member_ids, add_member_phones)
 
         responseSerializer = AlbumSerializer(self.album)
         return Response(responseSerializer.data)
@@ -170,12 +172,14 @@ class Albums(generics.ListAPIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         now = timezone.now()
         album = Album.objects.create_album(self.request.user, serializer.object.album_name, now)
+
         for member in serializer.object.members:
             if member.user_id:
-                album.members.add(member.user_id)
+                album.add_members(self.request.user, [member.user_id])
             else:
                 # TODO Add members from phone number
                 pass
+
         for photo_id in serializer.object.photos:
             Photo.objects.upload_to_album(photo_id, album, now)
 
