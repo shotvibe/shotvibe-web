@@ -1,97 +1,82 @@
-<!DOCTYPE html>
+{% load static %}
+<!DOCTYPE HTML>
 <html>
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>{{ inviting_user.get_full_name }} Has Shared Photos</title>
-    <style>
-
-      html {
-        background-color: #fff;
-        color: #000;
-      }
-
-      body {
-        margin: 0;
-        font-family: sans-serif;
-      }
-
-      h1 {
-        text-align: center;
-        font-size: 24px;
-        font-weight: normal;
-      }
-
-      .photos img {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-        margin-top: 16px;
-        margin-bottom: 16px;
-        width: 80%;
-        border: 2px solid #eee;
-      }
-
-      .detail {
-        margin-left: 32px;
-        margin-right: 32px;
-        font-size: 20px;
-        text-align: center;
-      }
-
-      .detail a {
-        text-decoration: none;
-        color: #000;
-      }
-
-      .detail a strong {
-        color: #00f;
-        text-decoration: underline;
-      }
-
-      .detail .badge {
-        margin: 28px;
-      }
-
-      .footer {
-        margin-top: 64px;
-      }
-
-    </style>
-    <!--
-    The following hack removes the address bar from the window.
-    http://mobile.tutsplus.com/tutorials/mobile-web-apps/remove-address-bar/
-    -->
-    <script>
-      window.addEventListener('load', function() {
-        setTimeout(function(){ window.scrollTo(0, 1); }, 1);
-      }, false);
-    </script>
+    <link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static "mobile/css/style.css" %}" />
   </head>
   <body>
-    <h1><strong>{{ inviting_user.get_full_name }}</strong> has shared these photos with you!</h1>
-    <div class="photos">
-      {% for photo in album.get_latest_photos %}
-      <img src="{{ photo.get_photo_url_no_ext }}_940x570.jpg" alt="">
+    <article>
+    <header id="header">
+    <p>Hello! <strong>{{ inviting_user.get_full_name }}</strong> wants to
+    share photos with you on</p>
+    <h1>ShotVibe</h1>
+    </header>
+    <section id="photos">
+    <div class="reel">
+      {% for photo in album.get_invite_page_photos %}
+      {% if not forloop.last %}
+      <a href="#" class="image">
+        <img src="{{ photo.get_photo_url_no_ext }}_940x570.jpg" alt="">
+      </a>
+      {% else %}
+      <div class="image last">
+        <div class="overlay">
+          <p>Browse all <strong>174</strong> photos<br />
+          in this album</p>
+          <a href="{{ app_url }}" class="button {{ device }}">Get the App</a>
+        </div>
+        <img src="{{ photo.get_photo_url_no_ext }}_940x570.jpg" alt="">
+      </div>
+      {% endif %}
       {% endfor %}
     </div>
-    {% if device == "android" or device == "iphone" %}
-    <div class="detail">
-      <a href="{{ app_url }}">Install the <strong>ShotVibe</strong> App to see the rest, and to share your own photos!</a>
-      <div class="badge">
-        {% if device == "android" %}
-        <a href="{{ app_url }}"><img alt="Android app on Google Play" src="//developer.android.com/images/brand/en_app_rgb_wo_60.png"></a>
-        {% elif device == "iphone" %}
-        <a href="{{ app_url }}"><img alt="Download on the App Store" src="//linkmaker.itunes.apple.com/htmlResources/assets/images/web/linkmaker/badge_appstore-lrg.png"></a>
-        {% endif %}
+    </section>
+    <section id="about">
+    <p>
+    <strong>ShotVibe</strong> is the simplest way to share photos with your friends and family. Now for
+    {% if device == "android" %}
+    Android + iPhone.
+    {% elif device == "iphone" %}
+    iPhone + Android.
+    {% endif %}
+    </p>
+    </section>
+    <section id="screenshots" class="{{ device }}">
+    <div class="screen">
+      <div class="reel">
+        {# {% with "mobile/images/tmp-"|add:device|add:".jpg" as screenshot %} #}
+        <div class="image">
+          <img src="{% static "mobile/images/tmp-"|add:device|add:".jpg" %}" alt="" />
+        </div>
+        <div class="image">
+          <img src="{% static "mobile/images/tmp-"|add:device|add:".jpg" %}" alt="" />
+        </div>
+        <div class="image">
+          <img src="{% static "mobile/images/tmp-"|add:device|add:".jpg" %}" alt="" />
+        </div>
+        <div class="image">
+          <img src="{% static "mobile/images/tmp-"|add:device|add:".jpg" %}" alt="" />
+        </div>
       </div>
     </div>
-    {% else %}
-    <div class="detail">
-      <p>Unfortunately, your device is not yet supported. We only have apps for Android and iPhone.</p>
-      <p>For more information, please visit <a href="https://www.shotvibe.com"><strong>ShotVibe</strong></a></p>
-    </div>
+    </section>
+    <section id="cta">
+    <a href="{{ app_url }}" class="button {{ device }}">Get the App</a>
+    <p>Also available for
+    {% if device == "android" %}
+    <strong>iPhone</strong>
+    {% elif device == "iphone" %}
+    <strong>Android</strong>
     {% endif %}
-    <div class="footer">
-    </div>
+    </p>
+    </section>
+    <footer id="footer">
+    &copy; 2013 ShotVibe, Inc. All rights reserved.<br />
+    <a href="//www.shotvibe.com">shotvibe.com</a>
+    </footer>
+    </article>
   </body>
 </html>
