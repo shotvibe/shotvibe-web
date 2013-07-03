@@ -112,7 +112,16 @@ class PhotoManager(models.Manager):
         return new_id
 
     def upload_to_album(self, photo_id, album, date_created):
-        pending_photo = PendingPhoto.objects.get(photo_id=photo_id)
+        try:
+            return Photo.objects.get(photo_id=photo_id)
+        except Photo.DoesNotExist:
+            pass
+
+        try:
+            pending_photo = PendingPhoto.objects.get(photo_id=photo_id)
+        except PendingPhoto.DoesNotExist:
+            # TODO Better exception
+            raise
 
         # TODO catch exception:
         width, height = image_uploads.process_uploaded_image(pending_photo.bucket, photo_id)
