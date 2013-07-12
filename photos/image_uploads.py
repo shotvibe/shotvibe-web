@@ -146,7 +146,10 @@ def load_image_correct_orientation(img_file_path):
 
     # Actual execution starts here:
     img = Image.open(img_file_path)
-    orientation_value = get_tag_value(img._getexif(), 'Orientation')
+    if hasattr(img, '_getexif'):
+        orientation_value = get_tag_value(img._getexif(), 'Orientation')
+    else:
+        orientation_value = None
     degrees = EXIF_ORIENTATION_DEGREES.get(orientation_value)
     if not (degrees is None):
         return img.rotate(degrees)
