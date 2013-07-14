@@ -34,12 +34,14 @@ LOCAL_PHOTO_BUCKETS_BASE_PATH = 'photo_buckets'
 LOCAL_PHOTO_BUCKET_URL_FORMAT_STR = '/photos/{0}/{1}.jpg'
 
 INSTALLED_APPS = sys.modules['shotvibe_site.settings'].INSTALLED_APPS + (
+    'django_extensions',
     'django_jenkins',
 )
 
 JENKINS_TASKS = (
     'django_jenkins.tasks.with_coverage',
     'django_jenkins.tasks.django_tests',
+    'django_jenkins.tasks.run_graphmodels',
 )
 
 PROJECT_APPS = (
