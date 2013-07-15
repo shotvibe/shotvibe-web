@@ -44,7 +44,7 @@ class AlbumSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'date_created', 'last_updated', 'members', 'photos')
 
     photos = PhotoSerializer(source='get_photos')
-    members = UserSerializer(source='members')
+    members = UserSerializer(source='get_member_users')
 
     def get_name_field(self, model_field):
         return None

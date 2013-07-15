@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.utils.timezone import utc
 from django.test.utils import override_settings
 
-from photos.models import Album, Photo, PendingPhoto
+from photos.models import Album, Photo, PendingPhoto, AlbumMember
 from photos import image_uploads
 
 def read_in_chunks(file_object, chunk_size=1024):
@@ -39,6 +39,9 @@ class ModelTest(TestCase):
 
         self.assertTrue(album.is_user_member(self.amanda.id))
         self.assertFalse(album.is_user_member(self.barney.id))
+
+        membership = AlbumMember.objects.filter(user=self.amanda, album=album).get()
+        self.assertEqual(membership.added_by_user, self.amanda)
 
         self.assertEqual(list(Album.objects.get_user_albums(self.amanda.id)), [album])
         self.assertEqual(list(Album.objects.get_user_albums(self.barney.id)), [])
