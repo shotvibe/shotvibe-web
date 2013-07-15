@@ -7,6 +7,10 @@ from django.db import models
 
 class Migration(SchemaMigration):
 
+    depends_on = (
+        ("phone_auth", "0001_initial"),
+    )
+
     def forwards(self, orm):
         # Adding model 'Album'
         db.create_table(u'photos_album', (
