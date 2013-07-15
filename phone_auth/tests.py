@@ -332,4 +332,3 @@ class InviteTests(TestCase):
         self.assertEqual(r.status_code, 302)
 
         self.assertEqual(PhoneNumber.objects.get(phone_number='+12127184000').verified, True)
-
