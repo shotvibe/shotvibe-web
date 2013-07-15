@@ -120,14 +120,14 @@ class AlbumMember(models.Model):
     album = models.ForeignKey(Album, related_name="memberships")
 
     added_by_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="created_album_memberships")
-    datetime_added = models.DateTimeField(auto_now_add=True)
+    datetime_added = models.DateTimeField()
 
     class Meta:
         db_table = "photos_album_members"
-        # unique_together = ('user', 'album')
+        unique_together = ('user', 'album')
 
     def __unicode__(self):
-        return "Member {0} of album {1} (Membersip #{2})".format(self.user, self.album, self.pk)
+        return "Member {0} of album {1} (Membership #{2})".format(self.user, self.album, self.pk)
 
 
 all_photo_buckets = (
