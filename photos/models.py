@@ -23,7 +23,7 @@ class AlbumManager(models.Manager):
         AlbumMember.objects.create(
             user = creator,
             album = album,
-            datetime_added = timezone.now(),
+            datetime_added = date_created,
             added_by_user = creator
         )
 
@@ -76,7 +76,7 @@ class Album(models.Model):
                 user = new_user,
                 album = self,
                 added_by_user = inviter,
-                datetime_added = timezone.now()
+                datetime_added = date_added
             )
 
 
