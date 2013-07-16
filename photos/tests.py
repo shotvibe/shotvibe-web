@@ -1,5 +1,6 @@
 import datetime
 import shutil
+from django.db.models.query import QuerySet
 
 from django.conf import settings
 from django.contrib import auth
@@ -32,6 +33,10 @@ class ModelTest(TestCase):
 
     def tearDown(self):
         shutil.rmtree(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, ignore_errors=True)
+
+    def test_issue_22(self):
+        user_albums_qs = Album.objects.get_user_albums(self.amanda.pk)
+        self.assertTrue(isinstance(user_albums_qs, QuerySet))
 
     def test_create_new_album(self):
         the_date = datetime.datetime(2010, 1, 1, tzinfo=utc)
