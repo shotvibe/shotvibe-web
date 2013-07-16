@@ -105,8 +105,7 @@ class AlbumDetail(generics.RetrieveAPIView):
                 if number:
                     add_member_phones.append(number)
 
-        now = timezone.now()
-        self.album.add_members(request.user, add_member_ids, add_member_phones, now)
+        self.album.add_members(request.user, add_member_ids, add_member_phones)
 
         responseSerializer = AlbumSerializer(self.album)
         return Response(responseSerializer.data)
@@ -172,7 +171,7 @@ class Albums(generics.ListAPIView):
         album = Album.objects.create_album(self.request.user, serializer.object.album_name, now)
         for member in serializer.object.members:
             if member.user_id:
-                album.members.add(member.user_id)
+                album.add_members(self.request.user, [member.user_id])
             else:
                 # TODO Add members from phone number
                 pass

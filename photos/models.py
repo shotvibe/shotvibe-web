@@ -1,3 +1,4 @@
+from django.contrib import auth
 import os
 import random
 
@@ -18,17 +19,24 @@ class AlbumManager(models.Manager):
                 last_updated = date_created,
                 revision_number = 0
                 )
-        album.members.add(creator.id)
+
+        AlbumMember.objects.create(
+            user = creator,
+            album = album,
+            datetime_added = date_created,
+            added_by_user = creator
+        )
+
         return album
 
     def get_user_albums(self, user_id):
-        return self.filter(members__id=user_id)
+        album_memberships = AlbumMember.objects.filter(user__pk=user_id).select_related("album").only("album")
+        return [membership.album for membership in album_memberships]
 
 class Album(models.Model):
     date_created = models.DateTimeField()
     name = models.CharField(max_length=255)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='+')
-    members = models.ManyToManyField(settings.AUTH_USER_MODEL)
     last_updated = models.DateTimeField()
     revision_number = models.IntegerField()
 
@@ -39,17 +47,38 @@ class Album(models.Model):
         Album.objects.filter(pk=self.id).update(revision_number=models.F('revision_number')+1)
         self.save(update_fields=['last_updated'])
 
-    def add_members(self, inviter, user_ids, phone_number_strs, date_added):
-        self.members.add(*user_ids)
+    def add_members(self, inviter, user_ids, phone_number_strs=None, date_added=None):
+
+        if not phone_number_strs:
+            phone_number_strs = []
+
+        # Date added is current datetime by default
+        if not date_added:
+            date_added = timezone.now()
+
+        # List of users to add. Start with users from user_ids.
+        new_users = [auth.get_user_model().objects.get(pk=user_id) for user_id in user_ids]
+
+        # Add users that was requested by phone number
         for phone_number_str in phone_number_strs:
             try:
                 phone_number = PhoneNumber.objects.get(phone_number=phone_number_str)
                 if phone_number.should_send_invite():
                     PhoneNumberLinkCode.objects.invite_existing_phone_number(phone_number, inviter, date_added)
-                self.members.add(phone_number.user.id)
+                new_users.append(phone_number.user)
             except PhoneNumber.DoesNotExist:
                 link_code_object = PhoneNumberLinkCode.objects.invite_new_phone_number(phone_number_str, inviter, date_added)
-                self.members.add(link_code_object.phone_number.user.id)
+                new_users.append(link_code_object.phone_number.user)
+
+        # Create memberships
+        for new_user in new_users:
+            AlbumMember.objects.create(
+                user = new_user,
+                album = self,
+                added_by_user = inviter,
+                datetime_added = date_added
+            )
+
 
         self.save_revision(date_added)
 
@@ -63,7 +92,7 @@ class Album(models.Model):
         return self.photo_set.order_by('-date_created', '-photo_id')[:2]
 
     def is_user_member(self, user_id):
-        return self.members.filter(id=user_id).exists()
+        return AlbumMember.objects.filter(album=self, user__pk=user_id).exists()
 
     def get_etag(self):
         return u'{0}'.format(self.revision_number)
@@ -80,7 +109,26 @@ class Album(models.Model):
                 album_name = self.name,
                 author_name = author.nickname,
                 num_photos = len(photo_ids),
-                user_ids = [u.id for u in self.members.all()])
+                user_ids = [membership.user.id for membership in AlbumMember.objects.filter(album=self).only('user__id')])
+
+    def get_member_users(self):
+        return [membership.user for membership in AlbumMember.objects.filter(album=self).only('user')]
+
+
+class AlbumMember(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="album_membership")
+    album = models.ForeignKey(Album, related_name="memberships")
+
+    added_by_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="created_album_memberships")
+    datetime_added = models.DateTimeField()
+
+    class Meta:
+        db_table = "photos_album_members"
+        unique_together = ('user', 'album')
+
+    def __unicode__(self):
+        return "Member {0} of album {1} (Membership #{2})".format(self.user, self.album, self.pk)
+
 
 all_photo_buckets = (
         'local:photos01',
