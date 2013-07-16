@@ -30,8 +30,9 @@ class AlbumManager(models.Manager):
         return album
 
     def get_user_albums(self, user_id):
-        album_memberships = AlbumMember.objects.filter(user__pk=user_id).select_related("album").only("album")
-        return [membership.album for membership in album_memberships]
+        album_memberships = AlbumMember.objects.filter(user__pk=user_id).select_related("album").only("album__id")
+        album_ids = [am.album.pk for am in album_memberships]
+        return Album.objects.filter(pk__in=album_ids)
 
 class Album(models.Model):
     date_created = models.DateTimeField()

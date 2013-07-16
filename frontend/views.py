@@ -60,7 +60,7 @@ def album(request, pk):
     data = {
             'album': album,
             'photos': album.get_photos().order_by('-date_created'),
-            'members': album.members.all(),
+            'members': album.get_member_users(),
             'num_photos_added': num_photos_added,
             'num_photos_failed': num_photos_failed
             }
