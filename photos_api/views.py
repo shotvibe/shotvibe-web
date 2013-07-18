@@ -95,17 +95,7 @@ class AlbumDetail(generics.RetrieveAPIView):
         if serializer.object.add_photos:
             self.album.add_photos(request.user, serializer.object.add_photos)
 
-        add_member_ids = []
-        add_member_phones = []
-        for member in serializer.object.add_members:
-            if member.user_id:
-                add_member_ids.append(member.user_id)
-            else:
-                number = parse_phone_number(member.phone_number, member.default_country)
-                if number:
-                    add_member_phones.append(number)
-
-        self.album.add_members(request.user, add_member_ids, add_member_phones)
+        self.album.add_members(request.user, member_identifiers=serializer.object.add_members)
 
         responseSerializer = AlbumSerializer(self.album)
         return Response(responseSerializer.data)
@@ -168,13 +158,10 @@ class Albums(generics.ListAPIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         now = timezone.now()
-        album = Album.objects.create_album(self.request.user, serializer.object.album_name, now)
-        for member in serializer.object.members:
-            if member.user_id:
-                album.add_members(self.request.user, [member.user_id])
-            else:
-                # TODO Add members from phone number
-                pass
+
+        album = Album.objects.create_album(self.request.user, serializer.object.album_name)
+        album.add_members(request.user, member_identifiers=serializer.object.members)
+
         for photo_id in serializer.object.photos:
             Photo.objects.upload_to_album(photo_id, album, now)
 

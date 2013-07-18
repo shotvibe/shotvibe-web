@@ -1,4 +1,6 @@
+from django.utils.translation import ugettext_lazy as _
 from django.contrib import auth
+import phonenumbers
 from rest_framework import serializers
 
 from photos.models import Album, Photo
@@ -17,7 +19,8 @@ class ListField(serializers.WritableField):
             serializer = self.element_serializer_type(data=e)
             if not serializer.is_valid():
                 # TODO better error handling
-                raise serializer.errors
+                # raise serializer.errors
+                raise serializers.ValidationError(serializer.errors.values()[0])
             result.append(serializer.object)
         return result
 
@@ -70,10 +73,11 @@ class PhotoListField(serializers.WritableField):
         return result
 
 class MemberIdentifier(object):
-    def __init__(self, user_id=None, phone_number=None, default_country=None):
+    def __init__(self, user_id=None, phone_number=None, default_country=None, contact_nickname=None):
         self.user_id = user_id
         self.phone_number = phone_number
         self.default_country = default_country
+        self.contact_nickname = contact_nickname
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -83,14 +87,46 @@ class MemberIdentifier(object):
 
 class MemberIdentifierSerializer(serializers.Serializer):
     user_id = serializers.IntegerField(required=False)
-    phone_number = serializers.CharField(required=False)
+    phone_number = serializers.CharField(required=False, error_messages={
+        'invalid_phone_number':_('Phone number is invalid'),
+        'not_possible_phone_number':_('This phone number is not possible'),
+    })
     default_country = serializers.CharField(required=False, min_length=2, max_length=2)
+    contact_nickname = serializers.CharField(required=False, error_messages={
+        'required_with_phone_number':_('\'contact_nickname\' attribute is required when adding a new member using phone number.')
+    })
+
+    def validate(self, attrs):
+        # `contact_nickname` is required when `phone_number` provided but not `user_id`
+        if 'user_id' not in attrs and not attrs.get('contact_nickname'):
+            raise serializers.ValidationError(self.fields['contact_nickname'].error_messages['required_with_phone_number'])
+
+        # Validate phone number
+        if 'user_id' not in attrs:
+            try:
+                number = phonenumbers.parse(attrs.get('phone_number'),
+                                            attrs.get('default_country'))
+            except phonenumbers.phonenumberutil.NumberParseException:
+                raise serializers.ValidationError(self.fields['phone_number'].error_messages['invalid_phone_number'])
+
+            if not phonenumbers.is_possible_number(number):
+                raise serializers.ValidationError(self.fields['phone_number'].error_messages['not_possible_phone_number'])
+
+            # Format final number.
+            attrs['phone_number'] = phonenumbers.format_number(number, phonenumbers.PhoneNumberFormat.E164)
+
+        return attrs
+
 
     def restore_object(self, attrs, instance=None):
         if 'user_id' in attrs:
             return MemberIdentifier(user_id=attrs['user_id'])
         else:
-            return MemberIdentifier(phone_number=attrs['phone_number'], default_country=attrs['default_country'])
+            return MemberIdentifier(
+                phone_number=attrs['phone_number'],
+                default_country=attrs['default_country'],
+                contact_nickname=attrs['contact_nickname']
+            )
 
 class AlbumUpdate(object):
     def __init__(self, add_photos=None, add_members=None):
