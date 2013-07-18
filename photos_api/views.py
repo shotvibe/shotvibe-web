@@ -1,5 +1,7 @@
+from django.utils.translation import ugettext_lazy as _
 from django.contrib import auth
 #from django.http import HttpResponseNotModified
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.core.files import File
@@ -17,7 +19,7 @@ from rest_framework.parsers import BaseParser
 import phonenumbers
 
 from photos.image_uploads import handle_file_upload
-from photos.models import Album, Photo, PendingPhoto
+from photos.models import Album, Photo, PendingPhoto, AlbumMember
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
@@ -109,6 +111,31 @@ class AlbumDetail(generics.RetrieveAPIView):
 
         responseSerializer = AlbumSerializer(self.album)
         return Response(responseSerializer.data)
+
+class LeaveAlbum(generics.DestroyAPIView):
+    model = AlbumMember
+    permission_classes = (IsAuthenticated, IsUserInAlbum)
+
+    def post(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+
+        if queryset is None:
+            queryset = self.get_queryset()
+
+        # pk from URL points to the album, not AlbumMember
+        album_pk = self.kwargs.get(self.pk_url_kwarg, None)
+        if album_pk is None:
+            raise AttributeError("Missing Album pk")
+
+        try:
+            obj = queryset.get(user=self.request.user, album__pk=album_pk)
+        except self.model.DoesNotExist:
+            # This should never happen since we already checked if this records exists by checking permissions
+            raise Http404(_(u"Album not found"))
+        return obj
+
 
 class UserList(generics.ListCreateAPIView):
     """
