@@ -1,5 +1,7 @@
 import filecmp
+import httplib
 import json
+from django.core.urlresolvers import reverse
 import os
 import shutil
 
@@ -10,7 +12,7 @@ from django.test.utils import override_settings
 from django.utils import timezone
 
 from phone_auth.models import PhoneNumber
-from photos.models import PendingPhoto
+from photos.models import PendingPhoto, AlbumMember
 
 from photos_api.serializers import AlbumUpdateSerializer, MemberIdentifier, MemberIdentifierSerializer, AlbumAddSerializer
 
@@ -446,3 +448,25 @@ class MembersTests(BaseTestCase):
         self.assertEqual(user_phone.phone_number, '+12127184000')
         self.assertEqual(user_phone.verified, False)
         self.assertEqual(user_phone.should_send_invite(), False)
+
+    def test_leave_album(self):
+        # Currently logged in user is amanda, she will be removed from the album
+
+        amanda = auth.get_user_model().objects.get(nickname="amanda")
+
+        # Make sure amanda is in album members
+        album_before_response = self.client.get(reverse('album-detail', kwargs={'pk':9}))
+        members_before = json.loads(album_before_response.content)['members']
+        self.assertTrue(amanda.nickname in [m['nickname'] for m in members_before])
+
+        # Send leave album request
+        leave_album_response = self.client.post(reverse('album-leave', kwargs={'pk':9}))
+        # Response should be 204 No Content
+        self.assertEqual(leave_album_response.status_code, httplib.NO_CONTENT)
+
+        # Make sure amanda is not a member of the album anymore
+        self.assertRaises(AlbumMember.DoesNotExist, AlbumMember.objects.filter(user=amanda, album__pk=9).get)
+
+        # Retrieving album details is forbidden, because user is not a member of the album anymore
+        album_after_response = self.client.get(reverse('album-detail', kwargs={'pk':9}))
+        self.assertEqual(album_after_response.status_code, httplib.FORBIDDEN)
