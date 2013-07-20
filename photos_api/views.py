@@ -5,6 +5,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.core.files import File
+from photos_api.device_push import broadcast_album_list_sync
 
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
@@ -117,7 +118,12 @@ class LeaveAlbum(generics.DestroyAPIView):
     permission_classes = (IsAuthenticated, IsUserInAlbum)
 
     def post(self, request, *args, **kwargs):
-        return self.delete(request, *args, **kwargs)
+        response = self.delete(request, *args, **kwargs)
+
+        # Send push notification to the user.
+        broadcast_album_list_sync(request.user.id)
+
+        return response
 
     def get_object(self, queryset=None):
 

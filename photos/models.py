@@ -9,6 +9,8 @@ from django.utils import timezone
 from phone_auth.models import PhoneNumber, PhoneNumberLinkCode
 from photos import image_uploads
 from photos_api import device_push
+from photos_api.device_push import broadcast_added_to_album, broadcast_album_list_sync
+
 
 class AlbumManager(models.Manager):
     def create_album(self, creator, name, date_created):
@@ -26,6 +28,10 @@ class AlbumManager(models.Manager):
             datetime_added = date_created,
             added_by_user = creator
         )
+
+        # Send push notifications
+        broadcast_added_to_album(album.id, album.name, creator.nickname, [creator.id])
+        broadcast_album_list_sync([creator.id])
 
         return album
 
@@ -80,6 +86,8 @@ class Album(models.Model):
                 datetime_added = date_added
             )
 
+        # Send push notification
+        broadcast_added_to_album(self.id, self.name, inviter.nickname, [nu.id for nu in new_users])
 
         self.save_revision(date_added)
 
