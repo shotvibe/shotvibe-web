@@ -38,17 +38,17 @@ def generate_random_data(words_file='/usr/share/dict/words', num_albums=100, num
             author = auth.get_user_model().objects.get(pk=random.choice(user_ids))
             date_created = album.last_updated + datetime.timedelta(seconds=random.randint(0, 60*60*24*30))
 
-            photo_id = Photo.objects.upload_request(author)
+            pending_photo = PendingPhoto.objects.create(author=author)
 
-            location, directory = PendingPhoto.objects.get(photo_id=photo_id).bucket.split(':')
+            location, directory = pending_photo.bucket.split(':')
             if location != 'local':
                 raise ValueError('Unknown photo bucket location: ' + location)
 
             with open(random.choice(test_photos)) as f:
-                image_uploads.handle_file_upload(directory, photo_id, read_in_chunks(f))
+                image_uploads.handle_file_upload(directory, pending_photo.photo_id, read_in_chunks(f))
 
             # Pretend that the photo was uploaded
-            Photo.objects.upload_to_album(photo_id, album, date_created)
+            pending_photo.get_or_process_uploaded_image_and_create_photo(album, date_created)
 
         max_album_members = 20
 
