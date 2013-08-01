@@ -61,6 +61,10 @@ body.
 
 Used to add photos or members to an album.
 
+### POST /albums/{aid}/leave/
+
+Used to leave an album.
+
 ### POST /albums/
 
 Used to create a new album.
@@ -622,6 +626,16 @@ Another example request:
     }
 
 The response returned is the same as for `GET /albums/{aid}/`, with the updated album
+
+## POST /albums/{aid}/leave/
+
+Used to leave an album.
+
+`aid` is the album that the user wishes to leave.
+
+The request body should be empty.
+
+The response will be 204 No Content.
 
 ## POST /albums/
 
