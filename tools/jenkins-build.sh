@@ -9,6 +9,10 @@ pip install -r ./tools/jenkins-requirements.txt
 
 ln -sf ./tools/jenkins_local_settings.py ./local_settings.py
 
+# Compile documentation in `docs` directory
+
+./tools/make-docs.sh
+
 mkdir -p reports
 
 # Fatal Reports that will break the build
