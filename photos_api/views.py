@@ -132,7 +132,12 @@ class LeaveAlbum(generics.DestroyAPIView):
     permission_classes = (IsAuthenticated, IsUserInAlbum)
 
     def post(self, request, *args, **kwargs):
-        return self.delete(request, *args, **kwargs)
+        response = self.delete(request, *args, **kwargs)
+
+        # Send push notification to the user.
+        device_push.broadcast_album_list_sync(request.user.id)
+
+        return response
 
     def get_object(self, queryset=None):
 
