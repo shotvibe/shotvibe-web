@@ -51,18 +51,18 @@ class ModelTest(TestCase):
         self.assertEqual(list(Album.objects.get_user_albums(self.amanda.id)), [album])
         self.assertEqual(list(Album.objects.get_user_albums(self.barney.id)), [])
 
-        photo_id = Photo.objects.upload_request(self.amanda)
+        pending_photo = PendingPhoto.objects.create(author=self.amanda)
 
-        location, directory = PendingPhoto.objects.get(photo_id=photo_id).bucket.split(':')
+        location, directory = pending_photo.bucket.split(':')
         if location != 'local':
             raise ValueError('Unknown photo bucket location: ' + location)
 
         with open('photos/test_photos/death-valley-sand-dunes.jpg') as f:
-            image_uploads.handle_file_upload(directory, photo_id, read_in_chunks(f))
+            image_uploads.handle_file_upload(directory, pending_photo.photo_id, read_in_chunks(f))
 
-        new_photo = Photo.objects.upload_to_album(photo_id, album, the_date)
+        new_photo = pending_photo.get_or_process_uploaded_image_and_create_photo(album, the_date)
 
-        self.assertFalse(PendingPhoto.objects.filter(photo_id=photo_id).exists())
+        self.assertFalse(PendingPhoto.objects.filter(photo_id=pending_photo.photo_id).exists())
 
         # This is the size of the test photo:
         self.assertEqual((new_photo.width, new_photo.height), (1024, 768))
@@ -77,16 +77,16 @@ class ModelTest(TestCase):
 
         update_date = datetime.datetime(2010, 1, 2, tzinfo=utc)
 
-        photo_id = Photo.objects.upload_request(self.amanda)
+        pending_photo = PendingPhoto.objects.create(author=self.amanda)
 
-        location, directory = PendingPhoto.objects.get(photo_id=photo_id).bucket.split(':')
+        location, directory = pending_photo.bucket.split(':')
         if location != 'local':
             raise ValueError('Unknown photo bucket location: ' + location)
 
         with open('photos/test_photos/death-valley-sand-dunes.jpg') as f:
-            image_uploads.handle_file_upload(directory, photo_id, read_in_chunks(f))
+            image_uploads.handle_file_upload(directory, pending_photo.photo_id, read_in_chunks(f))
 
-        Photo.objects.upload_to_album(photo_id, the_album, update_date)
+        pending_photo.get_or_process_uploaded_image_and_create_photo(the_album, update_date)
 
         self.assertEqual(the_album.last_updated, update_date)
 
