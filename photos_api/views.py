@@ -135,7 +135,7 @@ class LeaveAlbum(generics.DestroyAPIView):
         response = self.delete(request, *args, **kwargs)
 
         # Send push notification to the user.
-        broadcast_album_list_sync(request.user.id)
+        device_push.broadcast_album_list_sync(request.user.id)
 
         return response
 
