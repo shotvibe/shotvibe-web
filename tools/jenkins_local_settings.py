@@ -51,3 +51,31 @@ PROJECT_APPS = (
     'phone_auth',
     'photos_api',
 )
+
+# Buckets where we upload new avatars
+AVATAR_BUCKETS = (
+    's3:shotvibe-avatars-01:{filename}',
+    's3:shotvibe-avatars-02:{filename}'
+)
+
+# Format string for user avatar files. It should contain keyword argiments
+# `user_id` and `timestamp`.
+AVATAR_FILENAME_FORMAT_STRING = "user-avatar-{user_id}-{timestamp}.jpg"
+
+# Map of Storage:URL_Format_String for avatar images.
+# This is used to construct URL for a user's avatar from internal
+# representation storage:bucket_name:filename.
+AVATAR_STORAGE_URL_FORMAT_STRING_MAP = {
+    's3': 'https://{bucket_name}.s3.amazonaws.com/{filename}'
+}
+
+# Data required to generate default avatar file.
+# (format_string, min_number, max_number)
+DEFAULT_AVATAR_FILES = [
+    ('s3:shotvibe-avatars-01:default-avatar-{0}.jpg', 1, 78),
+    # ('foo:bar2:avatar_{0}', 41, 78)
+]
+
+# AWS Credentials
+AWS_ACCESS_KEY = "AKIAJ37YWEH3ZXFSVQ2A"
+AWS_SECRET_ACCESS_KEY = "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"
