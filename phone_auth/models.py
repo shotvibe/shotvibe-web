@@ -1,6 +1,5 @@
 import collections
 import random
-from phone_auth.utils import default_random_user_avatar_file
 import re
 import os
 import string
@@ -16,15 +15,17 @@ from django.utils.translation import ugettext_lazy as _
 
 from phone_auth.sms_send import send_sms
 
-USER_AVATAR_DATA_REGEX = re.compile('(s3|local):.+?:user-avatar-\d+?-\d+?\.jpg')
+USER_AVATAR_DATA_REGEX = re.compile(r's3:.+?:user-avatar-\d+?-\d+?\.jpg')
 
 
 def validate_avatar_file_data(value):
+    """Validates value supplied for User.avatar_file attribute"""
     if not USER_AVATAR_DATA_REGEX.match(value):
         raise ValidationError("Wrong value for avatar file")
 
 
 def default_random_user_avatar_file():
+    """Returns random default avatar_file location"""
     format_string, min_number, max_number = random.choice(
         settings.DEFAULT_AVATAR_FILES
     )
@@ -112,7 +113,9 @@ class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
         return self.get_full_name()
 
     def get_avatar_url(self):
-        storage, bucket, filename = self.avatar_file.split(":")
+        """Returns URL of the user's avatar image"""
+
+        storage, bucket, filename = str(self.avatar_file).split(":")
         format_string = settings.AVATAR_STORAGE_URL_FORMAT_STRING_MAP.get(
             storage)
 
