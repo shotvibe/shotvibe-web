@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-import datetime
+from phone_auth.models import default_random_user_avatar_file
 from south.db import db
 from south.v2 import SchemaMigration
-from django.db import models
 
 
 class Migration(SchemaMigration):
@@ -13,6 +12,10 @@ class Migration(SchemaMigration):
                       self.gf('django.db.models.fields.CharField')(default='s3:shotvibe-avatars-01:default-avatar_0070', max_length=128),
                       keep_default=False)
 
+        if not db.dry_run:
+            for user in orm.User.objects.all():
+                user.avatar_file = default_random_user_avatar_file()
+                user.save()
 
     def backwards(self, orm):
         # Deleting field 'User.avatar_file'
