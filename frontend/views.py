@@ -5,8 +5,10 @@ from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.utils import timezone
 
-from photos.models import Album, Photo, PendingPhoto
+from photos.models import Album, Photo, PendingPhoto, AlbumMember
 from photos import image_uploads
+from photos_api import device_push
+
 
 def index(request):
     if request.user.is_authenticated():
@@ -42,25 +44,34 @@ def album(request, pk):
 
     if request.POST:
         if 'add_photos' in request.POST:
-            photo_ids = []
+            pending_photos = []
             for f in request.FILES.getlist('photo_files'):
-                photo_id = Photo.objects.upload_request(request.user)
-                pending_photo = PendingPhoto.objects.get(photo_id=photo_id)
+
+                pending_photo = PendingPhoto.objects.create(author=request.user)
                 location, directory = pending_photo.bucket.split(':')
                 if location != 'local':
                     raise ValueError('Unknown photo bucket location: ' + location)
 
-                image_uploads.handle_file_upload(directory, photo_id, f.chunks())
-                photo_ids.append(photo_id)
+                image_uploads.handle_file_upload(directory, pending_photo.photo_id, f.chunks())
+                pending_photos.append(pending_photo)
                 num_photos_added += 1
 
-            if photo_ids:
-                album.add_photos(request.user, photo_ids)
+            # Upload pending photos
+            photos = [pf.get_or_process_uploaded_image_and_create_photo(album) for pf in pending_photos]
+
+            # Send push notifications to the album members about just added photos
+            device_push.broadcast_photos_added(
+                album_id=album.id,
+                author_id=request.user.id,
+                album_name=album.name,
+                author_name=request.user.nickname,
+                num_photos=len(photos),
+                user_ids=[membership.user.id for membership in AlbumMember.objects.filter(album=album).only('user__id')])
 
     data = {
             'album': album,
             'photos': album.get_photos().order_by('-date_created'),
-            'members': album.members.all(),
+            'members': album.get_member_users(),
             'num_photos_added': num_photos_added,
             'num_photos_failed': num_photos_failed
             }

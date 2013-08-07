@@ -9,7 +9,7 @@ from django.utils.timezone import utc
 
 from phone_auth.models import AuthToken, User, PhoneNumber, PhoneNumberConfirmSMSCode, PhoneNumberLinkCode
 from phone_auth.views import app_init
-from photos.models import Album
+from photos.models import Album, AlbumMember
 from frontend.mobile_views import invite_page
 
 class ModelTests(TestCase):
@@ -225,9 +225,11 @@ class InviteTests(TestCase):
         later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
         self.party_album.add_members(self.tom, [], ['+12127184000'], later_on)
 
-        self.assertEqual(len(self.party_album.members.all()), 2)
+        self.assertEqual(AlbumMember.objects.filter(album=self.party_album).count(), 2)
 
-        new_user = self.party_album.members.exclude(id=self.tom.id)[0]
+        album_members_qs = AlbumMember.objects.filter(album=self.party_album).exclude(user=self.tom)
+        self.assertTrue(album_members_qs.count()>0, "New user was not added to the AlbumMembers model")
+        new_user = album_members_qs[0].user
 
         new_user_phone_numbers = new_user.phonenumber_set.all()
         self.assertEqual(len(new_user_phone_numbers), 1)
@@ -244,7 +246,9 @@ class InviteTests(TestCase):
     def test_mobile_invite_page(self):
         later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
         self.party_album.add_members(self.tom, [], ['+12127184000'], later_on)
-        new_user = self.party_album.members.exclude(id=self.tom.id)[0]
+        album_members_qs = AlbumMember.objects.filter(album=self.party_album).exclude(user=self.tom)
+        self.assertTrue(album_members_qs.count()>0, "New user was not added to the AlbumMembers model")
+        new_user = album_members_qs[0].user
         link_code_object = PhoneNumberLinkCode.objects.get(phone_number=new_user.phonenumber_set.all()[0])
 
         r = self.client.get(reverse(invite_page, args=(link_code_object.invite_code,)))
@@ -275,7 +279,9 @@ class InviteTests(TestCase):
     def test_app_init_with_session(self):
         later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
         self.party_album.add_members(self.tom, [], ['+12127184000'], later_on)
-        new_user = self.party_album.members.exclude(id=self.tom.id)[0]
+        album_members_qs = AlbumMember.objects.filter(album=self.party_album).exclude(user=self.tom)
+        self.assertTrue(album_members_qs.count()>0, "New user was not added to the AlbumMembers model")
+        new_user = album_members_qs[0].user
         link_code_object = PhoneNumberLinkCode.objects.get(phone_number=new_user.phonenumber_set.all()[0])
 
         # Visit the invite_page so that the session data is associated with the client
@@ -301,7 +307,9 @@ class InviteTests(TestCase):
     def test_app_init_deletes_data(self):
         later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
         self.party_album.add_members(self.tom, [], ['+12127184000'], later_on)
-        new_user = self.party_album.members.exclude(id=self.tom.id)[0]
+        album_members_qs = AlbumMember.objects.filter(album=self.party_album).exclude(user=self.tom)
+        self.assertTrue(album_members_qs.count()>0, "New user was not added to the AlbumMembers model")
+        new_user = album_members_qs[0].user
         link_code_object = PhoneNumberLinkCode.objects.get(phone_number=new_user.phonenumber_set.all()[0])
         invite_code = link_code_object.invite_code
 
@@ -318,7 +326,9 @@ class InviteTests(TestCase):
         later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
         self.party_album.add_members(self.tom, [], ['+12127184000'], later_on)
 
-        new_user = self.party_album.members.exclude(id=self.tom.id)[0]
+        album_members_qs = AlbumMember.objects.filter(album=self.party_album).exclude(user=self.tom)
+        self.assertTrue(album_members_qs.count()>0, "New user was not added to the AlbumMembers model")
+        new_user = album_members_qs[0].user
         link_code_object = PhoneNumberLinkCode.objects.get(phone_number=new_user.phonenumber_set.all()[0])
 
         self.assertEqual(PhoneNumber.objects.get(phone_number='+12127184000').verified, False)
@@ -332,4 +342,3 @@ class InviteTests(TestCase):
         self.assertEqual(r.status_code, 302)
 
         self.assertEqual(PhoneNumber.objects.get(phone_number='+12127184000').verified, True)
-
