@@ -16,12 +16,14 @@
     </header>
     <section id="photos">
     <div class="reel">
-      {% for photo in album.get_invite_page_photos %}
-      {% if not forloop.last %}
+      {% with album.get_invite_page_photos as invite_page_photos %}
+      {% for photo in invite_page_photos %}
+      {% if not forloop.last or invite_page_photos|length < 4 %}
       <a href="#" class="image">
         <img src="{{ photo.get_photo_url_no_ext }}_940x570.jpg" alt="">
       </a>
-      {% else %}
+      {% endif %}
+      {% if forloop.last %}
       <div class="image last">
         <div class="overlay">
           <p>Browse all <strong>174</strong> photos<br />
@@ -32,6 +34,7 @@
       </div>
       {% endif %}
       {% endfor %}
+      {% endwith %}
     </div>
     </section>
     <section id="about">

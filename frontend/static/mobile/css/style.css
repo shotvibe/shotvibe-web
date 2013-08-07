@@ -107,20 +107,19 @@ a
 	overflow-x: scroll;
 	margin: 0 0 2em 0;
 	-webkit-overflow-scrolling: touch;
+	white-space: nowrap;
 }
 
-	/* 256px * number of photos */
 	#photos .reel
 	{
-		width: 1024px;
 		height: 192px;
 	}
 
 	#photos .reel .image
 	{
 		position: relative;
-		display: block;
-		float: left;
+		display: inline-block;
+		margin-right: -4px; /* See: http://css-tricks.com/fighting-the-space-between-inline-block-elements/ */
 		height: 192px;
 		overflow: hidden;
 	}
