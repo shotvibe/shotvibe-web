@@ -100,6 +100,9 @@ class Album(models.Model):
     def get_latest_photos(self):
         return self.photo_set.order_by('-date_created', '-photo_id')[:2]
 
+    def get_invite_page_photos(self):
+        return self.photo_set.order_by('-date_created', '-photo_id')[:4]
+
     def is_user_member(self, user_id):
         return AlbumMember.objects.filter(album=self, user__pk=user_id).exists()
 
