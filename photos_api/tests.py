@@ -15,6 +15,8 @@ from phone_auth.models import PhoneNumber
 from photos.models import PendingPhoto, AlbumMember
 
 from photos_api.serializers import AlbumUpdateSerializer, MemberIdentifier, MemberIdentifierSerializer, AlbumAddSerializer
+from rest_framework import serializers
+
 
 @override_settings(LOCAL_PHOTO_BUCKETS_BASE_PATH='.tmp_photo_buckets')
 class BaseTestCase(TestCase):
@@ -138,7 +140,7 @@ class Serializers(TestCase):
 
     def test_member_identifier_user_id(self):
         test_data = {
-                'user_id': 3
+                'user_id': 3,
                 }
         serializer = MemberIdentifierSerializer(data=test_data)
         if not serializer.is_valid():
@@ -148,12 +150,28 @@ class Serializers(TestCase):
     def test_member_identifier_phone_number(self):
         test_data = {
                 'phone_number': '212-718-9999',
-                'default_country': 'US'
+                'default_country': 'US',
+                'contact_nickname':'qwer'
                 }
         serializer = MemberIdentifierSerializer(data=test_data)
         if not serializer.is_valid():
             self.fail(serializer.errors)
-        self.assertEqual(serializer.object, MemberIdentifier(phone_number='212-718-9999', default_country='US'))
+        expected_member = MemberIdentifier(phone_number='+12127189999', default_country='US', contact_nickname='qwer')
+        self.assertEqual(serializer.object, expected_member)
+
+    def test_member_identifier_required_nickname(self):
+        test_data = {
+            'phone_number': '212-718-9999',
+            'default_country': 'US',
+        }
+        serializer = MemberIdentifierSerializer(data=test_data)
+        self.assertFalse(serializer.is_valid())
+        self.assertTrue('non_field_errors' in serializer._errors)
+        self.assertEqual(
+            unicode(serializer.fields['contact_nickname'].error_messages.get('required_with_phone_number')),
+            str(serializer._errors['non_field_errors'][0])
+        )
+
 
     def test_album_add(self):
         test_data = {
@@ -163,7 +181,8 @@ class Serializers(TestCase):
                     { 'user_id': 4 },
                     {
                         'phone_number': '212-718-9999',
-                        'default_country': 'US' }
+                        'default_country': 'US',
+                        'contact_nickname': 'John Smith' }
                     ],
                 'photos': [
                     { 'photo_id': 'test_photo_1' },
@@ -177,7 +196,7 @@ class Serializers(TestCase):
         self.assertEqual(serializer.object.members, [
             MemberIdentifier(user_id=3),
             MemberIdentifier(user_id=4),
-            MemberIdentifier(phone_number='212-718-9999', default_country='US')
+            MemberIdentifier(phone_number='+12127189999', default_country='US', contact_nickname='John Smith')
             ])
         self.assertEqual(serializer.object.photos, ['test_photo_1', 'test_photo_2'])
 
@@ -343,7 +362,8 @@ class MembersTests(BaseTestCase):
         add_members = { 'add_members': [
             {
                 'phone_number': '212-718-4000',
-                'default_country': 'US' }
+                'default_country': 'US',
+                'contact_nickname': 'John Doe' }
             ] }
 
         add_response = self.client.post('/albums/9/', content_type='application/json', data=json.dumps(add_members))
@@ -368,8 +388,17 @@ class MembersTests(BaseTestCase):
         self.assertEqual(user_phone.verified, False)
         self.assertEqual(user_phone.should_send_invite(), False)
 
+        # Check that nicknames was assigned to the new users.
+        nicknames_before = [u['nickname'] for u in members_before]
+        nicknames_after = [u['nickname'] for u in members_after]
+
+        new_nicknames = set(nicknames_after) - set(nicknames_before)
+        expected_nicknames = [member_data['contact_nickname'] for member_data in add_members['add_members']]
+        self.assertEqual(list(new_nicknames), expected_nicknames)
+
     def test_add_existing_phone(self):
         barney = auth.get_user_model().objects.get(pk=3)
+        barney_nickname = barney.nickname
         barney_phone = PhoneNumber.objects.create(
                 phone_number='+12127184000',
                 user=barney,
@@ -385,8 +414,10 @@ class MembersTests(BaseTestCase):
         add_members = { 'add_members': [
             {
                 'phone_number': '212-718-4000',
-                'default_country': 'US' }
-            ] }
+                'default_country': 'US',
+                'contact_nickname': 'this should not apply'
+            }
+        ]}
 
         add_response = self.client.post('/albums/9/', content_type='application/json', data=json.dumps(add_members))
         self.assertEqual(add_response.status_code, 200)
@@ -403,11 +434,19 @@ class MembersTests(BaseTestCase):
 
         self.assertEqual(barney_phone.should_send_invite(), False)
 
+        nicknames_before = [u['nickname'] for u in members_before]
+        nicknames_after = [u['nickname'] for u in members_after]
+
+        self.assertEqual(set(nicknames_before + [barney_nickname]), set(nicknames_after))
+        for member_data in add_members['add_members']:
+            self.assertFalse(member_data['contact_nickname'] in nicknames_after)
+
     def test_add_dangling_phone(self):
         number = {
-                'phone_number': '212-718-4000',
-                'default_country': 'US'
-                }
+            'phone_number': '212-718-4000',
+            'default_country': 'US',
+            'contact_nickname': 'John Doe'
+        }
         r = self.client.post('/auth/authorize_phone_number/', content_type='application/json', data=json.dumps(number))
         self.assertEqual(r.status_code, 200)
 
@@ -421,8 +460,10 @@ class MembersTests(BaseTestCase):
         add_members = { 'add_members': [
             {
                 'phone_number': '212-718-4000',
-                'default_country': 'US' }
-            ] }
+                'default_country': 'US',
+                'contact_nickname': 'hello world'
+            }
+        ]}
 
         add_response = self.client.post('/albums/9/', content_type='application/json', data=json.dumps(add_members))
         self.assertEqual(add_response.status_code, 200)

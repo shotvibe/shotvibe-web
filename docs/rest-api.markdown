@@ -576,7 +576,8 @@ The request JSON can include the following fields:
 
 *   `add_members`: Add new members to the album. Each member is either a user
     id, or a phone number. If a phone number is specified, then the user's
-    country should also be specified
+    country should also be specified, as well as the name of the contact as it
+    appears in the phone's address book.
 
 Example request:
 
@@ -616,11 +617,13 @@ Another example request:
             },
             {
                 "phone_number": "212-718-2000",
-                "default_country": "US"
+                "default_country": "US",
+                "contact_nickname": "John Smith"
             },
             {
                 "phone_number": "212-718-3000",
-                "default_country": "US"
+                "default_country": "US",
+                "contact_nickname": "Jane Doe"
             }
         ]
     }
@@ -680,11 +683,13 @@ Example request:
             },
             {
                 "phone_number": "212-718-2000",
-                "default_country": "US"
+                "default_country": "US",
+                "contact_nickname": "John Smith"
             },
             {
                 "phone_number": "212-718-3000",
-                "default_country": "US"
+                "default_country": "US",
+                "contact_nickname": "Jane Doe"
             }
         ]
     }

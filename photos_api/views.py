@@ -20,7 +20,7 @@ from rest_framework.parsers import BaseParser
 import phonenumbers
 
 from photos.image_uploads import handle_file_upload
-from photos.models import Album, Photo, PendingPhoto, AlbumMember
+from photos.models import Album, PendingPhoto, AlbumMember
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
@@ -112,17 +112,7 @@ class AlbumDetail(generics.RetrieveAPIView):
                 user_ids=[membership.user.id for membership in AlbumMember.objects.filter(album=self.album).only('user__id')])
 
 
-        add_member_ids = []
-        add_member_phones = []
-        for member in serializer.object.add_members:
-            if member.user_id:
-                add_member_ids.append(member.user_id)
-            else:
-                number = parse_phone_number(member.phone_number, member.default_country)
-                if number:
-                    add_member_phones.append(number)
-
-        self.album.add_members(request.user, add_member_ids, add_member_phones)
+        self.album.add_members(request.user, member_identifiers=serializer.object.add_members)
 
         responseSerializer = AlbumSerializer(self.album)
         return Response(responseSerializer.data)
@@ -215,13 +205,9 @@ class Albums(generics.ListAPIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         now = timezone.now()
-        album = Album.objects.create_album(self.request.user, serializer.object.album_name, now)
-        for member in serializer.object.members:
-            if member.user_id:
-                album.add_members(self.request.user, [member.user_id])
-            else:
-                # TODO Add members from phone number
-                pass
+
+        album = Album.objects.create_album(self.request.user, serializer.object.album_name)
+        album.add_members(request.user, member_identifiers=serializer.object.members)
 
         for pending_photo in PendingPhoto.objects.filter(photo_id__in=serializer.object.photos):
             pending_photo.get_or_process_uploaded_image_and_create_photo(album, now)

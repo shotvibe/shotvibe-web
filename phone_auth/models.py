@@ -231,17 +231,25 @@ class PhoneNumberConfirmSMSCode(models.Model):
 
 class PhoneNumberLinkCodeManager(models.Manager):
     # phone_number must not exist in PhoneNumber model
-    def invite_new_phone_number(self, phone_number_str, inviter, date_invited):
-        new_user = User.objects.create_user()
+    def invite_new_phone_number(self, inviter, phone_number_str, nickname, date_invited=None):
+
+        if date_invited is None:
+            date_invited = timezone.now()
+
+        new_user = User.objects.create_user(nickname=nickname)
         phone_number = PhoneNumber.objects.create(
                 phone_number = phone_number_str,
                 user = new_user,
                 date_created = date_invited,
                 verified = False)
 
-        return self.invite_existing_phone_number(phone_number, inviter, date_invited)
+        return self.invite_existing_phone_number(inviter, phone_number, date_invited)
 
-    def invite_existing_phone_number(self, phone_number, inviter, date_invited):
+    def invite_existing_phone_number(self, inviter, phone_number, date_invited=None):
+
+        if date_invited is None:
+            date_invited = timezone.now()
+
         link_code_object = PhoneNumberLinkCode.objects.create(
                 invite_code = PhoneNumberLinkCode.generate_invite_code(),
                 phone_number = phone_number,

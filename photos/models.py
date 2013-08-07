@@ -13,7 +13,12 @@ from photos_api.device_push import broadcast_added_to_album, broadcast_album_lis
 
 
 class AlbumManager(models.Manager):
-    def create_album(self, creator, name, date_created):
+    def create_album(self, creator, name, date_created=None):
+
+        # Date added is current datetime by default
+        if date_created is None:
+            date_created = timezone.now()
+
         album = self.create(
                 date_created = date_created,
                 name = name,
@@ -54,37 +59,40 @@ class Album(models.Model):
         Album.objects.filter(pk=self.id).update(revision_number=models.F('revision_number')+1)
         self.save(update_fields=['last_updated'])
 
-    def add_members(self, inviter, user_ids, phone_number_strs=None, date_added=None):
-
-        if not phone_number_strs:
-            phone_number_strs = []
+    def add_members(self, inviter, member_identifiers, date_added=None):
 
         # Date added is current datetime by default
         if not date_added:
             date_added = timezone.now()
 
-        # List of users to add. Start with users from user_ids.
-        new_users = [auth.get_user_model().objects.get(pk=user_id) for user_id in user_ids]
+        new_users = []
 
-        # Add users that was requested by phone number
-        for phone_number_str in phone_number_strs:
+        # New users by user_id
+        member_ids = [mi.user_id for mi in member_identifiers if mi.user_id is not None]
+        new_users = new_users + list(auth.get_user_model().objects.filter(pk__in=member_ids))
+
+        # New users by phone_number
+        member_identifiers_with_phones = [mi for mi in member_identifiers if mi.user_id is None]
+        for member_identifier in member_identifiers_with_phones:
             try:
-                phone_number = PhoneNumber.objects.get(phone_number=phone_number_str)
+                phone_number = PhoneNumber.objects.get(phone_number=member_identifier.phone_number)
                 if phone_number.should_send_invite():
-                    PhoneNumberLinkCode.objects.invite_existing_phone_number(phone_number, inviter, date_added)
+                    PhoneNumberLinkCode.objects.invite_existing_phone_number(inviter, phone_number, date_added)
                 new_users.append(phone_number.user)
             except PhoneNumber.DoesNotExist:
-                link_code_object = PhoneNumberLinkCode.objects.invite_new_phone_number(phone_number_str, inviter, date_added)
+                link_code_object = PhoneNumberLinkCode.objects.invite_new_phone_number(inviter,
+                                                                                       member_identifier.phone_number,
+                                                                                       member_identifier.contact_nickname,
+                                                                                       date_added)
                 new_users.append(link_code_object.phone_number.user)
 
         # Create memberships
         for new_user in new_users:
-            AlbumMember.objects.create(
-                user = new_user,
-                album = self,
-                added_by_user = inviter,
-                datetime_added = date_added
-            )
+            defaults = {
+                'added_by_user': inviter,
+                'datetime_added': date_added
+            }
+            AlbumMember.objects.get_or_create(user=new_user, album=self, defaults=defaults)
 
         # Send push notification
         broadcast_added_to_album(self.id, self.name, inviter.nickname, [nu.id for nu in new_users])
