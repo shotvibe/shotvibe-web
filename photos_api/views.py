@@ -1,8 +1,11 @@
+from django.utils.translation import ugettext_lazy as _
 from django.contrib import auth
 #from django.http import HttpResponseNotModified
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.core.files import File
+from photos_api import device_push
 
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
@@ -17,7 +20,7 @@ from rest_framework.parsers import BaseParser
 import phonenumbers
 
 from photos.image_uploads import handle_file_upload
-from photos.models import Album, Photo, PendingPhoto
+from photos.models import Album, PendingPhoto, AlbumMember
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
@@ -93,12 +96,56 @@ class AlbumDetail(generics.RetrieveAPIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         if serializer.object.add_photos:
-            self.album.add_photos(request.user, serializer.object.add_photos)
+            now = timezone.now()
+
+            # Upload pending photos. For photos that already uploaded this will simply return photo
+            pending_photos = PendingPhoto.objects.filter(photo_id__in=serializer.object.add_photos)
+            photos = [pf.get_or_process_uploaded_image_and_create_photo(self.album, now) for pf in pending_photos]
+
+            # Send push notifications to the album members about just added photos
+            device_push.broadcast_photos_added(
+                album_id=self.album.id,
+                author_id=request.user.id,
+                album_name=self.album.name,
+                author_name=request.user.nickname,
+                num_photos=len(photos),
+                user_ids=[membership.user.id for membership in AlbumMember.objects.filter(album=self.album).only('user__id')])
+
 
         self.album.add_members(request.user, member_identifiers=serializer.object.add_members)
 
         responseSerializer = AlbumSerializer(self.album)
         return Response(responseSerializer.data)
+
+class LeaveAlbum(generics.DestroyAPIView):
+    model = AlbumMember
+    permission_classes = (IsAuthenticated, IsUserInAlbum)
+
+    def post(self, request, *args, **kwargs):
+        response = self.delete(request, *args, **kwargs)
+
+        # Send push notification to the user.
+        device_push.broadcast_album_list_sync(request.user.id)
+
+        return response
+
+    def get_object(self, queryset=None):
+
+        if queryset is None:
+            queryset = self.get_queryset()
+
+        # pk from URL points to the album, not AlbumMember
+        album_pk = self.kwargs.get(self.pk_url_kwarg, None)
+        if album_pk is None:
+            raise AttributeError("Missing Album pk")
+
+        try:
+            obj = queryset.get(user=self.request.user, album__pk=album_pk)
+        except self.model.DoesNotExist:
+            # This should never happen since we already checked if this records exists by checking permissions
+            raise Http404(_(u"Album not found"))
+        return obj
+
 
 class UserList(generics.ListCreateAPIView):
     """
@@ -162,8 +209,8 @@ class Albums(generics.ListAPIView):
         album = Album.objects.create_album(self.request.user, serializer.object.album_name)
         album.add_members(request.user, member_identifiers=serializer.object.members)
 
-        for photo_id in serializer.object.photos:
-            Photo.objects.upload_to_album(photo_id, album, now)
+        for pending_photo in PendingPhoto.objects.filter(photo_id__in=serializer.object.photos):
+            pending_photo.get_or_process_uploaded_image_and_create_photo(album, now)
 
         responseSerializer = AlbumSerializer(album)
         return Response(responseSerializer.data)
@@ -179,10 +226,10 @@ def photos_upload_request(request, format=None):
 
     response_data = []
     for i in xrange(num_photos):
-        photo_id = Photo.objects.upload_request(request.user)
+        pending_photo = PendingPhoto.objects.create(author=request.user)
         response_data.append({
-            'photo_id': photo_id,
-            'upload_url': reverse('photo-upload', [photo_id], request=request)
+            'photo_id': pending_photo.photo_id,
+            'upload_url': reverse('photo-upload', [pending_photo.photo_id], request=request)
             })
 
     return Response(response_data)

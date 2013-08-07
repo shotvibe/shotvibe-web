@@ -132,3 +132,44 @@ def broadcast_photos_added(album_id, author_id, album_name, author_name, num_pho
                 }
             }
     send_message_or_log_errors(rq)
+
+def broadcast_added_to_album(album_id, album_name, adder_name, user_ids):
+    rq = {
+            'user_ids': [str(id) for id in user_ids],
+            'gcm': {
+                'data': {
+                    'type': 'added_to_album',
+                    'album_id': str(album_id),
+                    'adder': adder_name,
+                    'album_name' : album_name,
+                    }
+                },
+            'apns': {
+                'aps': {
+                    'alert': adder_name + ' added you to the album ' + album_name,
+                    'sound': 'default',
+                    },
+                'album_id': album_id
+                }
+            }
+    send_message_or_log_errors(rq)
+
+def broadcast_album_list_sync(user_ids):
+    _user_ids = []
+    if type(user_ids) in [tuple, list]:
+        _user_ids = [str(id) for id in user_ids]
+    else:
+        _user_ids = [str(user_ids)]
+    rq = {
+            'user_ids': _user_ids,
+            'gcm': {
+                'data': {
+                    'type': 'album_list_sync'
+                    }
+                },
+            'apns': {
+                'aps': {},
+                'type': 'album_list_sync'
+                }
+            }
+    send_message_or_log_errors(rq)

@@ -9,6 +9,8 @@ from django.utils import timezone
 from phone_auth.models import PhoneNumber, PhoneNumberLinkCode
 from photos import image_uploads
 from photos_api import device_push
+from photos_api.device_push import broadcast_added_to_album, broadcast_album_list_sync
+
 
 class AlbumManager(models.Manager):
     def create_album(self, creator, name, date_created=None):
@@ -31,6 +33,10 @@ class AlbumManager(models.Manager):
             datetime_added = date_created,
             added_by_user = creator
         )
+
+        # Send push notifications
+        broadcast_added_to_album(album.id, album.name, creator.nickname, [creator.id])
+        broadcast_album_list_sync([creator.id])
 
         return album
 
@@ -88,6 +94,8 @@ class Album(models.Model):
             }
             AlbumMember.objects.get_or_create(user=new_user, album=self, defaults=defaults)
 
+        # Send push notification
+        broadcast_added_to_album(self.id, self.name, inviter.nickname, [nu.id for nu in new_users])
 
         self.save_revision(date_added)
 
@@ -105,20 +113,6 @@ class Album(models.Model):
 
     def get_etag(self):
         return u'{0}'.format(self.revision_number)
-
-    def add_photos(self, author, photo_ids):
-        now = timezone.now()
-        for photo_id in photo_ids:
-            # TODO Catch exception
-            Photo.objects.upload_to_album(photo_id, self, now)
-
-        device_push.broadcast_photos_added(
-                album_id = self.id,
-                author_id = author.id,
-                album_name = self.name,
-                author_name = author.nickname,
-                num_photos = len(photo_ids),
-                user_ids = [membership.user.id for membership in AlbumMember.objects.filter(album=self).only('user__id')])
 
     def get_member_users(self):
         return [membership.user for membership in AlbumMember.objects.filter(album=self).only('user')]
@@ -146,57 +140,10 @@ all_photo_buckets = (
         'local:photos04',
         )
 
+
 class PhotoManager(models.Manager):
-    def upload_request(self, author):
-        success = False
-        while not success:
-            new_id = Photo.generate_photo_id()
+    pass
 
-            new_pending_photo = PendingPhoto.objects.create(
-                    photo_id = new_id,
-                    bucket = random.choice(all_photo_buckets),
-                    start_time = timezone.now(),
-                    author = author
-                    )
-
-            # Make sure that there is no existing Photo with the same id
-
-            if not Photo.objects.filter(photo_id=new_id).exists():
-                success = True
-            else:
-                new_pending_photo.delete()
-
-        return new_id
-
-    def upload_to_album(self, photo_id, album, date_created):
-        try:
-            return Photo.objects.get(photo_id=photo_id)
-        except Photo.DoesNotExist:
-            pass
-
-        try:
-            pending_photo = PendingPhoto.objects.get(photo_id=photo_id)
-        except PendingPhoto.DoesNotExist:
-            # TODO Better exception
-            raise
-
-        # TODO catch exception:
-        width, height = image_uploads.process_uploaded_image(pending_photo.bucket, photo_id)
-
-        new_photo = Photo.objects.create(
-                photo_id=photo_id,
-                bucket=pending_photo.bucket,
-                date_created=date_created,
-                author=pending_photo.author,
-                album=album,
-                width=width,
-                height=height)
-
-        pending_photo.delete()
-
-        album.save_revision(date_created)
-
-        return new_photo
 
 class Photo(models.Model):
     photo_id = models.CharField(primary_key=True, max_length=128)
@@ -241,8 +188,54 @@ class Photo(models.Model):
         image_dimensions_calculator = image_uploads.image_sizes[image_size_str]
         return image_dimensions_calculator.get_image_dimensions(self.width, self.height)
 
+def get_pending_photo_default_photo_id():
+    photo_id_generated = False
+    photo_id = None
+    while not photo_id_generated:
+        photo_id = Photo.generate_photo_id()
+        # Make sure that there is no existing Photo with the same id
+        if Photo.objects.filter(pk=photo_id).exists():
+            continue
+        photo_id_generated = True
+    return photo_id
+
+def get_pending_photo_default_bucket():
+    return random.choice(all_photo_buckets)
+
 class PendingPhoto(models.Model):
-    photo_id = models.CharField(primary_key=True, max_length=128)
-    bucket = models.CharField(max_length=64)
-    start_time = models.DateTimeField()
+    photo_id = models.CharField(primary_key=True, max_length=128, default=get_pending_photo_default_photo_id)
+    bucket = models.CharField(max_length=64, choices=zip(all_photo_buckets, all_photo_buckets),
+                              default=get_pending_photo_default_bucket)
+    start_time = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(settings.AUTH_USER_MODEL)
+
+    def get_or_process_uploaded_image_and_create_photo(self, album, date_created):
+        """
+        For already uploaded photos it will simply return photo.
+        For pending photo it will process uploaded image, create Photo object and return it.
+        """
+        try:
+            photo = Photo.objects.get(photo_id=self.photo_id)
+        except Photo.DoesNotExist:
+            pass
+        else:
+            return photo
+
+        # TODO catch exception:
+        width, height = image_uploads.process_uploaded_image(self.bucket, self.photo_id)
+
+        new_photo = Photo.objects.create(
+            photo_id=self.photo_id,
+            bucket=self.bucket,
+            date_created=date_created,
+            author=self.author,
+            album=album,
+            width=width,
+            height=height
+        )
+
+        self.delete()
+
+        album.save_revision(date_created)
+
+        return new_photo
