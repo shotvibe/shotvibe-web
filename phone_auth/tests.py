@@ -11,8 +11,6 @@ from phone_auth.models import AuthToken, User, PhoneNumber, PhoneNumberConfirmSM
 from phone_auth.views import app_init
 from photos.models import Album, AlbumMember
 from frontend.mobile_views import invite_page
-from photos_api.serializers import MemberIdentifier
-
 
 class ModelTests(TestCase):
     fixtures = ['tests/test_users']
@@ -225,7 +223,7 @@ class InviteTests(TestCase):
 
     def test_album_invite_phone(self):
         later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
-        self.party_album.add_members(self.tom, [MemberIdentifier(phone_number='+12127184000')], later_on)
+        self.party_album.add_members(self.tom, [], ['+12127184000'], later_on)
 
         self.assertEqual(AlbumMember.objects.filter(album=self.party_album).count(), 2)
 
@@ -247,7 +245,7 @@ class InviteTests(TestCase):
 
     def test_mobile_invite_page(self):
         later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
-        self.party_album.add_members(self.tom, [MemberIdentifier(phone_number='+12127184000')], later_on)
+        self.party_album.add_members(self.tom, [], ['+12127184000'], later_on)
         album_members_qs = AlbumMember.objects.filter(album=self.party_album).exclude(user=self.tom)
         self.assertTrue(album_members_qs.count()>0, "New user was not added to the AlbumMembers model")
         new_user = album_members_qs[0].user
@@ -280,7 +278,7 @@ class InviteTests(TestCase):
 
     def test_app_init_with_session(self):
         later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
-        self.party_album.add_members(self.tom, [MemberIdentifier(phone_number='+12127184000')], later_on)
+        self.party_album.add_members(self.tom, [], ['+12127184000'], later_on)
         album_members_qs = AlbumMember.objects.filter(album=self.party_album).exclude(user=self.tom)
         self.assertTrue(album_members_qs.count()>0, "New user was not added to the AlbumMembers model")
         new_user = album_members_qs[0].user
@@ -308,7 +306,7 @@ class InviteTests(TestCase):
 
     def test_app_init_deletes_data(self):
         later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
-        self.party_album.add_members(self.tom, [MemberIdentifier(phone_number='+12127184000')], later_on)
+        self.party_album.add_members(self.tom, [], ['+12127184000'], later_on)
         album_members_qs = AlbumMember.objects.filter(album=self.party_album).exclude(user=self.tom)
         self.assertTrue(album_members_qs.count()>0, "New user was not added to the AlbumMembers model")
         new_user = album_members_qs[0].user
@@ -326,7 +324,7 @@ class InviteTests(TestCase):
 
     def test_app_init_phone_verified(self):
         later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
-        self.party_album.add_members(self.tom, [MemberIdentifier(phone_number='+12127184000')], later_on)
+        self.party_album.add_members(self.tom, [], ['+12127184000'], later_on)
 
         album_members_qs = AlbumMember.objects.filter(album=self.party_album).exclude(user=self.tom)
         self.assertTrue(album_members_qs.count()>0, "New user was not added to the AlbumMembers model")

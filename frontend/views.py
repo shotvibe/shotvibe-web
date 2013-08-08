@@ -7,7 +7,6 @@ from django.utils import timezone
 
 from photos.models import Album, Photo, PendingPhoto, AlbumMember
 from photos import image_uploads
-from photos_api.serializers import MemberIdentifier
 from photos_api import device_push
 
 
@@ -102,10 +101,10 @@ def album_members(request, album_pk):
         try:
             user = auth.get_user_model().objects.get(pk=request.POST.get('member_id', ''))
         except auth.get_user_model().DoesNotExist:
-            # TODO Better error handling.
-            raise
-        else:
-            album.add_members(request.user, [MemberIdentifier(user_id=user.id)])
+            # TODO ...
+            pass
+        now = timezone.now()
+        album.add_members([user.id], now)
 
     members = album.members.all()
 
