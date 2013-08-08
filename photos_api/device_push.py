@@ -59,20 +59,20 @@ def upp_status(request):
     r = requests.get(settings.UNIVERSAL_PUSH_PROVIDER_URL + '/status')
     status = json.loads(r.text)
 
-    user_devices = {}
+    resolved_user_devices = {}
     unknown_user_ids = []
 
-    for user_id, registration_ids in status['gcm_devices'].iteritems():
+    for user_id, devices in status['user_devices'].iteritems():
         try:
             user = auth.get_user_model().objects.get(pk=user_id)
-            user_devices[user] = { 'gcm' : registration_ids }
+            resolved_user_devices[user] = devices
         except ObjectDoesNotExist:
             unknown_user_ids.append(user_id)
 
     data = {
             'database_info': status['database_info'],
             'gcm_config': status['gcm_config'],
-            'user_devices': user_devices,
+            'user_devices': resolved_user_devices,
             'unknown_user_ids': unknown_user_ids
             }
 

@@ -103,10 +103,11 @@
             <td>
               <table>
                 <tbody>
-                  {% for id in devices.gcm %}
+                  {% for device in devices %}
                   <tr>
-                    <th>GCM</th>
-                    <td><input value="{{ id }}" size="100" readonly="readonly"></td>
+                    <th>{{ device.type }}</th>
+                    <th>{{ device.app }}</th>
+                    <td><input value="{{ device.device }}" size="100" readonly="readonly"></td>
                   </tr>
                   {% endfor %}
                 </tbody>
