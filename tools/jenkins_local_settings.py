@@ -72,7 +72,7 @@ AVATAR_STORAGE_URL_FORMAT_STRING_MAP = {
 # Data required to generate default avatar file.
 # (format_string, min_number, max_number)
 DEFAULT_AVATAR_FILES = [
-    ('s3:shotvibe-avatars-01:default-avatar-{0}.jpg', 1, 78),
+    ('s3:shotvibe-avatars-01:default-avatar-{0:04d}.jpg', 1, 78),
     # ('foo:bar2:avatar_{0}', 41, 78)
 ]
 

@@ -29,8 +29,7 @@ def default_random_user_avatar_file():
     format_string, min_number, max_number = random.choice(
         settings.DEFAULT_AVATAR_FILES
     )
-    full_id = str(random.randint(min_number, max_number)).zfill(4)
-    return format_string.format(full_id)
+    return format_string.format(random.randint(min_number, max_number))
 
 
 class UserManager(auth.models.BaseUserManager):
