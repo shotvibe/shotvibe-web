@@ -1,3 +1,8 @@
+from boto.s3.connection import S3Connection
+from boto.s3.key import Key
+from django.conf import settings
+import random
+import tempfile
 from django.utils.translation import ugettext_lazy as _
 from django.contrib import auth
 #from django.http import HttpResponseNotModified
@@ -23,6 +28,16 @@ from photos.image_uploads import handle_file_upload
 from photos.models import Album, PendingPhoto, AlbumMember
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
+
+
+class PhotoUploadParser(BaseParser):
+
+    # Accept any Content-Type
+    media_type = '*/*'
+
+    def parse(self, stream, media_type=None, parser_context=None):
+        return File(stream)
+
 
 @api_view(['GET'])
 def api_root(request, format=None):
@@ -161,6 +176,67 @@ class UserDetail(generics.RetrieveAPIView):
     model = auth.get_user_model()
     serializer_class = UserSerializer
 
+
+class UserAvatarDetail(views.APIView):
+    """View that handles avatar uploads"""
+    permission_classes = (IsAuthenticated,)
+
+    parser_classes = (PhotoUploadParser,)
+
+    def process_upload_request(self, request, uploaded_chunks):
+        """Uploads user avatar to the randomly picked location
+        where we host user avatars and returns Response"""
+
+        avatar_image_filename = settings.AVATAR_FILENAME_FORMAT_STRING.format(
+            user_id=request.user.id,
+            timestamp=timezone.now().strftime("%s")
+        )
+        avatar_location_format_str = random.choice(settings.AVATAR_BUCKETS)
+        storage, bucket_name, filename = avatar_location_format_str.split(":")
+
+        # Write uploaded data to temporary file
+        # File will be delete once handler is closed
+        temp_file = tempfile.TemporaryFile()
+        for chunk in uploaded_chunks:
+            temp_file.write(chunk)
+        temp_file.seek(0)
+
+        if storage == "s3":
+            # Upload to S3
+            try:
+                conn = S3Connection(settings.AWS_ACCESS_KEY,
+                                    settings.AWS_SECRET_ACCESS_KEY)
+                bucket = conn.get_bucket(bucket_name)
+                key = Key(bucket, avatar_image_filename)
+                key.metadata = {'Content-Type': 'image/jpeg'}
+                key.set_contents_from_file(temp_file)
+                # Otherwise it's not accessible
+                key.make_public()
+                key.close(fast=True)
+                temp_file.close()
+            except:
+                temp_file.close()
+                raise
+        else:
+            temp_file.close()
+            raise ValueError("Failed to upload avatar. "
+                             "Unknown storage '{0}'.".format(storage))
+
+        request.user.avatar_file = avatar_location_format_str.format(
+            filename=avatar_image_filename)
+        request.user.save()
+
+        return Response()
+
+    def post(self, request):
+        return self.process_upload_request(request,
+                                           request.FILES['photo'].chunks())
+
+    def put(self, request):
+        return self.process_upload_request(request,
+                                           request.DATA.chunks())
+
+
 class IsSameUser(BasePermission):
     def has_permission(self, request, view, obj=None):
         if request.user.is_staff:
@@ -234,13 +310,6 @@ def photos_upload_request(request, format=None):
 
     return Response(response_data)
 
-class PhotoUploadParser(BaseParser):
-
-    # Accept any Content-Type
-    media_type = '*/*'
-
-    def parse(self, stream, media_type=None, parser_context=None):
-        return File(stream)
 
 class PhotoUpload(views.APIView):
     permission_classes = (IsAuthenticated,)
@@ -261,7 +330,9 @@ class PhotoUpload(views.APIView):
         return Response()
 
     def post(self, request, photo_id, format=None):
-        return self.process_upload_request(request, photo_id, request.FILES['photo'].chunks())
+        return self.process_upload_request(request, photo_id,
+                                           request.FILES['photo'].chunks())
 
     def put(self, request, photo_id, format=None):
-        return self.process_upload_request(request, photo_id, request.DATA.chunks())
+        return self.process_upload_request(request, photo_id,
+                                           request.DATA.chunks())

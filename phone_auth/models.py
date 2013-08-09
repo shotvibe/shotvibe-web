@@ -1,9 +1,12 @@
 import collections
+import random
+import re
 import os
 import string
 
 from django.conf import settings
 from django.contrib import auth
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import models, IntegrityError
 from django.utils import crypto
@@ -11,6 +14,23 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from phone_auth.sms_send import send_sms
+
+USER_AVATAR_DATA_REGEX = re.compile(r's3:.+?:user-avatar-\d+?-\d+?\.jpg')
+
+
+def validate_avatar_file_data(value):
+    """Validates value supplied for User.avatar_file attribute"""
+    if not USER_AVATAR_DATA_REGEX.match(value):
+        raise ValidationError("Wrong value for avatar file")
+
+
+def default_random_user_avatar_file():
+    """Returns random default avatar_file location"""
+    format_string, min_number, max_number = random.choice(
+        settings.DEFAULT_AVATAR_FILES
+    )
+    return format_string.format(random.randint(min_number, max_number))
+
 
 class UserManager(auth.models.BaseUserManager):
     def create_user(self, nickname=None, password=None):
@@ -63,12 +83,19 @@ class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
     is_registered = models.BooleanField(default=False)
 
     is_staff = models.BooleanField(_('staff status'), default=False,
-        help_text=_('Designates whether the user can log into this admin '
-                    'site.'))
+                                   help_text=_('Designates whether the user '
+                                               'can log into this admin site.'))
 
-    is_active = models.BooleanField(_('active'), default=True,
-        help_text=_('Designates whether this user should be treated as '
-                    'active. Unselect this instead of deleting accounts.'))
+    is_active = models.BooleanField(
+        _('active'),
+        default=True,
+        help_text=_('Designates whether this user should be treated as active. '
+                    'Unselect this instead of deleting accounts.')
+    )
+
+    avatar_file = models.CharField(max_length=128,
+                                   validators=[validate_avatar_file_data],
+                                   default=default_random_user_avatar_file)
 
     objects = UserManager()
 
@@ -85,8 +112,20 @@ class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
         return self.get_full_name()
 
     def get_avatar_url(self):
-        # TODO Temporary test image!
-        return u'https://static.shotvibe.com/frontend/img/ndt.png'
+        """Returns URL of the user's avatar image"""
+
+        storage, bucket, filename = str(self.avatar_file).split(":")
+        format_string = settings.AVATAR_STORAGE_URL_FORMAT_STRING_MAP.get(
+            storage)
+
+        if not format_string:
+            return None
+
+        return format_string.format(
+            bucket_name=bucket,
+            filename=filename
+        )
+
 
 class UserEmail(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, db_index=True)
