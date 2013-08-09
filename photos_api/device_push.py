@@ -70,7 +70,8 @@ def upp_status(request):
                     },
                 'apns' : {
                     'aps' : {
-                        'alert' : 'Test Message: ' + message
+                        'alert' : 'Test Message: ' + message,
+                        'sound': 'default'
                         }
                     }
                 }
@@ -131,7 +132,11 @@ def broadcast_photos_added(album_id, author_id, album_name, author_name, num_pho
             'apns' : {
                 'aps' : {
                     'alert' : author_name + ' added ' + str(num_photos) + ' photos to the album ' + album_name,
+                    'sound': 'default'
                     },
+
+                # TODO More Data needed
+
                 'album_id' : album_id
                 }
             }
@@ -146,9 +151,8 @@ def broadcast_photos_added(album_id, author_id, album_name, author_name, num_pho
                     }
                 },
             'apns' : {
-                'aps' : {
-                    'alert' : None
-                    },
+                'aps' : {},
+                'type': 'album_sync',
                 'album_id' : album_id
                 }
             }
@@ -168,8 +172,11 @@ def broadcast_added_to_album(album_id, album_name, adder_name, user_ids):
             'apns': {
                 'aps': {
                     'alert': adder_name + ' added you to the album ' + album_name,
-                    'sound': 'default',
+                    'sound': 'default'
                     },
+
+                # TODO More Data needed
+
                 'album_id': album_id
                 }
             }
