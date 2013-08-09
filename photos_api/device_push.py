@@ -9,10 +9,34 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.core.exceptions import ObjectDoesNotExist
 
+from rest_framework import status
 from rest_framework import views
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+@api_view(['POST'])
+@permission_classes((IsAuthenticated, ))
+def register_device_push(request):
+    try:
+        device = json.loads(request.stream.body)
+    except ValueError as ex:
+        return Response({ 'error': str(ex) }, status=status.HTTP_400_BAD_REQUEST)
+
+    rq = {
+            'user_id': str(request.user.id),
+            'device': device
+            }
+
+    # TODO Once we add an "id" field to phone_auth.AuthToken:
+    # rq['user_auth'] = str(request.auth.id)
+
+    r = requests.post(settings.UNIVERSAL_PUSH_PROVIDER_URL + '/device/register', data=json.dumps(rq))
+    r.raise_for_status()
+
+    return Response(None, status=status.HTTP_204_NO_CONTENT)
+
+# This is deprecated:
 class GcmDevice(views.APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -24,9 +48,6 @@ class GcmDevice(views.APIView):
     def delete(self, request, device_id, format=None):
         requests.delete(settings.UNIVERSAL_PUSH_PROVIDER_URL + '/gcm/device/' + device_id)
         return Response()
-
-class ApnsDevice(views.APIView):
-    pass
 
 @admin.site.admin_view
 def upp_status(request):
