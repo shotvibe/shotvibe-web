@@ -69,6 +69,10 @@ Used to leave an album.
 
 Used to create a new album.
 
+### POST /register_device_push/
+
+Used to register a mobile device to receive push notifications.
+
 ## POST /auth/authorize_phone_number/
 
 Used to request an authorization code via SMS (text message).
@@ -695,3 +699,75 @@ Example request:
     }
 
 The response returned is the same as for `GET /albums/{aid}/`, with the updated album
+
+## POST /register_device_push/
+
+Used to register a mobile device to receive push notifications.
+
+The request JSON depends on the type the mobile device:
+
+### Android
+
+The request JSON should have the following 3 required fields:
+
+*   `type`: Must be the string "gcm".
+
+*   `app`: Must be a string value with the name of the name of the app.
+    Currently it should always be "default".
+
+*   `registration_id`: Must be the device's Registration ID as returned by the
+    Android GCM API.
+
+Example request:
+
+```
+POST /register_device_push/
+Authorization: Token 01ba4719c80b6fe911b091a7c05124b64eeece96
+Content-Type: application/json
+Content-Length: 628
+
+{
+    "type": "gcm",
+    "app": "default",
+    "registration_id": "APA91br9Vny8Q45NQ-Y9tSnejA...NmMNUAZNk1_81JaZOBqU6DTcO"
+}
+```
+
+### iOS
+
+The request JSON should have the following 3 required fields:
+
+*   `type`: Must be the string "apns".
+
+*   `app`: Must be one of the following string values:
+
+    *   "prod": Should be used for the app `com.shotvibe.shotvibe` which will
+        be installed in the App Store
+
+    *   "adhoc": Should be used for the app `com.shotvibe.shotvibe.adhoc`.
+
+    *   "dev": Should be used for the app `com.shotvibe.shotvibe.debug` when
+        running in development.
+
+*   `device_token`: Must be the device token returned from the iOS Push
+    Notifications API, formatted as a lowercase hex-encoded string (See:
+    <http://stackoverflow.com/a/12442672>).
+
+Example request:
+
+```
+POST /register_device_push/
+Authorization: Token 01ba4719c80b6fe911b091a7c05124b64eeece96
+Content-Type: application/json
+Content-Length: 628
+
+{
+    "type": "apns",
+    "app": "prod",
+    "device_token": "0f1b4afaa5ead8127e89f83d450b0ba9f61ff05ccc2e7bdde5d76f28b9d0819e"
+}
+```
+
+### Response
+
+If the registration is successful then response will be `204 No Content`.
