@@ -107,7 +107,7 @@ class Migration(DataMigration):
             'revision_number': ('django.db.models.fields.IntegerField', [], {})
         },
         u'photos.albummember': {
-            'Meta': {'object_name': 'AlbumMember', 'db_table': "'photos_album_members'"},
+            'Meta': {'unique_together': "(('user', 'album'),)", 'object_name': 'AlbumMember', 'db_table': "'photos_album_members'"},
             'added_by_user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'created_album_memberships'", 'to': u"orm['phone_auth.User']"}),
             'album': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['photos.Album']"}),
             'datetime_added': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
