@@ -11,13 +11,16 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.core.files import File
 from photos_api import device_push
+from photos_api.permissions import IsUserInAlbum, UserDetailsPagePermission, \
+    IsSameUserOrStaff
 
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.reverse import reverse
 from rest_framework.response import Response
 #from rest_framework.exceptions import PermissionDenied
-from rest_framework.permissions import BasePermission, IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework import status
 from rest_framework import views
 from rest_framework.parsers import BaseParser
@@ -73,13 +76,6 @@ class AlbumList(generics.ListAPIView):
     model = Album
     serializer_class = AlbumNameSerializer
 
-class IsUserInAlbum(BasePermission):
-    def has_permission(self, request, view, obj=None):
-        if request.user.is_staff:
-            return True
-        album_id = int(view.kwargs['pk'])
-        album = get_object_or_404(Album, pk=album_id)
-        return album.is_user_member(request.user.id)
 
 def parse_phone_number(phone_number, default_country):
     try:
@@ -169,17 +165,49 @@ class UserList(generics.ListCreateAPIView):
     model = auth.get_user_model()
     serializer_class = UserSerializer
 
-class UserDetail(generics.RetrieveAPIView):
+
+class UserDetail(generics.RetrieveUpdateAPIView):
     """
     API endpoint that represents a single user.
     """
     model = auth.get_user_model()
     serializer_class = UserSerializer
+    permission_classes = (UserDetailsPagePermission,)
+
+    # These attributes can be changed with PUT or PATCH request
+    __allowed_attributes_to_change = ['nickname']
+
+    def __check_update_attr_permissions(self, request):
+        """Ensure that only allowed attributes can be changed"""
+        for key, value in request.DATA.iteritems():
+            if key not in self.__allowed_attributes_to_change:
+                raise PermissionDenied("You are not allowed to "
+                                       "change '{0}'".format(key))
+
+    def get_queryset(self):
+        """For PUT and PATCH requests limit queryset to only user
+        who makes request"""
+
+        if self.request.method in ['PUT', 'PATCH']:
+            return self.model.objects.filter(pk=self.request.user.pk)
+
+        return super(UserDetail, self).get_queryset()
+
+    def put(self, request, *args, **kwargs):
+        """PUT handler"""
+        self.__check_update_attr_permissions(request)
+        return super(UserDetail, self).put(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        """PATCH handler"""
+        self.check_permissions(request)
+        self.__check_update_attr_permissions(request)
+        return super(UserDetail, self).patch(request, *args, **kwargs)
 
 
 class UserAvatarDetail(views.APIView):
     """View that handles avatar uploads"""
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsSameUserOrStaff)
 
     parser_classes = (PhotoUploadParser,)
 
@@ -228,21 +256,14 @@ class UserAvatarDetail(views.APIView):
 
         return Response()
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         return self.process_upload_request(request,
                                            request.FILES['photo'].chunks())
 
-    def put(self, request):
+    def put(self, request, *args, **kwargs):
         return self.process_upload_request(request,
                                            request.DATA.chunks())
 
-
-class IsSameUser(BasePermission):
-    def has_permission(self, request, view, obj=None):
-        if request.user.is_staff:
-            return True
-        user_id = int(view.kwargs['pk'])
-        return request.user.id == user_id
 
 @supports_last_modified
 class Albums(generics.ListAPIView):

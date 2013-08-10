@@ -16,7 +16,7 @@ urlpatterns = patterns('',
     url(r'^albums/(?P<pk>\d+)/leave/$', views.LeaveAlbum.as_view(), name='album-leave'),
     url(r'^users/$', views.UserList.as_view(), name='user-list'),
     url(r'^users/(?P<pk>\d+)/$', views.UserDetail.as_view(), name='user-detail'),
-    url(r'^users/avatar/$', views.UserAvatarDetail.as_view(), name='user-avatar'),
+    url(r'^users/(?P<pk>\d+)/avatar/$', views.UserAvatarDetail.as_view(), name='user-avatar'),
     url(r'^photos/upload_request/$', views.photos_upload_request, name='photos-upload-request'),
     url(r'^photos/upload/(?P<photo_id>[\w-]+)/$', views.PhotoUpload.as_view(), name='photo-upload'),
 )
