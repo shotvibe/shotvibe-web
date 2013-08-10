@@ -154,6 +154,7 @@ class Photo(models.Model):
     date_created = models.DateTimeField(db_index=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL)
     album = models.ForeignKey(Album)
+    album_index = models.PositiveIntegerField(db_index=True)
     width = models.IntegerField()
     height = models.IntegerField()
 
