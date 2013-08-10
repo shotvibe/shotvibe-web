@@ -1,6 +1,8 @@
 import filecmp
 import httplib
 import json
+from boto.s3.connection import S3Connection
+from boto.s3.key import Key
 from django.core.urlresolvers import reverse
 import os
 import shutil
@@ -15,6 +17,8 @@ from phone_auth.models import PhoneNumber
 from photos.models import PendingPhoto, AlbumMember
 
 from photos_api.serializers import AlbumUpdateSerializer, MemberIdentifier, MemberIdentifierSerializer, AlbumAddSerializer
+import requests
+
 
 @override_settings(LOCAL_PHOTO_BUCKETS_BASE_PATH='.tmp_photo_buckets')
 class BaseTestCase(TestCase):
@@ -61,6 +65,32 @@ class UserTest(BaseTestCase):
         self.assertEqual(r.status_code, 200)
 
         self.assertFalse(auth.get_user_model().objects.filter(id=2).exists())
+
+    def test_avatar_upload(self):
+        test_avatar_path = 'photos/test_photos/death-valley-sand-dunes.jpg'
+        url = reverse('user-avatar')
+
+        with open(test_avatar_path, 'rb') as f:
+            upload_response = self.client.put(url, f.read(),
+                                              'application/octet-stream')
+        self.assertEqual(upload_response.status_code, 200)
+        user = auth.get_user_model().objects.get(id=2)
+        self.assertTrue(user.avatar_file.startswith("s3:"))
+
+        response = requests.get(user.get_avatar_url())
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers['content-type'], "image/jpeg")
+
+        storage, bucket_name, filename = user.avatar_file.split(":")
+
+        # Delete test image from S3
+        conn = S3Connection(settings.AWS_ACCESS_KEY,
+                            settings.AWS_SECRET_ACCESS_KEY)
+        bucket = conn.get_bucket(bucket_name)
+        key = Key(bucket, filename)
+        key.delete()
+        key.close(fast=True)
+
 
 class NotModifiedTest(BaseTestCase):
     def setUp(self):
