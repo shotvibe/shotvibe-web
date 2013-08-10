@@ -1,16 +1,19 @@
-from boto.s3.connection import S3Connection
-from boto.s3.key import Key
-from django.conf import settings
 import random
 import tempfile
+
+from boto.s3.connection import S3Connection
+from boto.s3.key import Key
+
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib import auth
+
 #from django.http import HttpResponseNotModified
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.core.files import File
 from photos_api import device_push
+from photos_api.parsers import PhotoUploadParser
 
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
@@ -20,7 +23,6 @@ from rest_framework.response import Response
 from rest_framework.permissions import BasePermission, IsAdminUser, IsAuthenticated
 from rest_framework import status
 from rest_framework import views
-from rest_framework.parsers import BaseParser
 
 import phonenumbers
 
@@ -28,15 +30,6 @@ from photos.image_uploads import handle_file_upload
 from photos.models import Album, PendingPhoto, AlbumMember
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
-
-
-class PhotoUploadParser(BaseParser):
-
-    # Accept any Content-Type
-    media_type = '*/*'
-
-    def parse(self, stream, media_type=None, parser_context=None):
-        return File(stream)
 
 
 @api_view(['GET'])
