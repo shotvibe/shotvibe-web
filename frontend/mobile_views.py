@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http.response import HttpResponseNotFound
@@ -21,16 +22,16 @@ def invite_page(request, invite_code):
     request.session['phone_number'] = link_code_object.phone_number.phone_number
 
     if device == 'android':
-        test_app_url = 'market://details?id=com.urbandictionary.android'
+        app_url = settings.GOOGLE_PLAY_URL
     elif device == 'iphone':
-        test_app_url = 'itms-apps://itunes.apple.com/us/app/urban-dictionary/id584986228'
+        app_url = settings.APPLE_APP_STORE_URL
     else:
-        test_app_url = None
+        app_url = None
 
     data = {
             'inviting_user' : link_code_object.inviting_user,
             'album' : album,
-            'app_url' : test_app_url,
+            'app_url' : app_url,
             'device' : device }
     return render_to_response('frontend/mobile/invite_page.html', data, context_instance=RequestContext(request))
 

@@ -26,6 +26,9 @@ LOCAL_PHOTO_BUCKET_URL_FORMAT_STR = '/photos/{0}/{1}.jpg'
 
 UNIVERSAL_PUSH_PROVIDER_URL = 'http://127.0.0.1:8800'
 
+# Internet links for the downloadable apps
+GOOGLE_PLAY_URL = 'market://details?id=com.urbandictionary.android'
+APPLE_APP_STORE_URL = 'itms-apps://itunes.apple.com/us/app/urban-dictionary/id584986228'
 
 # Buckets where we upload new avatars
 AVATAR_BUCKETS = (
