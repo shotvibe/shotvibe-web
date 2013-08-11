@@ -1,6 +1,7 @@
 import filecmp
 import httplib
 import json
+from django.contrib.auth import get_user_model
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from django.core.urlresolvers import reverse
@@ -68,7 +69,7 @@ class UserTest(BaseTestCase):
 
     def test_avatar_upload(self):
         test_avatar_path = 'photos/test_photos/death-valley-sand-dunes.jpg'
-        url = reverse('user-avatar')
+        url = reverse('user-avatar', kwargs={'pk': 2})
 
         with open(test_avatar_path, 'rb') as f:
             upload_response = self.client.put(url, f.read(),
@@ -90,6 +91,36 @@ class UserTest(BaseTestCase):
         key = Key(bucket, filename)
         key.delete()
         key.close(fast=True)
+
+    def test_user_updates(self):
+        logged_in_user_id = 2
+        initial_user = get_user_model().objects.get(pk=logged_in_user_id)
+        data = {'nickname': 'testnickname'}
+        user_url = reverse('user-detail', kwargs={'pk': logged_in_user_id})
+        response = self.client.post(user_url, data, REQUEST_METHOD=str('PATCH'))
+        self.assertEqual(response.status_code, httplib.OK)
+        updated_user = get_user_model().objects.get(pk=logged_in_user_id)
+        self.assertEqual(updated_user.nickname, data['nickname'])
+
+        # Test disallowed attrs
+        disallowed_attrs = {
+            'id': 23423423,
+            'primary_email': 'ingo@shotvibe.com',
+            'date_joined': timezone.now(),
+            'is_registered': not initial_user.is_registered,
+            'is_staff': not initial_user.is_staff,
+            'is_active': not initial_user.is_active,
+            'avatar_file': 'test-file.jpg'
+        }
+        for attr_name, value in disallowed_attrs.iteritems():
+            data = {attr_name: value}
+            response = self.client.post(user_url, data,
+                                        REQUEST_METHOD=str('PATCH'))
+
+            self.assertEqual(response.status_code, httplib.FORBIDDEN)
+            updated_user = get_user_model().objects.get(pk=logged_in_user_id)
+            self.assertNotEqual(getattr(updated_user, attr_name),
+                                data[attr_name])
 
 
 class NotModifiedTest(BaseTestCase):
