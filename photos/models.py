@@ -1,4 +1,5 @@
 from django.contrib import auth
+from django.db.models import Max
 import os
 import random
 
@@ -154,6 +155,7 @@ class Photo(models.Model):
     date_created = models.DateTimeField(db_index=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL)
     album = models.ForeignKey(Album)
+    album_index = models.PositiveIntegerField(db_index=True)
     width = models.IntegerField()
     height = models.IntegerField()
 
@@ -227,12 +229,21 @@ class PendingPhoto(models.Model):
         # TODO catch exception:
         width, height = image_uploads.process_uploaded_image(self.bucket, self.photo_id)
 
+        album_index_q = Photo.objects.filter(album=album)\
+            .aggregate(Max('album_index'))
+        album_index = album_index_q['album_index__max']
+        if album_index is None:
+            album_index = 0
+        else:
+            album_index += 1
+
         new_photo = Photo.objects.create(
             photo_id=self.photo_id,
             bucket=self.bucket,
             date_created=date_created,
             author=self.author,
             album=album,
+            album_index=album_index,
             width=width,
             height=height
         )

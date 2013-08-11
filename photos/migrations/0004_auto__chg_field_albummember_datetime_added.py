@@ -1,28 +1,21 @@
 # -*- coding: utf-8 -*-
 import datetime
 from south.db import db
-from south.v2 import DataMigration
+from south.v2 import SchemaMigration
 from django.db import models
 
-class Migration(DataMigration):
+
+class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Set default values for AlbumMember.added_by_member and AlbumMember.datetime_added. It only applies to
-        # the existing records.
-        for membership in orm.AlbumMember.objects.all():
-            # Set added_by_user to the creator of the album
-            membership.added_by_user = membership.album.creator
 
-            # Set `datetime_added` to the datetime when album was created by default
-            membership.datetime_added = membership.album.date_created
-
-            membership.save()
-
+        # Changing field 'AlbumMember.datetime_added'
+        db.alter_column('photos_album_members', 'datetime_added', self.gf('django.db.models.fields.DateTimeField')())
 
     def backwards(self, orm):
-        # Nothing is required here to migrate backward.
-        pass
 
+        # Changing field 'AlbumMember.datetime_added'
+        db.alter_column('photos_album_members', 'datetime_added', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True))
 
     models = {
         u'auth.group': {
@@ -45,39 +38,9 @@ class Migration(DataMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
-        u'phone_auth.authtoken': {
-            'Meta': {'object_name': 'AuthToken'},
-            'date_created': ('django.db.models.fields.DateTimeField', [], {}),
-            'description': ('django.db.models.fields.TextField', [], {}),
-            'key': ('django.db.models.fields.CharField', [], {'max_length': '40', 'primary_key': 'True'}),
-            'last_access': ('django.db.models.fields.DateTimeField', [], {}),
-            'last_access_ip': ('django.db.models.fields.GenericIPAddressField', [], {'max_length': '39', 'null': 'True', 'blank': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['phone_auth.User']"})
-        },
-        u'phone_auth.phonenumber': {
-            'Meta': {'object_name': 'PhoneNumber'},
-            'date_created': ('django.db.models.fields.DateTimeField', [], {'db_index': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'phone_number': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '32'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['phone_auth.User']"}),
-            'verified': ('django.db.models.fields.BooleanField', [], {'default': 'False'})
-        },
-        u'phone_auth.phonenumberconfirmsmscode': {
-            'Meta': {'object_name': 'PhoneNumberConfirmSMSCode'},
-            'confirmation_code': ('django.db.models.fields.CharField', [], {'max_length': '6'}),
-            'confirmation_key': ('django.db.models.fields.CharField', [], {'max_length': '40', 'primary_key': 'True'}),
-            'date_created': ('django.db.models.fields.DateTimeField', [], {'db_index': 'True'}),
-            'phone_number': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['phone_auth.PhoneNumber']"})
-        },
-        u'phone_auth.phonenumberlinkcode': {
-            'Meta': {'object_name': 'PhoneNumberLinkCode'},
-            'date_created': ('django.db.models.fields.DateTimeField', [], {'db_index': 'True'}),
-            'invite_code': ('django.db.models.fields.CharField', [], {'max_length': '32', 'primary_key': 'True'}),
-            'inviting_user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'+'", 'to': u"orm['phone_auth.User']"}),
-            'phone_number': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['phone_auth.PhoneNumber']", 'unique': 'True'})
-        },
         u'phone_auth.user': {
             'Meta': {'object_name': 'User'},
+            'avatar_file': ('django.db.models.fields.CharField', [], {'default': "'s3:shotvibe-avatars-01:default-avatar-0056.jpg'", 'max_length': '128'}),
             'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['auth.Group']", 'symmetrical': 'False', 'blank': 'True'}),
             'id': ('django.db.models.fields.IntegerField', [], {'primary_key': 'True'}),
@@ -109,17 +72,17 @@ class Migration(DataMigration):
         u'photos.albummember': {
             'Meta': {'unique_together': "(('user', 'album'),)", 'object_name': 'AlbumMember', 'db_table': "'photos_album_members'"},
             'added_by_user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'created_album_memberships'", 'to': u"orm['phone_auth.User']"}),
-            'album': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['photos.Album']"}),
-            'datetime_added': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'album': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'memberships'", 'to': u"orm['photos.Album']"}),
+            'datetime_added': ('django.db.models.fields.DateTimeField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'album_membership'", 'to': u"orm['phone_auth.User']"})
         },
         u'photos.pendingphoto': {
             'Meta': {'object_name': 'PendingPhoto'},
             'author': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['phone_auth.User']"}),
-            'bucket': ('django.db.models.fields.CharField', [], {'max_length': '64'}),
-            'photo_id': ('django.db.models.fields.CharField', [], {'max_length': '128', 'primary_key': 'True'}),
-            'start_time': ('django.db.models.fields.DateTimeField', [], {})
+            'bucket': ('django.db.models.fields.CharField', [], {'default': "'local:photos04'", 'max_length': '64'}),
+            'photo_id': ('django.db.models.fields.CharField', [], {'default': "'e31938d4889b0c72111f513c2239654d225d0738d47c648bbbe24729c60f319e'", 'max_length': '128', 'primary_key': 'True'}),
+            'start_time': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'})
         },
         u'photos.photo': {
             'Meta': {'object_name': 'Photo'},
@@ -133,5 +96,4 @@ class Migration(DataMigration):
         }
     }
 
-    complete_apps = ['phone_auth', 'photos']
-    symmetrical = True
+    complete_apps = ['photos']
