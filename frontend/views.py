@@ -8,7 +8,7 @@ from django.utils import timezone
 from photos.models import Album, Photo, PendingPhoto, AlbumMember
 from photos import image_uploads
 from photos_api.serializers import MemberIdentifier
-from photos_api import device_push
+from photos_api.signals import photos_added_to_album
 
 
 def index(request):
@@ -60,14 +60,12 @@ def album(request, pk):
             # Upload pending photos
             photos = [pf.get_or_process_uploaded_image_and_create_photo(album) for pf in pending_photos]
 
-            # Send push notifications to the album members about just added photos
-            device_push.broadcast_photos_added(
-                album_id=album.id,
-                author_id=request.user.id,
-                album_name=album.name,
-                author_name=request.user.nickname,
-                num_photos=len(photos),
-                user_ids=[membership.user.id for membership in AlbumMember.objects.filter(album=album).only('user__id')])
+            # TODO: If this function will be refactored to use Class Based Views
+            # change sender from `request` to `self` (View instance)
+            photos_added_to_album.send(sender=request,
+                                       photos=photos,
+                                       by_user=request.user,
+                                       to_album=album)
 
     data = {
             'album': album,

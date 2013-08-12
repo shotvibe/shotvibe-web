@@ -116,7 +116,7 @@ def send_message_or_log_errors(msg):
         # TODO better logging
         print 'Error sending push notification: ' + str(e)
 
-def broadcast_photos_added(album_id, author_id, album_name, author_name, num_photos, user_ids):
+def broadcast_photos_added_to_album(album_id, author_id, album_name, author_name, num_photos, user_ids):
     # Send broadcast to all other users
     rq = {
             'user_ids' : [str(id) for id in user_ids if id != author_id],
@@ -158,7 +158,7 @@ def broadcast_photos_added(album_id, author_id, album_name, author_name, num_pho
             }
     send_message_or_log_errors(rq)
 
-def broadcast_added_to_album(album_id, album_name, adder_name, user_ids):
+def broadcast_members_added_to_album(album_id, album_name, adder_name, user_ids):
     rq = {
             'user_ids': [str(id) for id in user_ids],
             'gcm': {
