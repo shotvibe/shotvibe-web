@@ -76,6 +76,9 @@ class UserManager(auth.models.BaseUserManager):
         return user
 
 class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
+    STATUS_JOINED = 'joined'
+    STATUS_SMS_SENT = 'sms_sent'
+
     id = models.IntegerField(primary_key=True)
     nickname = models.CharField(max_length=128)
     primary_email = models.ForeignKey('UserEmail', db_index=False, null=True, blank=True, related_name='+', on_delete=models.SET_NULL)
@@ -104,6 +107,10 @@ class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
 
     def __unicode__(self):
         return u'{0} ({1})'.format(self.id, self.nickname)
+
+    def get_invite_status(self):
+        query = self.phonenumber_set.filter(verified=True)
+        return User.STATUS_JOINED if query.count() > 0 else User.STATUS_SMS_SENT
 
     def get_full_name(self):
         return self.nickname
