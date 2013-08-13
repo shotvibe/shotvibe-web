@@ -27,11 +27,12 @@ class ListField(serializers.WritableField):
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = auth.get_user_model()
-        fields = ('id', 'url', 'nickname', 'avatar_url')
+        fields = ('id', 'url', 'nickname', 'avatar_url', 'invite_status')
 
     id = serializers.IntegerField(source='id')
 
     avatar_url = serializers.CharField(source='get_avatar_url')
+    invite_status = serializers.CharField(source='get_invite_status')
 
 class PhotoSerializer(serializers.ModelSerializer):
     class Meta:

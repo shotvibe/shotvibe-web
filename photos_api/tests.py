@@ -529,6 +529,28 @@ class MembersTests(BaseTestCase):
     def setUp(self):
         self.client.login(username='2', password='amanda')
 
+    def test_invite_status(self):
+        album_url = reverse('album-detail', kwargs={'pk': 9})
+        album_before_response = self.client.get(album_url)
+        j = json.loads(album_before_response.content)
+
+        for member in j['members']:
+            self.assertEqual(member['invite_status'], 'sms_sent')
+            user_id = member['id']
+            user = get_user_model().objects.get(id=user_id)
+
+            phone_number = PhoneNumber.objects.create(
+                phone_number="+1212{0}".format(user.id).ljust(12, '0'),
+                user=user,
+                date_created=timezone.now(),
+                verified=True
+            )
+
+        album_before_response = self.client.get(album_url)
+        j = json.loads(album_before_response.content)
+        for member in j['members']:
+            self.assertEqual(member['invite_status'], 'joined')
+
     def test_add_members(self):
         album_before_response = self.client.get('/albums/9/')
         members_before = json.loads(album_before_response.content)['members']
