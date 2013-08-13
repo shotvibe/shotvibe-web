@@ -1,9 +1,11 @@
 import random
 import tempfile
 
+import json
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 
+from django.core.files import File
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib import auth
@@ -12,17 +14,19 @@ from django.contrib import auth
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from photos_api import device_push
+from phone_auth.signals import user_avatar_changed
 from photos_api.permissions import IsUserInAlbum, UserDetailsPagePermission, \
     IsSameUserOrStaff
 from photos_api.parsers import PhotoUploadParser
+from photos_api import device_push, is_phone_number_mobile
+from phone_auth.models import AnonymousPhoneNumber, random_default_avatar_file_data, PhoneContact, PhoneNumber
 
-from rest_framework import generics
+from rest_framework import generics, serializers
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.generics import GenericAPIView
 from rest_framework.reverse import reverse
 from rest_framework.response import Response
-#from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework import status
 from rest_framework import views
@@ -31,7 +35,7 @@ import phonenumbers
 
 from photos.image_uploads import handle_file_upload
 from photos.models import Album, PendingPhoto, AlbumMember
-from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer
+from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer, QueryPhonesRequestSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
 
@@ -247,6 +251,8 @@ class UserAvatarDetail(views.APIView):
             filename=avatar_image_filename)
         request.user.save()
 
+        user_avatar_changed.send(sender=self, user=request.user)
+
         return Response()
 
     def post(self, request, *args, **kwargs):
@@ -350,3 +356,81 @@ class PhotoUpload(views.APIView):
     def put(self, request, photo_id, format=None):
         return self.process_upload_request(request, photo_id,
                                            request.DATA.chunks())
+
+
+class QueryPhoneNumbers(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = QueryPhonesRequestSerializer
+
+    def __process_requested_item(self, user, country_code, phone_number,
+                                 nickname):
+
+        try:
+            number = phonenumbers.parse(phone_number, country_code)
+        except phonenumbers.phonenumberutil.NumberParseException as e:
+            return {'phone_type': 'invalid'}
+
+        if not phonenumbers.is_possible_number(number):
+            return {'phone_type': 'invalid'}
+
+        phone_number_str = phonenumbers.format_number(
+            number,
+            phonenumbers.PhoneNumberFormat.E164
+        )
+
+        data = {}
+
+        try:
+            apn = AnonymousPhoneNumber.objects.get(phone_number=phone_number_str)
+        except AnonymousPhoneNumber.DoesNotExist:
+            is_mobile = is_phone_number_mobile(phone_number_str,
+                                                     country_code)
+            apn = AnonymousPhoneNumber.objects.create(
+                phone_number=phone_number_str,
+                date_created=timezone.now(),
+                avatar_file=random_default_avatar_file_data(),
+                is_mobile=is_mobile,
+                is_mobile_queried=timezone.now()
+            )
+
+        try:
+            phone_contact = apn.phonecontact_set.get(created_by_user=user)
+        except PhoneContact.DoesNotExist:
+            try:
+                owner_user = PhoneNumber.objects.only('user').\
+                    get(phone_number=phone_number_str).user
+            except PhoneNumber.DoesNotExist:
+                owner_user = None
+            phone_contact = PhoneContact.objects.create(
+                anonymous_phone_number=apn,
+                user=owner_user,
+                created_by_user=user,
+                date_created=timezone.now(),
+                contact_nickname=nickname
+            )
+
+        data['phone_type'] = 'mobile' if apn.is_mobile else 'landline'
+        data['avatar_url'] = apn.get_avatar_url()
+        data['user_id'] = phone_contact.user_id
+        data['phone_number'] = apn.phone_number
+        return data
+
+    def post(self, request, *args, **kwargs):
+        data = json.loads(str(request.body))
+        serializer = self.get_serializer(data=data, files=request.FILES)
+        if not serializer.is_valid():
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        default_country = serializer.data.get('default_country')
+        phone_numbers = serializer.data.get('phone_numbers')
+        response_items = []
+        for pn in phone_numbers:
+            item = self.__process_requested_item(request.user,
+                                                 default_country,
+                                                 pn['phone_number'],
+                                                 pn['contact_nickname'])
+            response_items.append(item)
+
+        # return Response(json.dumps(response_items))
+        return Response({'phone_number_details': response_items})

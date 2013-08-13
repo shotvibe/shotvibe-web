@@ -153,3 +153,17 @@ class AlbumAddSerializer(serializers.Serializer):
 
     def restore_object(self, attrs, instance=None):
         return AlbumAdd(album_name=attrs['album_name'], members=attrs['members'], photos=attrs['photos'])
+
+
+class QueryPhonesRequestItemSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=40)
+    contact_nickname = serializers.CharField(max_length=128)
+
+
+class QueryPhonesRequestSerializer(serializers.Serializer):
+    default_country = serializers.CharField(max_length=2)
+    phone_numbers = QueryPhonesRequestItemSerializer(many=True)
+
+    def validate_default_country(self, attrs, source):
+        attrs['default_country'] = attrs['default_country'].upper()
+        return attrs
