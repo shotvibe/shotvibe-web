@@ -20,6 +20,7 @@ from photos_api.permissions import IsUserInAlbum, UserDetailsPagePermission, \
 from photos_api.parsers import PhotoUploadParser
 from photos_api import device_push, is_phone_number_mobile
 from phone_auth.models import AnonymousPhoneNumber, random_default_avatar_file_data, PhoneContact, PhoneNumber
+from photos_api.signals import photos_added_to_album, member_leave_album
 
 from rest_framework import generics, serializers
 from rest_framework.decorators import api_view, permission_classes
@@ -110,15 +111,10 @@ class AlbumDetail(generics.RetrieveAPIView):
             pending_photos = PendingPhoto.objects.filter(photo_id__in=serializer.object.add_photos)
             photos = [pf.get_or_process_uploaded_image_and_create_photo(self.album, now) for pf in pending_photos]
 
-            # Send push notifications to the album members about just added photos
-            device_push.broadcast_photos_added(
-                album_id=self.album.id,
-                author_id=request.user.id,
-                album_name=self.album.name,
-                author_name=request.user.nickname,
-                num_photos=len(photos),
-                user_ids=[membership.user.id for membership in AlbumMember.objects.filter(album=self.album).only('user__id')])
-
+            photos_added_to_album.send(sender=self,
+                                       photos=photos,
+                                       by_user=request.user,
+                                       to_album=self.album)
 
         self.album.add_members(request.user, member_identifiers=serializer.object.add_members)
 
@@ -130,10 +126,10 @@ class LeaveAlbum(generics.DestroyAPIView):
     permission_classes = (IsAuthenticated, IsUserInAlbum)
 
     def post(self, request, *args, **kwargs):
+        album = self.get_object().album
         response = self.delete(request, *args, **kwargs)
 
-        # Send push notification to the user.
-        device_push.broadcast_album_list_sync(request.user.id)
+        member_leave_album.send(sender=self, user=request.user, album=album)
 
         return response
 
