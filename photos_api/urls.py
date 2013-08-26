@@ -8,7 +8,6 @@ from photos_api import device_push
 urlpatterns = patterns('',
     url(r'^$', views.api_root),
     url(r'^auth/', include('phone_auth.urls')),
-    url(r'^delete_account/', views.delete_account),
     url(r'^gcm/devices/(?P<device_id>[\w-]+)/$', device_push.GcmDevice.as_view(), name='gcm-device'), # Deprecated
     url(r'^register_device_push/$', device_push.register_device_push, name='register-device-push'),
     url(r'^albums/$', views.Albums.as_view(), name='album-list'),

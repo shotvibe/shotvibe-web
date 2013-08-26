@@ -52,20 +52,6 @@ def api_root(request, format=None):
     }
     return Response(response_data)
 
-@api_view(['POST'])
-@permission_classes((IsAuthenticated,))
-def delete_account(request):
-    """
-    This function is very dangerous!
-
-    It will delete the user account and all associated data, including:
-    - All photos added
-    - All albums created, including all of the contained photos, even if other users added them!
-    """
-    request.user.delete()
-
-    return Response()
-
 class AlbumList(generics.ListAPIView):
     """
     The list of all albums in the database, of all users.

@@ -62,6 +62,20 @@ def logout(request):
 
     return Response()
 
+@api_view(['POST'])
+@permission_classes((IsAuthenticated,))
+def delete_account(request):
+    """
+    This function is very dangerous!
+
+    It will delete the user account and all associated data, including:
+    - All photos added
+    - All albums created, including all of the contained photos, even if other users added them!
+    """
+    request.user.delete()
+
+    return Response()
+
 # This view is called from the mobile app, after it has been installed, and is
 # being run for the first time
 @never_cache

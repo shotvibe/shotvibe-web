@@ -84,6 +84,7 @@ class ModelTests(TestCase):
         self.assertEqual(token.description, 'iPhone 3GS')
 
 class ViewTests(TestCase):
+    fixtures = ['tests/test_users']
     urls = 'phone_auth.urls'
 
     def test_authorize_phone_number(self):
@@ -215,6 +216,16 @@ class ViewTests(TestCase):
         self.assertEqual(r.status_code, 200)
 
         self.assertFalse(AuthToken.objects.filter(key=auth_token).exists())
+
+    def test_delete(self):
+        self.assertTrue(auth.get_user_model().objects.filter(id=2).exists())
+
+        self.client.login(username='2', password='amanda')
+
+        r = self.client.post('/delete_account/')
+        self.assertEqual(r.status_code, 200)
+
+        self.assertFalse(auth.get_user_model().objects.filter(id=2).exists())
 
 
 class InviteTests(TestCase):

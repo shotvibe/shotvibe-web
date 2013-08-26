@@ -35,6 +35,10 @@ Used to request an authorization code via SMS (text message).
 
 Used to complete the authorization procedure and obtain an Authorization Token.
 
+### POST /auth/delete_account/
+
+Used to completely delete the user's account and all associated data.
+
 ### GET /albums/
 
 Retrieves all the albums that the user is a member of.
@@ -161,6 +165,21 @@ Example response:
         "auth_token": "64fb97a5a7df19765aebf1c0e70ef229818ca7d5",
         "user_id": 22
     }
+
+## POST /auth/delete_account/
+
+This function is very dangerous!
+
+It will delete the user account and all associated data, including:
+
+-   All photos added
+
+-   All albums created, including all of the contained photos, even if other
+    users added them!
+
+Request body should be empty.
+
+Will return an empty response on success.
 
 ## GET /albums/
 

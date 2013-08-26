@@ -6,4 +6,5 @@ urlpatterns = patterns('',
     url(r'^authorize_phone_number/', views.AuthorizePhoneNumber.as_view()),
     url(r'^confirm_sms_code/(?P<confirmation_key>[\w]+)/$', views.ConfirmSMSCode.as_view()),
     url(r'^logout/', views.logout),
+    url(r'^delete_account/', views.delete_account),
 )
