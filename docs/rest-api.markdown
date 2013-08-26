@@ -43,6 +43,10 @@ Used to completely delete the user's account and all associated data.
 
 Used to get the user profile data.
 
+### PATCH /users/{uid}/
+
+Used to set the user profile data.
+
 ### GET /albums/
 
 Retrieves all the albums that the user is a member of.
@@ -205,6 +209,29 @@ Allow: HEAD, GET, PATCH, PUT, OPTIONS
     "avatar_url": "https://shotvibe-avatars-01.s3.amazonaws.com/default-avatar-0064.jpg"
 }
 ```
+
+## PATCH /users/{uid}/
+
+Used to set the user profile data.
+
+Currently you can only set the nickname.
+
+The request JSON should be an object containing the field `nickname` set to the
+desired nickname.
+
+Example request:
+
+```
+PATCH /users/3/
+Authorization: Token 01ba4719c80b6fe911b091a7c05124b64eeece96
+Content-Length: 122
+
+{
+    "nickname": "John Smith"
+}
+```
+
+The response body is the same as for `GET /users/{uid}/`.
 
 ## GET /albums/
 
