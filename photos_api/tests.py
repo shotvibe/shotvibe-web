@@ -9,15 +9,23 @@ import shutil
 
 from django.conf import settings
 from django.contrib import auth
-from django.test import TestCase
+from django.test import TestCase, Client
 from django.test.utils import override_settings
 from django.utils import timezone
 
-from phone_auth.models import PhoneNumber
+from phone_auth.models import PhoneNumber, PhoneContact, AnonymousPhoneNumber
 from photos.models import PendingPhoto, AlbumMember
+from photos_api import is_phone_number_mobile
 
 from photos_api.serializers import AlbumUpdateSerializer, MemberIdentifier, MemberIdentifierSerializer, AlbumAddSerializer
 import requests
+
+try:
+    from django.contrib.auth import get_user_model
+except ImportError:
+    from django.contrib.auth.models import User
+else:
+    User = get_user_model()
 
 
 @override_settings(LOCAL_PHOTO_BUCKETS_BASE_PATH='.tmp_photo_buckets')
@@ -58,17 +66,29 @@ class UserTest(BaseTestCase):
         first_album_response = self.client.get(first_album_url)
         self.assertEqual(first_album_response.status_code, 200)
 
-    def test_delete(self):
-        self.assertTrue(auth.get_user_model().objects.filter(id=2).exists())
-
-        r = self.client.post('/delete_account/')
-        self.assertEqual(r.status_code, 200)
-
-        self.assertFalse(auth.get_user_model().objects.filter(id=2).exists())
-
     def test_avatar_upload(self):
+        # ===================================
+        # Create data needed to test AnonymousPhoneNumber.avatar_file sync
+        amanda = User.objects.get(nickname='amanda')
+        fred = User.objects.get(nickname='fred')
+        apn = AnonymousPhoneNumber.objects.create(
+            phone_number='+12127189999',
+            is_mobile=True,
+            is_mobile_queried=timezone.now()
+        )
+        phone_contact = PhoneContact.objects.create(
+            anonymous_phone_number=apn,
+            user=amanda,
+            created_by_user=fred,
+            date_created=timezone.now(),
+            contact_nickname='amanda1'
+        )
+        initial_avatar=apn.avatar_file
+        # ===================================
+
+
         test_avatar_path = 'photos/test_photos/death-valley-sand-dunes.jpg'
-        url = reverse('user-avatar')
+        url = reverse('user-avatar', kwargs={'pk': 2})
 
         with open(test_avatar_path, 'rb') as f:
             upload_response = self.client.put(url, f.read(),
@@ -81,16 +101,158 @@ class UserTest(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.headers['content-type'], "image/jpeg")
 
+        # Test that avatar for AnonymousPhoneNumber was changed as well
+        new_apn = AnonymousPhoneNumber.objects.get(pk=apn.pk)
+        self.assertEqual(user.avatar_file,
+                         new_apn.avatar_file)
+
         storage, bucket_name, filename = user.avatar_file.split(":")
 
         # Delete test image from S3
-        conn = S3Connection(settings.AWS_ACCESS_KEY,
-                            settings.AWS_SECRET_ACCESS_KEY)
-        bucket = conn.get_bucket(bucket_name)
-        key = Key(bucket, filename)
-        key.delete()
-        key.close(fast=True)
+        if storage == 's3':
+            conn = S3Connection(settings.AWS_ACCESS_KEY,
+                                settings.AWS_SECRET_ACCESS_KEY)
+            bucket = conn.get_bucket(bucket_name)
+            key = Key(bucket, filename)
+            key.delete()
+            key.close(fast=True)
 
+    def test_user_updates(self):
+        logged_in_user_id = 2
+        initial_user = get_user_model().objects.get(pk=logged_in_user_id)
+        data = {'nickname': 'testnickname'}
+        user_url = reverse('user-detail', kwargs={'pk': logged_in_user_id})
+        response = self.client.post(user_url, data, REQUEST_METHOD=str('PATCH'))
+        self.assertEqual(response.status_code, httplib.OK)
+        updated_user = get_user_model().objects.get(pk=logged_in_user_id)
+        self.assertEqual(updated_user.nickname, data['nickname'])
+
+        # Test disallowed attrs
+        disallowed_attrs = {
+            'id': 23423423,
+            'primary_email': 'ingo@shotvibe.com',
+            'date_joined': timezone.now(),
+            'is_registered': not initial_user.is_registered,
+            'is_staff': not initial_user.is_staff,
+            'is_active': not initial_user.is_active,
+            'avatar_file': 'test-file.jpg'
+        }
+        for attr_name, value in disallowed_attrs.iteritems():
+            data = {attr_name: value}
+            response = self.client.post(user_url, data,
+                                        REQUEST_METHOD=str('PATCH'))
+
+            self.assertEqual(response.status_code, httplib.FORBIDDEN)
+            updated_user = get_user_model().objects.get(pk=logged_in_user_id)
+            self.assertNotEqual(getattr(updated_user, attr_name),
+                                data[attr_name])
+
+    def test_query_phone_numbers_auth(self):
+        client = Client()
+        response = client.post(
+            reverse('query-phone-numbers'),
+            {'default_acountry': 'US', 'phone_numbers': []}
+        )
+        self.assertEqual(response.status_code, httplib.UNAUTHORIZED)
+
+    def test_query_phone_numbers_invalid(self):
+        data = {
+            "default_country": "us",
+            "phone_numbers": [
+                {
+                    "phone_number": "212718999923123123",
+                    "contact_nickname": "John Smith"
+                },
+            ]
+        }
+        response = self.client.post(reverse('query-phone-numbers'),
+                                    json.dumps(data, indent=4),
+                                    content_type="application/json")
+        self.assertEqual(response.status_code, httplib.OK)
+        response_data = json.loads(response.content)
+        self.assertEqual(response_data['phone_number_details'][0],
+                         {'phone_type': 'invalid'})
+
+    def test_query_phone_numbers_unknown(self):
+
+        # make sure we don't have this phone number
+        self.assertRaises(PhoneNumber.DoesNotExist, PhoneNumber.objects.get,
+                          phone_number='+12127189999')
+
+        data = {
+            "default_country": "us",
+            "phone_numbers": [
+                {
+                    "phone_number": "2127189999",
+                    "contact_nickname": "John Smith"
+                },
+            ]
+        }
+        response = self.client.post(reverse('query-phone-numbers'),
+                                    json.dumps(data, indent=4),
+                                    content_type="application/json")
+        self.assertEqual(response.status_code, httplib.OK)
+        response_data = json.loads(response.content)
+        phone_numbers = response_data['phone_number_details']
+        self.assertEqual(phone_numbers[0]['user_id'], None)
+        initial_avatar = phone_numbers[0]['avatar_url']
+
+
+        # Make request from different user and with the same anonymous phone
+        # number and make sure the same avatar is used.
+        client = Client()
+        client.login(username=3, password="barney")
+        response = client.post(reverse('query-phone-numbers'),
+                               json.dumps(data, indent=4),
+                               content_type='application/json')
+        self.assertEqual(response.status_code, httplib.OK)
+        response_data = json.loads(response.content)
+        phone_numbers = response_data['phone_number_details']
+        self.assertEqual(phone_numbers[0]['user_id'], None)
+        self.assertEqual(phone_numbers[0]['avatar_url'], initial_avatar)
+
+    def test_query_phone_numbers_existing(self):
+
+        amanda = User.objects.get(nickname='amanda')
+        fred = User.objects.get(nickname='fred')
+        phone_number = PhoneNumber.objects.create(
+            phone_number='+12127189999',
+            user=fred,
+            date_created=timezone.now(),
+            verified=True
+        )
+
+        data = {
+            "default_country": "us",
+            "phone_numbers": [
+                {
+                    "phone_number": "2127189999",
+                    "contact_nickname": "John Smith"
+                },
+            ]
+        }
+        response = self.client.post(reverse('query-phone-numbers'),
+                                    json.dumps(data, indent=4),
+                                    content_type="application/json")
+        self.assertEqual(response.status_code, httplib.OK)
+        response_data = json.loads(response.content)
+        phone_numbers = response_data['phone_number_details']
+        self.assertEqual(phone_numbers[0]['user_id'], fred.id)
+        initial_avatar = phone_numbers[0]['avatar_url']
+
+
+        # Make request from different user and with the same anonymous phone
+        # number and make sure the same avatar is used.
+        client = Client()
+        client.login(username=3, password="barney")
+        response = client.post(reverse('query-phone-numbers'),
+                               json.dumps(data, indent=4),
+                               content_type='application/json')
+        self.assertEqual(response.status_code, httplib.OK)
+        response_data = json.loads(response.content)
+        phone_numbers = response_data['phone_number_details']
+        self.assertEqual(phone_numbers[0]['user_id'], fred.id)
+        self.assertEqual(phone_numbers[0]['avatar_url'], initial_avatar)
 
 class NotModifiedTest(BaseTestCase):
     def setUp(self):
@@ -342,6 +504,28 @@ class MembersTests(BaseTestCase):
     def setUp(self):
         self.client.login(username='2', password='amanda')
 
+    def test_invite_status(self):
+        album_url = reverse('album-detail', kwargs={'pk': 9})
+        album_before_response = self.client.get(album_url)
+        j = json.loads(album_before_response.content)
+
+        for member in j['members']:
+            self.assertEqual(member['invite_status'], 'sms_sent')
+            user_id = member['id']
+            user = get_user_model().objects.get(id=user_id)
+
+            phone_number = PhoneNumber.objects.create(
+                phone_number="+1212{0}".format(user.id).ljust(12, '0'),
+                user=user,
+                date_created=timezone.now(),
+                verified=True
+            )
+
+        album_before_response = self.client.get(album_url)
+        j = json.loads(album_before_response.content)
+        for member in j['members']:
+            self.assertEqual(member['invite_status'], 'joined')
+
     def test_add_members(self):
         album_before_response = self.client.get('/albums/9/')
         members_before = json.loads(album_before_response.content)['members']
@@ -500,3 +684,15 @@ class MembersTests(BaseTestCase):
         # Retrieving album details is forbidden, because user is not a member of the album anymore
         album_after_response = self.client.get(reverse('album-detail', kwargs={'pk':9}))
         self.assertEqual(album_after_response.status_code, httplib.FORBIDDEN)
+
+
+class TestPhoneNumberMobile(TestCase):
+    def test_1(self):
+        # "97254", "97252", "97250", "97258" These are prefixes for mobile
+        # numbers in Israel
+        self.assertTrue(is_phone_number_mobile("+972541231212", 'IL'))
+        self.assertTrue(is_phone_number_mobile("+972521231212", 'IL'))
+        self.assertTrue(is_phone_number_mobile("+972501231212", 'IL'))
+        self.assertTrue(is_phone_number_mobile("+972581231212", 'IL'))
+        self.assertFalse(is_phone_number_mobile("+972231231212", 'IL'))
+        self.assertTrue(is_phone_number_mobile("+12127184000", 'US'))

@@ -1,5 +1,6 @@
 import collections
 import random
+from phone_auth.signals import user_avatar_changed
 import re
 import os
 import string
@@ -18,13 +19,28 @@ from phone_auth.sms_send import send_sms
 USER_AVATAR_DATA_REGEX = re.compile(r's3:.+?:user-avatar-\d+?-\d+?\.jpg')
 
 
+def avatar_url_from_avatar_file_data(avatar_file):
+    """Returns URL of the user's avatar image"""
+    storage, bucket, filename = str(avatar_file).split(":")
+    format_string = settings.AVATAR_STORAGE_URL_FORMAT_STRING_MAP.get(
+        storage)
+
+    if not format_string:
+        return None
+
+    return format_string.format(
+        bucket_name=bucket,
+        filename=filename
+    )
+
+
 def validate_avatar_file_data(value):
     """Validates value supplied for User.avatar_file attribute"""
     if not USER_AVATAR_DATA_REGEX.match(value):
         raise ValidationError("Wrong value for avatar file")
 
 
-def default_random_user_avatar_file():
+def random_default_avatar_file_data(*args, **kwargs):
     """Returns random default avatar_file location"""
     format_string, min_number, max_number = random.choice(
         settings.DEFAULT_AVATAR_FILES
@@ -76,6 +92,9 @@ class UserManager(auth.models.BaseUserManager):
         return user
 
 class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
+    STATUS_JOINED = 'joined'
+    STATUS_SMS_SENT = 'sms_sent'
+
     id = models.IntegerField(primary_key=True)
     nickname = models.CharField(max_length=128)
     primary_email = models.ForeignKey('UserEmail', db_index=False, null=True, blank=True, related_name='+', on_delete=models.SET_NULL)
@@ -95,7 +114,7 @@ class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
 
     avatar_file = models.CharField(max_length=128,
                                    validators=[validate_avatar_file_data],
-                                   default=default_random_user_avatar_file)
+                                   default=random_default_avatar_file_data)
 
     objects = UserManager()
 
@@ -105,6 +124,10 @@ class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
     def __unicode__(self):
         return u'{0} ({1})'.format(self.id, self.nickname)
 
+    def get_invite_status(self):
+        query = self.phonenumber_set.filter(verified=True)
+        return User.STATUS_JOINED if query.count() > 0 else User.STATUS_SMS_SENT
+
     def get_full_name(self):
         return self.nickname
 
@@ -113,18 +136,26 @@ class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
 
     def get_avatar_url(self):
         """Returns URL of the user's avatar image"""
+        return avatar_url_from_avatar_file_data(self.avatar_file)
 
-        storage, bucket, filename = str(self.avatar_file).split(":")
-        format_string = settings.AVATAR_STORAGE_URL_FORMAT_STRING_MAP.get(
-            storage)
+    def pick_anonymous_avatar(self, phone_number_str, save=False):
+        """Picks up avatar used for anonymous contact data for the given
+        phone_number_str.
 
-        if not format_string:
-            return None
-
-        return format_string.format(
-            bucket_name=bucket,
-            filename=filename
-        )
+        If there is no AnonymousPhoneNumber for the given phone number
+         it does nothing.
+        Save self if `save` is True.
+        """
+        try:
+            contact = PhoneContact.objects.\
+                only('anonymous_phone_number__avatar_file').\
+                get(anonymous_phone_number__phone_number=phone_number_str)
+        except PhoneContact.DoesNotExist:
+            pass
+        else:
+            self.avatar_file = contact.anonymous_phone_number.avatar_file
+            if save:
+                self.save()
 
 
 class UserEmail(models.Model):
@@ -184,10 +215,15 @@ class PhoneNumberManager(models.Manager):
         except PhoneNumber.DoesNotExist:
             new_user = User.objects.create_user()
             phone_number = self.create(
-                    phone_number = phone_number_str,
-                    user = new_user,
-                    date_created = timezone.now(),
-                    verified = False)
+                phone_number=phone_number_str,
+                user=new_user,
+                date_created=timezone.now(),
+                verified=False
+            )
+            new_user.pick_anonymous_avatar(phone_number_str)
+            new_user.save()
+
+            user_avatar_changed.send(sender=self, user=new_user)
 
         confirmation_key = generate_key()
         confirmation_code = '6666' # TODO Temporary!
@@ -240,6 +276,20 @@ class PhoneNumberManager(models.Manager):
         result.auth_token = auth_token.key
         return result
 
+
+class AnonymousPhoneNumber(models.Model):
+    phone_number = models.CharField(max_length=32, unique=True, db_index=True)
+    date_created = models.DateTimeField(default=timezone.now)
+    avatar_file = models.CharField(max_length=128,
+                                   validators=[validate_avatar_file_data],
+                                   default=random_default_avatar_file_data)
+    is_mobile = models.BooleanField()
+    is_mobile_queried = models.DateTimeField()
+
+    def get_avatar_url(self):
+        return avatar_url_from_avatar_file_data(self.avatar_file)
+
+
 class PhoneNumber(models.Model):
     phone_number = models.CharField(max_length=32, unique=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
@@ -277,6 +327,10 @@ class PhoneNumberLinkCodeManager(models.Manager):
                 user = new_user,
                 date_created = date_invited,
                 verified = False)
+        new_user.pick_anonymous_avatar(phone_number_str)
+        new_user.save()
+
+        user_avatar_changed.send(sender=self, user=new_user)
 
         return self.invite_existing_phone_number(phone_number, inviter, date_invited)
 
@@ -314,3 +368,27 @@ class PhoneNumberLinkCode(models.Model):
         if not url_prefix:
             url_prefix = ''
         return url_prefix + reverse(invite_page, urlconf=frontend.urls, args=(self.invite_code,))
+
+
+class PhoneContact(models.Model):
+    """Phone contact data uploaded by users to see who from his
+    address book is registered at Shotvibe"""
+    anonymous_phone_number = models.ForeignKey(AnonymousPhoneNumber)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True,
+                             default=None, related_name="phone_contacts")
+    created_by_user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                        related_name="created_phone_contacts")
+    date_created = models.DateTimeField(default=timezone.now)
+    contact_nickname = models.TextField()
+
+
+def update_anonymous_phone_number_avatar(sender, **kwargs):
+    user = kwargs.get('user')
+    query = user.phone_contacts.all().select_related('anonymous_phone_number')\
+        .only('anonymous_phone_number')
+    for phone_contact in query:
+        if phone_contact.anonymous_phone_number.avatar_file != user.avatar_file:
+            phone_contact.anonymous_phone_number.avatar_file = user.avatar_file
+            phone_contact.anonymous_phone_number.save()
+
+user_avatar_changed.connect(update_anonymous_phone_number_avatar)

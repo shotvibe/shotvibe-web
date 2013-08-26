@@ -1,26 +1,21 @@
 # -*- coding: utf-8 -*-
-from phone_auth.models import random_default_avatar_file_data
+import datetime
 from south.db import db
 from south.v2 import SchemaMigration
+from django.db import models
 
 
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding field 'User.avatar_file'
-        db.add_column(u'phone_auth_user', 'avatar_file',
-                      self.gf('django.db.models.fields.CharField')(default='s3:shotvibe-avatars-01:default-avatar_0070', max_length=128),
-                      keep_default=False)
 
-        if not db.dry_run:
-            for user in orm.User.objects.all():
-                user.avatar_file = random_default_avatar_file_data()
-                user.save()
+        # Changing field 'AlbumMember.datetime_added'
+        db.alter_column('photos_album_members', 'datetime_added', self.gf('django.db.models.fields.DateTimeField')())
 
     def backwards(self, orm):
-        # Deleting field 'User.avatar_file'
-        db.delete_column(u'phone_auth_user', 'avatar_file')
 
+        # Changing field 'AlbumMember.datetime_added'
+        db.alter_column('photos_album_members', 'datetime_added', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True))
 
     models = {
         u'auth.group': {
@@ -43,40 +38,9 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
-        u'phone_auth.authtoken': {
-            'Meta': {'object_name': 'AuthToken'},
-            'date_created': ('django.db.models.fields.DateTimeField', [], {}),
-            'description': ('django.db.models.fields.TextField', [], {}),
-            'key': ('django.db.models.fields.CharField', [], {'max_length': '40', 'primary_key': 'True'}),
-            'last_access': ('django.db.models.fields.DateTimeField', [], {}),
-            'last_access_ip': ('django.db.models.fields.GenericIPAddressField', [], {'max_length': '39', 'null': 'True', 'blank': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['phone_auth.User']"})
-        },
-        u'phone_auth.phonenumber': {
-            'Meta': {'object_name': 'PhoneNumber'},
-            'date_created': ('django.db.models.fields.DateTimeField', [], {'db_index': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'phone_number': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '32'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['phone_auth.User']"}),
-            'verified': ('django.db.models.fields.BooleanField', [], {'default': 'False'})
-        },
-        u'phone_auth.phonenumberconfirmsmscode': {
-            'Meta': {'object_name': 'PhoneNumberConfirmSMSCode'},
-            'confirmation_code': ('django.db.models.fields.CharField', [], {'max_length': '6'}),
-            'confirmation_key': ('django.db.models.fields.CharField', [], {'max_length': '40', 'primary_key': 'True'}),
-            'date_created': ('django.db.models.fields.DateTimeField', [], {'db_index': 'True'}),
-            'phone_number': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['phone_auth.PhoneNumber']"})
-        },
-        u'phone_auth.phonenumberlinkcode': {
-            'Meta': {'object_name': 'PhoneNumberLinkCode'},
-            'date_created': ('django.db.models.fields.DateTimeField', [], {'db_index': 'True'}),
-            'invite_code': ('django.db.models.fields.CharField', [], {'max_length': '32', 'primary_key': 'True'}),
-            'inviting_user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'+'", 'to': u"orm['phone_auth.User']"}),
-            'phone_number': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['phone_auth.PhoneNumber']", 'unique': 'True'})
-        },
         u'phone_auth.user': {
             'Meta': {'object_name': 'User'},
-            'avatar_file': ('django.db.models.fields.CharField', [], {'default': "'s3:shotvibe-avatars-01:default-avatar_0042'", 'max_length': '128'}),
+            'avatar_file': ('django.db.models.fields.CharField', [], {'default': "'s3:shotvibe-avatars-01:default-avatar-0056.jpg'", 'max_length': '128'}),
             'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['auth.Group']", 'symmetrical': 'False', 'blank': 'True'}),
             'id': ('django.db.models.fields.IntegerField', [], {'primary_key': 'True'}),
@@ -95,7 +59,41 @@ class Migration(SchemaMigration):
             'email': ('django.db.models.fields.EmailField', [], {'unique': 'True', 'max_length': '75'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['phone_auth.User']"})
+        },
+        u'photos.album': {
+            'Meta': {'object_name': 'Album'},
+            'creator': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'+'", 'to': u"orm['phone_auth.User']"}),
+            'date_created': ('django.db.models.fields.DateTimeField', [], {}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'last_updated': ('django.db.models.fields.DateTimeField', [], {}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'revision_number': ('django.db.models.fields.IntegerField', [], {})
+        },
+        u'photos.albummember': {
+            'Meta': {'unique_together': "(('user', 'album'),)", 'object_name': 'AlbumMember', 'db_table': "'photos_album_members'"},
+            'added_by_user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'created_album_memberships'", 'to': u"orm['phone_auth.User']"}),
+            'album': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'memberships'", 'to': u"orm['photos.Album']"}),
+            'datetime_added': ('django.db.models.fields.DateTimeField', [], {}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'album_membership'", 'to': u"orm['phone_auth.User']"})
+        },
+        u'photos.pendingphoto': {
+            'Meta': {'object_name': 'PendingPhoto'},
+            'author': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['phone_auth.User']"}),
+            'bucket': ('django.db.models.fields.CharField', [], {'default': "'local:photos04'", 'max_length': '64'}),
+            'photo_id': ('django.db.models.fields.CharField', [], {'default': "'e31938d4889b0c72111f513c2239654d225d0738d47c648bbbe24729c60f319e'", 'max_length': '128', 'primary_key': 'True'}),
+            'start_time': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'})
+        },
+        u'photos.photo': {
+            'Meta': {'object_name': 'Photo'},
+            'album': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['photos.Album']"}),
+            'author': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['phone_auth.User']"}),
+            'bucket': ('django.db.models.fields.CharField', [], {'max_length': '64'}),
+            'date_created': ('django.db.models.fields.DateTimeField', [], {'db_index': 'True'}),
+            'height': ('django.db.models.fields.IntegerField', [], {}),
+            'photo_id': ('django.db.models.fields.CharField', [], {'max_length': '128', 'primary_key': 'True'}),
+            'width': ('django.db.models.fields.IntegerField', [], {})
         }
     }
 
-    complete_apps = ['phone_auth']
+    complete_apps = ['photos']

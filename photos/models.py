@@ -1,4 +1,5 @@
 from django.contrib import auth
+from django.db.models import Max
 import os
 import random
 
@@ -8,8 +9,7 @@ from django.utils import timezone
 
 from phone_auth.models import PhoneNumber, PhoneNumberLinkCode
 from photos import image_uploads
-from photos_api import device_push
-from photos_api.device_push import broadcast_added_to_album, broadcast_album_list_sync
+from photos_api.signals import members_added_to_album, album_created
 
 
 class AlbumManager(models.Manager):
@@ -28,10 +28,7 @@ class AlbumManager(models.Manager):
             datetime_added = date_created,
             added_by_user = creator
         )
-
-        # Send push notifications
-        broadcast_added_to_album(album.id, album.name, creator.nickname, [creator.id])
-        broadcast_album_list_sync([creator.id])
+        album_created.send(sender=self, album=album)
 
         return album
 
@@ -86,8 +83,8 @@ class Album(models.Model):
                 datetime_added = date_added
             )
 
-        # Send push notification
-        broadcast_added_to_album(self.id, self.name, inviter.nickname, [nu.id for nu in new_users])
+        members_added_to_album.send(sender=self, member_users=new_users,
+                                    by_user=inviter, to_album=self)
 
         self.save_revision(date_added)
 
@@ -146,6 +143,7 @@ class Photo(models.Model):
     date_created = models.DateTimeField(db_index=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL)
     album = models.ForeignKey(Album)
+    album_index = models.PositiveIntegerField(db_index=True)
     width = models.IntegerField()
     height = models.IntegerField()
 
@@ -219,12 +217,21 @@ class PendingPhoto(models.Model):
         # TODO catch exception:
         width, height = image_uploads.process_uploaded_image(self.bucket, self.photo_id)
 
+        album_index_q = Photo.objects.filter(album=album)\
+            .aggregate(Max('album_index'))
+        album_index = album_index_q['album_index__max']
+        if album_index is None:
+            album_index = 0
+        else:
+            album_index += 1
+
         new_photo = Photo.objects.create(
             photo_id=self.photo_id,
             bucket=self.bucket,
             date_created=date_created,
             author=self.author,
             album=album,
+            album_index=album_index,
             width=width,
             height=height
         )

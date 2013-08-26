@@ -24,11 +24,12 @@ class ListField(serializers.WritableField):
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = auth.get_user_model()
-        fields = ('id', 'url', 'nickname', 'avatar_url')
+        fields = ('id', 'url', 'nickname', 'avatar_url', 'invite_status')
 
     id = serializers.IntegerField(source='id')
 
     avatar_url = serializers.CharField(source='get_avatar_url')
+    invite_status = serializers.CharField(source='get_invite_status')
 
 class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -117,3 +118,17 @@ class AlbumAddSerializer(serializers.Serializer):
 
     def restore_object(self, attrs, instance=None):
         return AlbumAdd(album_name=attrs['album_name'], members=attrs['members'], photos=attrs['photos'])
+
+
+class QueryPhonesRequestItemSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=40)
+    contact_nickname = serializers.CharField(max_length=128)
+
+
+class QueryPhonesRequestSerializer(serializers.Serializer):
+    default_country = serializers.CharField(max_length=2)
+    phone_numbers = QueryPhonesRequestItemSerializer(many=True)
+
+    def validate_default_country(self, attrs, source):
+        attrs['default_country'] = attrs['default_country'].upper()
+        return attrs

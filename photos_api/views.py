@@ -1,42 +1,43 @@
-from boto.s3.connection import S3Connection
-from boto.s3.key import Key
-from django.conf import settings
 import random
 import tempfile
+
+import json
+from boto.s3.connection import S3Connection
+from boto.s3.key import Key
+
+from django.core.files import File
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib import auth
+
 #from django.http import HttpResponseNotModified
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.core.files import File
-from photos_api import device_push
+from phone_auth.signals import user_avatar_changed
+from photos_api.permissions import IsUserInAlbum, UserDetailsPagePermission, \
+    IsSameUserOrStaff
+from photos_api.parsers import PhotoUploadParser
+from photos_api import device_push, is_phone_number_mobile
+from phone_auth.models import AnonymousPhoneNumber, random_default_avatar_file_data, PhoneContact, PhoneNumber
+from photos_api.signals import photos_added_to_album, member_leave_album
 
-from rest_framework import generics
+from rest_framework import generics, serializers
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.generics import GenericAPIView
 from rest_framework.reverse import reverse
 from rest_framework.response import Response
-#from rest_framework.exceptions import PermissionDenied
-from rest_framework.permissions import BasePermission, IsAdminUser, IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework import status
 from rest_framework import views
-from rest_framework.parsers import BaseParser
 
 import phonenumbers
 
 from photos.image_uploads import handle_file_upload
-from photos.models import Album, Photo, PendingPhoto, AlbumMember
-from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer
+from photos.models import Album, PendingPhoto, AlbumMember
+from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer, QueryPhonesRequestSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
-
-
-class PhotoUploadParser(BaseParser):
-
-    # Accept any Content-Type
-    media_type = '*/*'
-
-    def parse(self, stream, media_type=None, parser_context=None):
-        return File(stream)
 
 
 @api_view(['GET'])
@@ -51,20 +52,6 @@ def api_root(request, format=None):
     }
     return Response(response_data)
 
-@api_view(['POST'])
-@permission_classes((IsAuthenticated,))
-def delete_account(request):
-    """
-    This function is very dangerous!
-
-    It will delete the user account and all associated data, including:
-    - All photos added
-    - All albums created, including all of the contained photos, even if other users added them!
-    """
-    request.user.delete()
-
-    return Response()
-
 class AlbumList(generics.ListAPIView):
     """
     The list of all albums in the database, of all users.
@@ -73,13 +60,6 @@ class AlbumList(generics.ListAPIView):
     model = Album
     serializer_class = AlbumNameSerializer
 
-class IsUserInAlbum(BasePermission):
-    def has_permission(self, request, view, obj=None):
-        if request.user.is_staff:
-            return True
-        album_id = int(view.kwargs['pk'])
-        album = get_object_or_404(Album, pk=album_id)
-        return album.is_user_member(request.user.id)
 
 def parse_phone_number(phone_number, default_country):
     try:
@@ -117,15 +97,10 @@ class AlbumDetail(generics.RetrieveAPIView):
             pending_photos = PendingPhoto.objects.filter(photo_id__in=serializer.object.add_photos)
             photos = [pf.get_or_process_uploaded_image_and_create_photo(self.album, now) for pf in pending_photos]
 
-            # Send push notifications to the album members about just added photos
-            device_push.broadcast_photos_added(
-                album_id=self.album.id,
-                author_id=request.user.id,
-                album_name=self.album.name,
-                author_name=request.user.nickname,
-                num_photos=len(photos),
-                user_ids=[membership.user.id for membership in AlbumMember.objects.filter(album=self.album).only('user__id')])
-
+            photos_added_to_album.send(sender=self,
+                                       photos=photos,
+                                       by_user=request.user,
+                                       to_album=self.album)
 
         add_member_ids = []
         add_member_phones = []
@@ -147,10 +122,10 @@ class LeaveAlbum(generics.DestroyAPIView):
     permission_classes = (IsAuthenticated, IsUserInAlbum)
 
     def post(self, request, *args, **kwargs):
+        album = self.get_object().album
         response = self.delete(request, *args, **kwargs)
 
-        # Send push notification to the user.
-        device_push.broadcast_album_list_sync(request.user.id)
+        member_leave_album.send(sender=self, user=request.user, album=album)
 
         return response
 
@@ -179,17 +154,49 @@ class UserList(generics.ListCreateAPIView):
     model = auth.get_user_model()
     serializer_class = UserSerializer
 
-class UserDetail(generics.RetrieveAPIView):
+
+class UserDetail(generics.RetrieveUpdateAPIView):
     """
     API endpoint that represents a single user.
     """
     model = auth.get_user_model()
     serializer_class = UserSerializer
+    permission_classes = (UserDetailsPagePermission,)
+
+    # These attributes can be changed with PUT or PATCH request
+    __allowed_attributes_to_change = ['nickname']
+
+    def __check_update_attr_permissions(self, request):
+        """Ensure that only allowed attributes can be changed"""
+        for key, value in request.DATA.iteritems():
+            if key not in self.__allowed_attributes_to_change:
+                raise PermissionDenied("You are not allowed to "
+                                       "change '{0}'".format(key))
+
+    def get_queryset(self):
+        """For PUT and PATCH requests limit queryset to only user
+        who makes request"""
+
+        if self.request.method in ['PUT', 'PATCH']:
+            return self.model.objects.filter(pk=self.request.user.pk)
+
+        return super(UserDetail, self).get_queryset()
+
+    def put(self, request, *args, **kwargs):
+        """PUT handler"""
+        self.__check_update_attr_permissions(request)
+        return super(UserDetail, self).put(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        """PATCH handler"""
+        self.check_permissions(request)
+        self.__check_update_attr_permissions(request)
+        return super(UserDetail, self).patch(request, *args, **kwargs)
 
 
 class UserAvatarDetail(views.APIView):
     """View that handles avatar uploads"""
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsSameUserOrStaff)
 
     parser_classes = (PhotoUploadParser,)
 
@@ -236,23 +243,18 @@ class UserAvatarDetail(views.APIView):
             filename=avatar_image_filename)
         request.user.save()
 
+        user_avatar_changed.send(sender=self, user=request.user)
+
         return Response()
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         return self.process_upload_request(request,
                                            request.FILES['photo'].chunks())
 
-    def put(self, request):
+    def put(self, request, *args, **kwargs):
         return self.process_upload_request(request,
                                            request.DATA.chunks())
 
-
-class IsSameUser(BasePermission):
-    def has_permission(self, request, view, obj=None):
-        if request.user.is_staff:
-            return True
-        user_id = int(view.kwargs['pk'])
-        return request.user.id == user_id
 
 @supports_last_modified
 class Albums(generics.ListAPIView):
@@ -350,3 +352,81 @@ class PhotoUpload(views.APIView):
     def put(self, request, photo_id, format=None):
         return self.process_upload_request(request, photo_id,
                                            request.DATA.chunks())
+
+
+class QueryPhoneNumbers(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = QueryPhonesRequestSerializer
+
+    def __process_requested_item(self, user, country_code, phone_number,
+                                 nickname):
+
+        try:
+            number = phonenumbers.parse(phone_number, country_code)
+        except phonenumbers.phonenumberutil.NumberParseException as e:
+            return {'phone_type': 'invalid'}
+
+        if not phonenumbers.is_possible_number(number):
+            return {'phone_type': 'invalid'}
+
+        phone_number_str = phonenumbers.format_number(
+            number,
+            phonenumbers.PhoneNumberFormat.E164
+        )
+
+        data = {}
+
+        try:
+            apn = AnonymousPhoneNumber.objects.get(phone_number=phone_number_str)
+        except AnonymousPhoneNumber.DoesNotExist:
+            is_mobile = is_phone_number_mobile(phone_number_str,
+                                                     country_code)
+            apn = AnonymousPhoneNumber.objects.create(
+                phone_number=phone_number_str,
+                date_created=timezone.now(),
+                avatar_file=random_default_avatar_file_data(),
+                is_mobile=is_mobile,
+                is_mobile_queried=timezone.now()
+            )
+
+        try:
+            phone_contact = apn.phonecontact_set.get(created_by_user=user)
+        except PhoneContact.DoesNotExist:
+            try:
+                owner_user = PhoneNumber.objects.only('user').\
+                    get(phone_number=phone_number_str).user
+            except PhoneNumber.DoesNotExist:
+                owner_user = None
+            phone_contact = PhoneContact.objects.create(
+                anonymous_phone_number=apn,
+                user=owner_user,
+                created_by_user=user,
+                date_created=timezone.now(),
+                contact_nickname=nickname
+            )
+
+        data['phone_type'] = 'mobile' if apn.is_mobile else 'landline'
+        data['avatar_url'] = apn.get_avatar_url()
+        data['user_id'] = phone_contact.user_id
+        data['phone_number'] = apn.phone_number
+        return data
+
+    def post(self, request, *args, **kwargs):
+        data = json.loads(str(request.body))
+        serializer = self.get_serializer(data=data, files=request.FILES)
+        if not serializer.is_valid():
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        default_country = serializer.data.get('default_country')
+        phone_numbers = serializer.data.get('phone_numbers')
+        response_items = []
+        for pn in phone_numbers:
+            item = self.__process_requested_item(request.user,
+                                                 default_country,
+                                                 pn['phone_number'],
+                                                 pn['contact_nickname'])
+            response_items.append(item)
+
+        # return Response(json.dumps(response_items))
+        return Response({'phone_number_details': response_items})
