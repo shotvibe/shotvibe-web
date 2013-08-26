@@ -338,6 +338,21 @@ The HTTP `ETag` should be stored, and on the next request should be used in an
 `If-None-Match` HTTP header. If the album has not changed, the server will
 return: `304 Not Modified`
 
+Each object in the `members` array contains the fields:
+
+-   `id`: user ID of the member
+
+-   `nickname`
+
+-   `avatar_url`
+
+-   `invite_status`: Can be one of the following values:
+
+    -   `"joined"`: The member is active and has viewed the album.
+
+    -   `"sms_sent"`: An SMS invitation has been sent to the user, but he has not
+        yet installed the app.
+
 Example response:
 
     HTTP 200 OK
@@ -357,102 +372,119 @@ Example response:
                 "url": "https://api.shotvibe.com/users/1/",
                 "nickname": "admin",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                "invite_status": "joined"
             },
             {
                 "id": 2,
                 "url": "https://api.shotvibe.com/users/2/",
                 "nickname": "amanda",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                "invite_status": "joined"
             },
             {
                 "id": 5,
                 "url": "https://api.shotvibe.com/users/5/",
                 "nickname": "daniel",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                "invite_status": "joined"
             },
             {
                 "id": 6,
                 "url": "https://api.shotvibe.com/users/6/",
                 "nickname": "emma",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                "invite_status": "joined"
             },
             {
                 "id": 9,
                 "url": "https://api.shotvibe.com/users/9/",
                 "nickname": "helen",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                "invite_status": "joined"
             },
             {
                 "id": 11,
                 "url": "https://api.shotvibe.com/users/11/",
                 "nickname": "jackie",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                "invite_status": "joined"
             },
             {
                 "id": 12,
                 "url": "https://api.shotvibe.com/users/12/",
                 "nickname": "kevin",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                "invite_status": "joined"
             },
             {
                 "id": 13,
                 "url": "https://api.shotvibe.com/users/13/",
                 "nickname": "lauren",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                "invite_status": "joined"
             },
             {
                 "id": 14,
                 "url": "https://api.shotvibe.com/users/14/",
                 "nickname": "mark",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                "invite_status": "joined"
             },
             {
                 "id": 15,
                 "url": "https://api.shotvibe.com/users/15/",
                 "nickname": "nancy",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                "invite_status": "joined"
             },
             {
                 "id": 17,
                 "url": "https://api.shotvibe.com/users/17/",
                 "nickname": "paula",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                "invite_status": "joined"
             },
             {
                 "id": 670666294,
                 "url": "https://api.shotvibe.com/users/670666294/",
                 "nickname": "x",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                "invite_status": "sms_sent"
             },
             {
                 "id": 670666295,
                 "url": "https://api.shotvibe.com/users/670666295/",
                 "nickname": "x",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                "invite_status": "sms_sent"
             },
             {
                 "id": 670666296,
                 "url": "https://api.shotvibe.com/users/670666296/",
                 "nickname": "x",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                "invite_status": "sms_sent"
             },
             {
                 "id": 670666297,
                 "url": "https://api.shotvibe.com/users/670666297/",
                 "nickname": "x",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                "invite_status": "sms_sent"
             },
             {
                 "id": 1791562667,
                 "url": "https://api.shotvibe.com/users/1791562667/",
                 "nickname": "testuser",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                "invite_status": "sms_sent"
             },
             {
                 "id": 1791562669,
                 "url": "https://api.shotvibe.com/users/1791562669/",
                 "nickname": "benny",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                "invite_status": "sms_sent"
             }
         ],
         "photos": [
