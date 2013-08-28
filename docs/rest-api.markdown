@@ -89,6 +89,10 @@ Used to create a new album.
 
 Used to register a mobile device to receive push notifications.
 
+### POST /query_phone_numbers/
+
+Used to query info about phone numbers in a user's phone contact list.
+
 ## POST /auth/authorize_phone_number/
 
 Used to request an authorization code via SMS (text message).
@@ -898,3 +902,118 @@ Content-Length: 628
 ### Response
 
 If the registration is successful then response will be `204 No Content`.
+
+## POST /query_phone_numbers/
+
+Used to query info about phone numbers in a user's phone contact list.
+
+The request JSON should contain a `default_country` value as well as a list of
+phone contacts. Each phone contact should have a `phone_number` and
+`contact_nickname` value.
+
+The response body is an object containing the field `phone_number_details` that
+contains an array of results matching the list of phone numbers that were sent.
+Each result contains the fields:
+
+-   `phone_type`: Will be either `"mobile"`, `"landline"` or `"invalid"`. If
+    this is not `"mobile"` then none of the other fields will be available.
+
+-   `user_id`: Will be a user ID or `null`.
+
+-   `avatar_url`: Will be the url of the avatar of this phone number.
+
+-   `phone_number`: Will be the original phone number, but in a canonical E164
+    format.
+
+The app should send the user's contact list to this method, and then app should
+display the contact list with the results of this method:
+
+-   Only phone numbers that the server determines are `"mobile"` should be
+    displayed to the user.
+
+-   Phone numbers that have a `user_id` value (not `null`) should have a
+    "ShotVibe" icon next to them, since they are ShotVibe users.
+
+-   The avatar image of each contact should be displayed. Note that all phone
+    numbers have an `avatar_url`, even if they are not registered ShotVibe
+    users.
+
+-   Duplicate contacts should not be displayed. It is possible for a user to
+    have in his address book contacts that have the same number, but formatted
+    differently. For example: "212-718-2002", "2127182002" and "+1 (212) 718
+    2002". The server will return all of these will the same value in the
+    canonical `phone_number` field, and the app should only display one of
+    them.
+
+Example request:
+
+```
+POST /query_phone_numbers/
+Authorization: Token 01ba4719c80b6fe911b091a7c05124b64eeece96
+Content-Type: application/json
+Content-Length: 2042
+
+{
+    "default_country": "US",
+    "phone_numbers": [
+        {
+            "phone_number": "2127182002",
+            "contact_nickname": "John Smith"
+        },
+        {
+            "phone_number": "(212) 718 3003",
+            "contact_nickname": "Hardwin Fionnghall"
+        },
+        {
+            "phone_number": "(212) 718 4004",
+            "contact_nickname": "Stephan Hendrik"
+        },
+        {
+            "phone_number": "1 (212) 718 2002",
+            "contact_nickname": "John Smith Home"
+        },
+        {
+            "phone_number": "4",
+            "contact_nickname": "Joe"
+        },
+    ]
+}
+```
+
+Example Response:
+
+```
+HTTP 200 OK
+Vary: Accept
+Content-Type: application/json
+Allow: POST, OPTIONS
+
+{
+    "phone_number_details": [
+        {
+            "phone_type": "mobile",
+            "user_id": 2,
+            "avatar_url": "https://www.example.com/john_smith.jpg",
+            "phone_number": "+12127182002"
+        },
+        {
+            "phone_type": "landline"
+        },
+        {
+            "phone_type": "mobile",
+            "user_id": null,
+            "avatar_url": "https://www.example.com/default-avatar-42.jpg",
+            "phone_number": "+12127184004"
+        },
+        {
+            "phone_type": "mobile",
+            "user_id": 2,
+            "avatar_url": "https://www.example.com/john_smith.jpg",
+            "phone_number": "+12127182002"
+        },
+        {
+            "phone_type": "invalid"
+        }
+    ]
+}
+```
