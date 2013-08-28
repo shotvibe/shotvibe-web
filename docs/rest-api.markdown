@@ -47,6 +47,10 @@ Used to get the user profile data.
 
 Used to set the user profile data.
 
+### PUT /users/{uid}/avatar/
+
+Upload a photo to be used as the user's avatar image.
+
 ### GET /albums/
 
 Retrieves all the albums that the user is a member of.
@@ -232,6 +236,31 @@ Content-Length: 122
 ```
 
 The response body is the same as for `GET /users/{uid}/`.
+
+## PUT /users/{uid}/avatar/
+
+Upload a photo to be used as the user's avatar image.
+
+Returns an empty response body.
+
+Example request:
+
+```
+PUT /users/5/avatar/
+Authorization: Token 01ba4719c80b6fe911b091a7c05124b64eeece96
+Content-Length: 126003
+
+<<< BINARY IMAGE DATA >>>
+```
+
+Example response:
+
+```
+HTTP 200 OK
+Vary: Accept
+Content-Type: application/json
+Allow: POST, OPTIONS
+```
 
 ## GET /albums/
 
