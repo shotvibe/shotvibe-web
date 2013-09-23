@@ -22,7 +22,7 @@ from photos_api import device_push, is_phone_number_mobile
 from phone_auth.models import AnonymousPhoneNumber, random_default_avatar_file_data, PhoneContact, PhoneNumber
 from photos_api.signals import photos_added_to_album, member_leave_album
 
-from rest_framework import generics, serializers
+from rest_framework import generics, serializers, mixins
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.generics import GenericAPIView
 from rest_framework.reverse import reverse
@@ -35,8 +35,10 @@ from rest_framework import views
 import phonenumbers
 
 from photos.image_uploads import handle_file_upload
-from photos.models import Album, PendingPhoto, AlbumMember
-from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer, QueryPhonesRequestSerializer
+from photos.models import Album, PendingPhoto, AlbumMember, Photo
+from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
+    UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer, \
+    QueryPhonesRequestSerializer, DeletePhotosSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
 
@@ -292,6 +294,34 @@ class Albums(generics.ListAPIView):
 
         responseSerializer = AlbumSerializer(album)
         return Response(responseSerializer.data)
+
+
+class DeletePhotosView(mixins.DestroyModelMixin, generics.MultipleObjectAPIView):
+    model = Photo
+    serializer_class = DeletePhotosSerializer
+
+    def post(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        for photo in self.object_list:
+
+            if photo.author == self.request.user:
+                album = photo.album or None
+                photo.delete()
+
+                # Save album revision, because we deleted photo from it.
+                album.save_revision(timezone.now())
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get_queryset(self):
+        serializer = self.get_serializer(data=json.loads(self.request.body))
+        if serializer.is_valid():
+            queryset = self.model._default_manager.filter(
+                photo_id__in=serializer.data.get('photos', []))
+            return queryset
+        else:
+            return self.model._default_manager.none()
+
 
 @api_view(['POST'])
 @permission_classes((IsAuthenticated, ))

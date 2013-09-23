@@ -390,6 +390,72 @@ class Serializers(TestCase):
             ])
         self.assertEqual(serializer.object.photos, ['test_photo_1', 'test_photo_2'])
 
+
+class PhotoTests(BaseTestCase):
+
+    def setUp(self):
+        self.client.login(username='2', password='amanda')
+
+    def tearDown(self):
+        shutil.rmtree(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, ignore_errors=True)
+
+    def upload_and_add_photo_to_album(self, album_id, client=None):
+        if not client:
+            client = self.client
+        album_url = reverse('album-detail', kwargs={'pk': album_id})
+        upload_request_response = client.post(
+            reverse('photos-upload-request'))
+        upload_request_json = json.loads(upload_request_response.content)
+
+        photo_id = upload_request_json[0]['photo_id']
+        upload_url = upload_request_json[0]['upload_url']
+
+        test_photo_path = 'photos/test_photos/death-valley-sand-dunes.jpg'
+
+        with open(test_photo_path, 'rb') as f:
+            upload_response = client.post(upload_url, {'photo': f})
+
+        photo_list = {'add_photos': [{'photo_id': photo_id}]}
+        add_response = client.post(album_url,
+                                   content_type='application/json',
+                                   data=json.dumps(photo_list))
+        return photo_id
+
+    def test_delete_photos(self):
+
+        album_url = reverse('album-detail', kwargs={'pk': 9})
+        album_before_response = self.client.get(album_url)
+
+        # Upload and add photo to the album
+        photo_id = self.upload_and_add_photo_to_album(9)
+
+        # Upload one more photo from other user
+        daniel = Client()
+        daniel.login(username="5", password="daniel")
+        daniel_photo_id = self.upload_and_add_photo_to_album(9, client=daniel)
+
+        # Test that photo was successfully added
+        album_json = json.loads(self.client.get(album_url).content)
+        all_album_photos = [x['photo_id'] for x in album_json['photos']]
+        self.assertIn(photo_id, all_album_photos)
+        self.assertIn(daniel_photo_id, all_album_photos)
+
+        # Delete photo
+        url = reverse('photos-delete')
+        data = {'photos': [
+            {'photo_id': photo_id},
+        ]}
+        response = self.client.post(url,
+                                    content_type='application/json',
+                                    data=json.dumps(data))
+
+        # Test that photo is not in album anymore
+        album_json = json.loads(self.client.get(album_url).content)
+        all_album_photos = [x['photo_id'] for x in album_json['photos']]
+        self.assertNotIn(photo_id, all_album_photos)
+        self.assertIn(daniel_photo_id, all_album_photos)
+
+
 class PhotoUpload(BaseTestCase):
     def setUp(self):
         self.client.login(username='2', password='amanda')
