@@ -94,6 +94,7 @@ class UserManager(auth.models.BaseUserManager):
 class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
     STATUS_JOINED = 'joined'
     STATUS_SMS_SENT = 'sms_sent'
+    STATUS_INVITATION_VIEWED = 'invitation_viewed'
 
     id = models.IntegerField(primary_key=True)
     nickname = models.CharField(max_length=128)
@@ -126,7 +127,15 @@ class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
 
     def get_invite_status(self):
         query = self.phonenumber_set.filter(verified=True)
-        return User.STATUS_JOINED if query.count() > 0 else User.STATUS_SMS_SENT
+        if query.count() > 0:
+            return User.STATUS_JOINED
+        else:
+            query = PhoneNumberLinkCode.objects.filter(
+                phone_number__in=self.phonenumber_set.all())
+            for link_code in query:
+                if link_code.was_visited:
+                    return User.STATUS_INVITATION_VIEWED
+            return User.STATUS_SMS_SENT
 
     def get_full_name(self):
         return self.nickname
@@ -359,6 +368,7 @@ class PhoneNumberLinkCode(models.Model):
     phone_number = models.ForeignKey(PhoneNumber, unique=True)
     inviting_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='+')
     date_created = models.DateTimeField(db_index=True)
+    was_visited = models.BooleanField(default=False)
 
     objects = PhoneNumberLinkCodeManager()
 
@@ -367,7 +377,12 @@ class PhoneNumberLinkCode(models.Model):
         return crypto.get_random_string(26, string.ascii_letters + string.digits)
 
     def __unicode__(self):
-        return self.invite_code + ': ' + unicode(self.phone_number)
+        value = self.invite_code + ': ' + unicode(self.phone_number)
+        if self.was_visited:
+            value += ' (visited)'
+        else:
+            value += ' (not visited)'
+        return value
 
     def get_invite_page(self, url_prefix=None):
         import frontend.urls

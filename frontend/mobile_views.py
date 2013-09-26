@@ -28,6 +28,9 @@ def invite_page(request, invite_code):
     else:
         app_url = None
 
+    link_code_object.was_visited = True
+    link_code_object.save(update_fields=['was_visited'])
+
     data = {
             'inviting_user' : link_code_object.inviting_user,
             'album' : album,
