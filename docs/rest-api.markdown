@@ -73,6 +73,10 @@ Upload a single photo. Returns an empty response body.
 Alternative method for uploading a single photo. Returns an empty response
 body.
 
+### POST /photos/delete/
+
+Delete photos that a user has uploaded.
+
 ### POST /albums/{aid}/
 
 Used to add photos or members to an album.
@@ -702,6 +706,40 @@ Example response:
     Vary: Accept
     Content-Type: application/json
     Allow: POST, OPTIONS
+
+## POST /photos/delete/
+
+Delete photos that a user has uploaded.
+
+Only the user that added the photos to the album can delete them.
+
+The request JSON should include an object with a "photos" field that contains
+an array of photos that should be deleted.
+
+The response will be 204 No Content.
+
+Example request:
+
+```
+POST /photos/delete/
+Authorization: Token 01ba4719c80b6fe911b091a7c05124b64eeece96
+Content-Type: application/json
+Content-Length: 281
+
+{
+    "photos": [
+        {
+            "photo_id": "5a7e5e6afd698dc0ae2221469fd25b6f9b9941ddab20c90d95f6cba9efa57905"
+        },
+        {
+            "photo_id": "906bf4bf2bdf3e80f32660786cd227596b2ffe173d4f3a233f5ab5ad672f87ae"
+        },
+        {
+            "photo_id": "19191da2a395424c0abfa9ebfbfdda53cf77eb384125e18d587c63d732baf1be"
+        }
+    ]
+}
+```
 
 ## POST /albums/{aid}/
 
