@@ -73,6 +73,11 @@ class PhotoListField(serializers.WritableField):
             result.append(p['photo_id'])
         return result
 
+
+class DeletePhotosSerializer(serializers.Serializer):
+    photos = PhotoListField(source='photo_id')
+
+
 class MemberIdentifier(object):
     def __init__(self, user_id=None, phone_number=None, default_country=None, contact_nickname=None):
         self.user_id = user_id
