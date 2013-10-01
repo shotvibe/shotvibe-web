@@ -148,3 +148,23 @@ def app_init(request):
         response['Location'] = 'shotvibe://shotvibe/start_with_auth/?country_code=' + country_code + '&auth_token=' + auth_token.key + '&user_id=' + str(user.id)
 
     return response
+
+@never_cache
+@api_view(['POST'])
+def country_lookup(request):
+    country_code = None
+    try:
+        g = GeoIP()
+        country_code = g.country_code(request.META.get('REMOTE_ADDR'))
+        del g
+    except GeoIPException:
+        pass
+
+    if country_code is None:
+        country_code = 'US'
+
+    response_data = {
+            'country_code' : country_code
+            }
+
+    return Response(response_data)
