@@ -58,7 +58,8 @@ def album(request, pk):
                 num_photos_added += 1
 
             # Upload pending photos
-            photos = [pf.get_or_process_uploaded_image_and_create_photo(album) for pf in pending_photos]
+            now = timezone.now()
+            photos = [pf.get_or_process_uploaded_image_and_create_photo(album, now) for pf in pending_photos]
 
             # TODO: If this function will be refactored to use Class Based Views
             # change sender from `request` to `self` (View instance)
