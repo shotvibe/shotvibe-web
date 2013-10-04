@@ -13,6 +13,9 @@ from django.core import mail
 COUNTRY_CODE_ISRAEL = 972
 
 def is_test_number(phone):
+    if not isinstance(phone, phonenumbers.PhoneNumber):
+        phone = phonenumbers.parse(phone)
+
     if phone.country_code == 1:
         e164 = phonenumbers.format_number(phone, phonenumbers.PhoneNumberFormat.E164)
 

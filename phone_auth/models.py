@@ -14,7 +14,7 @@ from django.utils import crypto
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
-from phone_auth.sms_send import send_sms
+from phone_auth.sms_send import is_test_number, send_sms
 
 USER_AVATAR_DATA_REGEX = re.compile(r's3:.+?:user-avatar-\d+?-\d+?\.jpg')
 
@@ -226,7 +226,10 @@ class PhoneNumberManager(models.Manager):
             user_avatar_changed.send(sender=self, user=new_user)
 
         confirmation_key = generate_key()
-        confirmation_code = '6666' # TODO Temporary!
+        if is_test_number(phone_number.phone_number):
+            confirmation_code = '6666'
+        else:
+            confirmation_code = crypto.get_random_string(4, string.digits)
 
         PhoneNumberConfirmSMSCode.objects.get_or_create(
                 phone_number = phone_number,
