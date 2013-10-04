@@ -98,6 +98,8 @@ def app_init(request):
     if country_code is None:
         country_code = 'US'
 
+    app_url_scheme = request.GET.get('app_url_scheme', 'shotvibe')
+
     response = HttpResponse(status=302)
 
     try:
@@ -109,9 +111,9 @@ def app_init(request):
         # inside the app. We still give the app the user's country_code, to
         # make it easier for him to enter his phone number.
         if app == 'android':
-            response['Location'] = 'shotvibe://shotvibe/start_unregistered/?country_code=' + country_code
+            response['Location'] = app_url_scheme + '://shotvibe/start_unregistered/?country_code=' + country_code
         elif app == 'iphone':
-            response['Location'] = 'shotvibe://shotvibe/start_unregistered/?country_code=' + country_code
+            response['Location'] = app_url_scheme + '://shotvibe/start_unregistered/?country_code=' + country_code
 
         return response
 
@@ -143,9 +145,9 @@ def app_init(request):
         request.session.delete()
 
     if app == 'android':
-        response['Location'] = 'shotvibe://shotvibe/start_with_auth/?country_code=' + country_code + '&auth_token=' + auth_token.key + '&user_id=' + str(user.id)
+        response['Location'] = app_url_scheme + '://shotvibe/start_with_auth/?country_code=' + country_code + '&auth_token=' + auth_token.key + '&user_id=' + str(user.id)
     elif app == 'iphone':
-        response['Location'] = 'shotvibe://shotvibe/start_with_auth/?country_code=' + country_code + '&auth_token=' + auth_token.key + '&user_id=' + str(user.id)
+        response['Location'] = app_url_scheme + '://shotvibe/start_with_auth/?country_code=' + country_code + '&auth_token=' + auth_token.key + '&user_id=' + str(user.id)
 
     return response
 
