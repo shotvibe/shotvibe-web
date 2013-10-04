@@ -57,3 +57,5 @@ DEFAULT_AVATAR_FILES = [
 # AWS Credentials
 AWS_ACCESS_KEY = "************"
 AWS_SECRET_ACCESS_KEY = "*******************"
+
+DISABLE_AUTOLOGIN_FOR_COUNTRY_LOOKUP_VERSION = '1'
