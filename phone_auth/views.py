@@ -152,16 +152,23 @@ def app_init(request):
 @never_cache
 @api_view(['POST'])
 def country_lookup(request):
-    country_code = None
-    try:
-        g = GeoIP()
-        country_code = g.country_code(request.META.get('REMOTE_ADDR'))
-        del g
-    except GeoIPException:
-        pass
+    version = request.GET.get('version', '0')
 
-    if country_code is None:
-        country_code = 'US'
+    if version == settings.DISABLE_AUTOLOGIN_FOR_COUNTRY_LOOKUP_VERSION:
+        country_code = None
+        try:
+            g = GeoIP()
+            country_code = g.country_code(request.META.get('REMOTE_ADDR'))
+            del g
+        except GeoIPException:
+            pass
+
+        if country_code is None:
+            country_code = 'US'
+    else:
+        COUNTRY_CODE_AUTOLOGIN = 'auto'
+
+        country_code = COUNTRY_CODE_AUTOLOGIN
 
     response_data = {
             'country_code' : country_code
