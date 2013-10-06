@@ -442,6 +442,9 @@ Each object in the `members` array contains the fields:
     -   `"sms_sent"`: An SMS invitation has been sent to the user, but he has not
         yet installed the app.
 
+    -   `"invitation_viewed"`: The user clicked the SMS and viewed the mobile
+        invite page, but he has not yet installed the app.
+
 Example response:
 
     HTTP 200 OK
@@ -552,7 +555,7 @@ Example response:
                 "url": "https://api.shotvibe.com/users/670666296/",
                 "nickname": "x",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
-                "invite_status": "sms_sent"
+                "invite_status": "invitation_viewed"
             },
             {
                 "id": 670666297,
@@ -566,7 +569,7 @@ Example response:
                 "url": "https://api.shotvibe.com/users/1791562667/",
                 "nickname": "testuser",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
-                "invite_status": "sms_sent"
+                "invite_status": "invitation_viewed"
             },
             {
                 "id": 1791562669,
