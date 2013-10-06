@@ -4,6 +4,7 @@ import json
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from django.core.urlresolvers import reverse
+from frontend.mobile_views import invite_page
 import os
 import shutil
 
@@ -13,7 +14,7 @@ from django.test import TestCase, Client
 from django.test.utils import override_settings
 from django.utils import timezone
 
-from phone_auth.models import PhoneNumber, PhoneContact, AnonymousPhoneNumber
+from phone_auth.models import PhoneNumber, PhoneContact, AnonymousPhoneNumber, PhoneNumberLinkCode
 from photos.models import PendingPhoto, AlbumMember
 from photos_api import is_phone_number_mobile
 
@@ -591,7 +592,6 @@ class MembersTests(BaseTestCase):
         album_url = reverse('album-detail', kwargs={'pk': 9})
         album_before_response = self.client.get(album_url)
         j = json.loads(album_before_response.content)
-
         for member in j['members']:
             self.assertEqual(member['invite_status'], 'sms_sent')
             user_id = member['id']
@@ -605,9 +605,50 @@ class MembersTests(BaseTestCase):
             )
 
         album_before_response = self.client.get(album_url)
-        j = json.loads(album_before_response.content)
-        for member in j['members']:
+        j2 = json.loads(album_before_response.content)
+        for member in j2['members']:
             self.assertEqual(member['invite_status'], 'joined')
+
+        # TEST invitation_viewed status
+
+        # This user not in Album #9
+        album_user_ids = [usr['id'] for usr in j2['members']]
+        inviter = User.objects.get(pk=album_user_ids[0])
+        barney = User.objects.get(pk=3)
+        self.assertNotIn(barney.id, album_user_ids)
+        self.assertEqual(barney.phonenumber_set.count(), 0)
+
+        phone_number = PhoneNumber.objects.create(
+                phone_number = "+12127184123",
+                user = barney,
+                date_created = timezone.now(),
+                verified = False)
+
+        link_code = PhoneNumberLinkCode.objects.invite_existing_phone_number(
+            inviter, phone_number)
+
+        # Add barney to the album
+        add_members = {'add_members': [
+            {'user_id': barney.id}
+        ]}
+        add_response = self.client.post(album_url,
+                                        content_type='application/json',
+                                        data=json.dumps(add_members))
+
+
+        j3 = json.loads(self.client.get(album_url).content)
+        barney_status = [m['invite_status'] for m in j3['members'] if m['id'] == barney.id][0]
+        self.assertEqual(barney_status, User.STATUS_SMS_SENT)
+
+        # View invite
+        with self.settings(ROOT_URLCONF='shotvibe_site.urls'):
+            response = self.client.get(link_code.get_invite_page())
+            self.assertEqual(response.status_code, httplib.OK)
+
+        # Verify status
+        j3 = json.loads(self.client.get(album_url).content)
+        barney_status = [m['invite_status'] for m in j3['members'] if m['id'] == barney.id][0]
+        self.assertEqual(barney_status, User.STATUS_INVITATION_VIEWED)
 
     def test_add_members(self):
         album_before_response = self.client.get('/albums/9/')
