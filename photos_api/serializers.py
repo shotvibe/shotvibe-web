@@ -143,6 +143,7 @@ class MemberIdentifier(object):
     def __repr__(self):
         return repr(self.__dict__)
 
+
 class MemberIdentifierSerializer(serializers.Serializer):
     user_id = serializers.IntegerField(required=False)
     phone_number = serializers.CharField(required=False, error_messages={
@@ -177,6 +178,7 @@ class MemberIdentifierSerializer(serializers.Serializer):
 
 
     def restore_object(self, attrs, instance=None):
+
         if 'user_id' in attrs:
             return MemberIdentifier(user_id=attrs['user_id'])
         else:
@@ -185,6 +187,10 @@ class MemberIdentifierSerializer(serializers.Serializer):
                 default_country=attrs['default_country'],
                 contact_nickname=attrs['contact_nickname']
             )
+
+
+class AlbumMembersSerializer(serializers.Serializer):
+    members = ListField(MemberIdentifierSerializer, required=False)
 
 
 class AlbumUpdate(object):

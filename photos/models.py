@@ -1,4 +1,5 @@
 from django.contrib import auth
+from django.contrib.auth import get_user_model
 from django.db.models import Max
 import os
 import random
@@ -58,30 +59,47 @@ class Album(models.Model):
 
     def add_members(self, inviter, member_identifiers, date_added=None):
 
+        result = []
+
         # Date added is current datetime by default
         if not date_added:
             date_added = timezone.now()
 
         new_users = []
 
-        # New users by user_id
-        member_ids = [mi.user_id for mi in member_identifiers if mi.user_id is not None]
-        new_users = new_users + list(auth.get_user_model().objects.filter(pk__in=member_ids))
+        for member_identifier in member_identifiers:
+            if member_identifier.user_id is None:
+                try:
+                    phone_number = PhoneNumber.objects.get(
+                        phone_number=member_identifier.phone_number)
+                    if phone_number.should_send_invite():
+                        PhoneNumberLinkCode.objects.\
+                            invite_existing_phone_number(inviter, phone_number,
+                                                         date_added)
+                    new_users.append(phone_number.user)
+                except PhoneNumber.DoesNotExist:
+                    link_code_object = PhoneNumberLinkCode.objects.\
+                        invite_new_phone_number(inviter,
+                                                member_identifier.phone_number,
+                                                member_identifier.contact_nickname,
+                                                date_added)
+                    new_users.append(link_code_object.phone_number.user)
 
-        # New users by phone_number
-        member_identifiers_with_phones = [mi for mi in member_identifiers if mi.user_id is None]
-        for member_identifier in member_identifiers_with_phones:
-            try:
-                phone_number = PhoneNumber.objects.get(phone_number=member_identifier.phone_number)
-                if phone_number.should_send_invite():
-                    PhoneNumberLinkCode.objects.invite_existing_phone_number(inviter, phone_number, date_added)
-                new_users.append(phone_number.user)
-            except PhoneNumber.DoesNotExist:
-                link_code_object = PhoneNumberLinkCode.objects.invite_new_phone_number(inviter,
-                                                                                       member_identifier.phone_number,
-                                                                                       member_identifier.contact_nickname,
-                                                                                       date_added)
-                new_users.append(link_code_object.phone_number.user)
+                # Later check for the result of the Twilio SMS send, which
+                # will tell us if sending the SMS failed due to being an invalid
+                # number. In this save success=False, error=invalid_phone_number
+                result.append({"success": True})
+
+            else:
+                try:
+                    new_users.append(get_user_model().objects.get(
+                        pk=member_identifier.user_id))
+                    result.append({"success": True})
+                except get_user_model().DoesNotExist, err:
+                    result.append({"success": False, "error": "invalid_user_id"})
+
+
+
 
         # Create memberships
         for new_user in new_users:
@@ -95,6 +113,8 @@ class Album(models.Model):
                                     by_user=inviter, to_album=self)
 
         self.save_revision(date_added)
+
+        return result
 
     def __unicode__(self):
         return self.name

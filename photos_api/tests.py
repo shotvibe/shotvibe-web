@@ -719,7 +719,8 @@ class MembersTests(BaseTestCase):
         self.assertEqual(barney_status, User.STATUS_INVITATION_VIEWED)
 
     def test_add_members(self):
-        album_before_response = self.client.get('/albums/9/')
+        album_details_url = reverse('album-detail', kwargs={'pk': 9})
+        album_before_response = self.client.get(album_details_url)
         members_before = json.loads(album_before_response.content)['members']
         etag = album_before_response['etag']
 
@@ -729,10 +730,10 @@ class MembersTests(BaseTestCase):
             { 'user_id': 12 }
             ] }
 
-        add_response = self.client.post('/albums/9/', content_type='application/json', data=json.dumps(add_members))
+        add_response = self.client.post(album_details_url, content_type='application/json', data=json.dumps(add_members))
         self.assertEqual(add_response.status_code, 200)
 
-        album_after_response = self.client.get('/albums/9/', HTTP_IF_NONE_MATCH=etag)
+        album_after_response = self.client.get(album_details_url, HTTP_IF_NONE_MATCH=etag)
         self.assertEqual(album_after_response.status_code, 200)
 
         members_after = json.loads(album_after_response.content)['members']
@@ -740,6 +741,44 @@ class MembersTests(BaseTestCase):
         members_ids_before = [u['id'] for u in members_before]
         members_ids_after = [u['id'] for u in members_after]
         self.assertEqual(set(members_ids_before + [3, 4, 12]), set(members_ids_after))
+
+
+        # Add using separate endpoint
+        users_not_in_album = User.objects.exclude(id__in=members_ids_after)[:3]
+        data = {'members': []}
+        for user in users_not_in_album:
+            data['members'].append({'user_id': user.id})
+        album_members_url = reverse('album-members', kwargs={'pk': 9})
+        response = self.client.post(album_members_url,
+                                    data=json.dumps(data),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, httplib.OK)
+        response_array = json.loads(response.content)
+        for item in response_array:
+            self.assertTrue("success" in item)
+            self.assertEqual(item.get('success'), True)
+
+        # Verify that users were added
+        album_after_response = self.client.get(album_details_url,
+                                               HTTP_IF_NONE_MATCH=etag)
+        members_after = json.loads(album_after_response.content)['members']
+        u1 = [user.id for user in users_not_in_album]
+        u2 = [user['id'] for user in members_after]
+        self.assertTrue(all([_u1 in u2 for _u1 in u1]))
+
+
+        # Add member with invalid ID
+        data = {'members': [{'user_id': 23498273984}]}
+        response = self.client.post(album_members_url,
+                                    data=json.dumps(data),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, httplib.OK)
+        response_array = json.loads(response.content)
+        for item in response_array:
+            self.assertTrue("success" in item)
+            self.assertTrue("error" in item)
+            self.assertEqual(item.get('success'), False)
+            self.assertEqual(item.get('error'), 'invalid_user_id')
 
     def test_add_new_phone(self):
         album_before_response = self.client.get('/albums/9/')
