@@ -34,7 +34,7 @@ def send_push_on_photo_removed_from_album(sender, **kwargs):
     users = album.get_member_users()
     device_push.broadcast_album_list_sync([user.id for user in users])
 
-signals.photos_removed_from_album.connect()
+signals.photos_removed_from_album.connect(send_push_on_photo_removed_from_album)
 
 def send_push_on_album_created(sender, **kwargs):
     album = kwargs.get('album')
