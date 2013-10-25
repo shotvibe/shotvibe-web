@@ -21,8 +21,20 @@ def send_push_on_photos_added_to_album(sender, **kwargs):
         num_photos=len(photos),
         user_ids=[membership.user.id for membership in membership_query])
 
+    device_push.broadcast_album_list_sync(user.id)
+
 signals.photos_added_to_album.connect(send_push_on_photos_added_to_album)
 
+
+def send_push_on_photo_removed_from_album(sender, **kwargs):
+    photos = kwargs.get('photos')
+    user = kwargs.get('by_user')
+    album = kwargs.get('from_album')
+
+    users = album.get_member_users()
+    device_push.broadcast_album_list_sync([user.id for user in users])
+
+signals.photos_removed_from_album.connect()
 
 def send_push_on_album_created(sender, **kwargs):
     album = kwargs.get('album')
