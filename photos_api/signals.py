@@ -10,4 +10,3 @@ members_added_to_album = Signal(providing_args=['member_users', 'by_user',
                                                 'to_album'])
 
 member_leave_album = Signal(providing_args=['user', 'album'])
-
