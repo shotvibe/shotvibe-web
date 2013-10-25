@@ -27,10 +27,14 @@ signals.photos_added_to_album.connect(send_push_on_photos_added_to_album)
 def send_push_on_album_created(sender, **kwargs):
     album = kwargs.get('album')
     # Send push notifications
-    device_push.broadcast_members_added_to_album(album.id,
-                                                 album.name,
-                                                 album.creator.nickname,
-                                                 [album.creator.id])
+    # ====================================================
+    # https://github.com/shotvibe/shotvibe-web/issues/70
+    # Do not send push notification to user himself.
+    # --------
+    # device_push.broadcast_members_added_to_album(album.id,
+    #                                              album.name,
+    #                                              album.creator.nickname,
+    #                                              [album.creator.id])
     device_push.broadcast_album_list_sync([album.creator.id])
 
 signals.album_created.connect(send_push_on_album_created)
