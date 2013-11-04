@@ -93,7 +93,7 @@ image_sizes = {
         'r_fhd'  : BoxFitWithRotationOnlyShrink(1920, 1080),
         'r_qxga' : BoxFitWithRotationOnlyShrink(2048, 1536),
         'r_wqxga': BoxFitWithRotationOnlyShrink(2560, 1600),
-        'thumb75': BoxFitExpanded(75, 75),
+        'thumb75': BoxFitExpanded(192, 192), # Name should be changed, and apps should be updated with the new name
         'iphone3': BoxFitWithRotationOnlyShrink(480, 320), # TODO Delete: Deprecated by r_hvgq
         'iphone4': BoxFitWithRotationOnlyShrink(960, 640), # TODO Delete: Deprecated by r_dvga
         'iphone5': BoxFitWithRotationOnlyShrink(1136, 640), # TODO Delete: Deprecated by r_dvgax
