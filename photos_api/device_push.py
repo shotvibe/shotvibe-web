@@ -142,21 +142,6 @@ def broadcast_photos_added_to_album(album_id, author_id, album_name, author_name
             }
     send_message_or_log_errors(rq)
 
-    # Send broadcast to the author, so that all of his devices will sync
-    rq = { 'user_ids' : [str(author_id)],
-            'gcm' : {
-                'data' : {
-                    'type' : 'album_sync',
-                    'album_id' : str(album_id)
-                    }
-                },
-            'apns' : {
-                'aps' : {},
-                'type': 'album_sync',
-                'album_id' : album_id
-                }
-            }
-    send_message_or_log_errors(rq)
 
 def broadcast_members_added_to_album(album_id, album_name, adder_name, user_ids):
     rq = {
@@ -198,6 +183,28 @@ def broadcast_album_list_sync(user_ids):
             'apns': {
                 'aps': {},
                 'type': 'album_list_sync'
+                }
+            }
+    send_message_or_log_errors(rq)
+
+def broadcast_album_sync(user_ids, album_id):
+    _user_ids = []
+    if type(user_ids) in [tuple, list]:
+        _user_ids = [str(id) for id in user_ids]
+    else:
+        _user_ids = [str(user_ids)]
+    # Send broadcast to the author, so that all of his devices will sync
+    rq = { 'user_ids' : _user_ids,
+            'gcm' : {
+                'data' : {
+                    'type' : 'album_sync',
+                    'album_id' : str(album_id)
+                    }
+                },
+            'apns' : {
+                'aps' : {},
+                'type': 'album_sync',
+                'album_id' : album_id
                 }
             }
     send_message_or_log_errors(rq)
