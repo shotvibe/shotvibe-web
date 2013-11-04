@@ -83,7 +83,7 @@ class UserAdmin(auth.admin.UserAdmin):
 
     fieldsets = (
         (None, {'fields': ('password',)}),
-        ('Personal info', {'fields': ('nickname', 'primary_email')}),
+        ('Personal info', {'fields': ('nickname', 'avatar_full', 'primary_email')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser',
                                        'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
@@ -96,19 +96,26 @@ class UserAdmin(auth.admin.UserAdmin):
     )
     form = UserChangeForm
     add_form = UserCreationForm
-    list_display = ('id', 'nickname', 'is_registered', 'primary_email', 'first_phone_number', 'is_staff')
+    list_display = ('id', 'avatar', 'nickname', 'is_registered', 'primary_email', 'first_phone_number', 'is_staff')
     list_display_links = list_display
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'is_registered', 'groups')
     search_fields = ('nickname', 'primary_email',)
     ordering = ('id',)
     filter_horizontal = ('groups', 'user_permissions',)
 
-    readonly_fields = ('primary_email',)
+    readonly_fields = ('avatar_full', 'primary_email',)
 
     inlines = [UserEmailInline, PhoneNumberInline]
 
     def first_phone_number(self, instance):
         return instance.phonenumber_set.all()[:1].get()
+
+    def avatar(self, instance):
+        return format_html(u'<img src="{0}" width="24" height="24">', instance.get_avatar_url(), instance.get_avatar_url())
+
+    def avatar_full(self, instance):
+        return format_html(u'<img src="{0}">', instance.get_avatar_url(), instance.get_avatar_url())
+
 
 #admin.site.unregister(auth.models.Group)
 
