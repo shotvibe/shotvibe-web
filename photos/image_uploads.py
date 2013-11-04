@@ -222,7 +222,10 @@ def process_uploaded_image(bucket, photo_id):
 
         saved_image = get_matching_saved_image(new_width, new_height)
         if saved_image:
-            os.symlink(saved_image, os.path.join(bucket_directory, filename))
+            symlink_name = os.path.join(bucket_directory, filename)
+            if os.path.isfile(symlink_name):
+                os.remove(symlink_name)
+            os.symlink(saved_image, symlink_name)
             continue
 
         mipmap = get_best_mipmap(mipmaps, new_width, new_height)
