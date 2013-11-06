@@ -420,8 +420,13 @@ class QueryPhoneNumbers(GenericAPIView):
                 contact_nickname=nickname
             )
 
+        if phone_contact.user:
+            avatar_url = phone_contact.user.get_avatar_url()
+        else:
+            avatar_url = apn.get_avatar_url()
+
         data['phone_type'] = 'mobile' if apn.is_mobile else 'landline'
-        data['avatar_url'] = apn.get_avatar_url()
+        data['avatar_url'] = avatar_url
         data['user_id'] = phone_contact.user_id
         data['phone_number'] = apn.phone_number
         return data
