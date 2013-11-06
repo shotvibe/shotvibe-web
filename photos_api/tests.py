@@ -1,6 +1,7 @@
 import filecmp
 import httplib
 import json
+import phonenumbers
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from django.core.urlresolvers import reverse
@@ -836,9 +837,9 @@ class TestPhoneNumberMobile(TestCase):
     def test_1(self):
         # "97254", "97252", "97250", "97258" These are prefixes for mobile
         # numbers in Israel
-        self.assertTrue(is_phone_number_mobile("+972541231212", 'IL'))
-        self.assertTrue(is_phone_number_mobile("+972521231212", 'IL'))
-        self.assertTrue(is_phone_number_mobile("+972501231212", 'IL'))
-        self.assertTrue(is_phone_number_mobile("+972581231212", 'IL'))
-        self.assertFalse(is_phone_number_mobile("+972231231212", 'IL'))
-        self.assertTrue(is_phone_number_mobile("+12127184000", 'US'))
+        self.assertTrue(is_phone_number_mobile(phonenumbers.parse("+972541231212")))
+        self.assertTrue(is_phone_number_mobile(phonenumbers.parse("+972521231212")))
+        self.assertTrue(is_phone_number_mobile(phonenumbers.parse("+972501231212")))
+        self.assertTrue(is_phone_number_mobile(phonenumbers.parse("+972581231212")))
+        self.assertFalse(is_phone_number_mobile(phonenumbers.parse("+97231231212")))
+        self.assertTrue(is_phone_number_mobile(phonenumbers.parse("+12127184000")))
