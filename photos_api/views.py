@@ -395,8 +395,7 @@ class QueryPhoneNumbers(GenericAPIView):
         try:
             apn = AnonymousPhoneNumber.objects.get(phone_number=phone_number_str)
         except AnonymousPhoneNumber.DoesNotExist:
-            is_mobile = is_phone_number_mobile(phone_number_str,
-                                                     country_code)
+            is_mobile = is_phone_number_mobile(number)
             apn = AnonymousPhoneNumber.objects.create(
                 phone_number=phone_number_str,
                 date_created=timezone.now(),
