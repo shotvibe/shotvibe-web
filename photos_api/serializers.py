@@ -154,8 +154,8 @@ class AlbumAdd(object):
 
 class AlbumAddSerializer(serializers.Serializer):
     album_name = serializers.CharField()
-    members = ListField(MemberIdentifierSerializer, blank=True)
-    photos = PhotoListField(blank=True)
+    members = ListField(MemberIdentifierSerializer, required=False)
+    photos = PhotoListField(required=False)
 
     def restore_object(self, attrs, instance=None):
         return AlbumAdd(album_name=attrs['album_name'], members=attrs['members'], photos=attrs['photos'])

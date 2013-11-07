@@ -6,7 +6,7 @@ from rest_framework.permissions import BasePermission
 class IsSameUserOrStaff(BasePermission):
     """Authorized user has the same pk as `pk` view keyword argument
     or is staff"""
-    def has_permission(self, request, view, obj=None):
+    def has_permission(self, request, view):
         if request.user.is_staff:
             return True
         user_id = int(view.kwargs['pk'])
@@ -16,7 +16,7 @@ class IsSameUserOrStaff(BasePermission):
 class IsUserInAlbum(BasePermission):
     """Authenticated user is member of the album specified by pk view
      keyword argument or is staff"""
-    def has_permission(self, request, view, obj=None):
+    def has_permission(self, request, view):
         if request.user.is_staff:
             return True
         album_id = int(view.kwargs['pk'])
