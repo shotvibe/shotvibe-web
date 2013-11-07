@@ -130,7 +130,7 @@ class AlbumMember(models.Model):
         unique_together = ('user', 'album')
 
     def __unicode__(self):
-        return "Member {0} of album {1} (Membership #{2})".format(self.user, self.album, self.pk)
+        return u"Member {0} of album {1} (Membership #{2})".format(self.user, self.album, self.pk)
 
 
 all_photo_buckets = (
