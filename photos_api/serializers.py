@@ -178,6 +178,13 @@ class AlbumAddSerializer(serializers.Serializer):
         return AlbumAdd(album_name=attrs['album_name'], members=attrs['members'], photos=attrs['photos'])
 
 
+class AlbumViewSerializer(serializers.Serializer):
+    timestamp = serializers.DateTimeField()
+
+    def restore_object(self, attrs, instance=None):
+        return attrs['timestamp']
+
+
 class QueryPhonesRequestItemSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length=40)
     contact_nickname = serializers.CharField(max_length=128)

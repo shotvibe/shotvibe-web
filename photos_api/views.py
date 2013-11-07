@@ -39,7 +39,7 @@ from photos.models import Album, PendingPhoto, AlbumMember, Photo
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
     UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer, \
     QueryPhonesRequestSerializer, DeletePhotosSerializer, \
-    AlbumMemberSerializer
+    AlbumMemberSerializer, AlbumViewSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
 
@@ -138,6 +138,29 @@ class LeaveAlbum(generics.DestroyAPIView):
             # This should never happen since we already checked if this records exists by checking permissions
             raise Http404(_(u"Album not found"))
         return obj
+
+
+class ViewAlbum(GenericAPIView):
+    permission_classes = (IsAuthenticated, IsUserInAlbum)
+    serializer_class = AlbumViewSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = AlbumViewSerializer(data=request.DATA)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        timestamp = serializer.object
+        if timestamp.tzinfo is None:
+            return Response(u"Missing timezone", status=status.HTTP_400_BAD_REQUEST)
+
+        album_pk = self.kwargs.get(self.pk_url_kwarg, None)
+        if album_pk is None:
+            raise AttributeError("Missing Album pk")
+
+        obj = AlbumMember.objects.get(user=self.request.user, album__pk=album_pk)
+        obj.update_last_access(timestamp)
+
+        return Response(obj.last_access)
 
 
 class UserList(generics.ListCreateAPIView):

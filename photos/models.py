@@ -149,6 +149,11 @@ class AlbumMember(models.Model):
     def get_num_new_photos(self):
         return self.album.get_num_new_photos(self.last_access)
 
+    def update_last_access(self, timestamp):
+        if self.last_access is None or self.last_access < timestamp:
+            self.last_access = timestamp
+            self.save(update_fields=['last_access'])
+
 
 all_photo_buckets = (
         'local:photos01',
