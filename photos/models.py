@@ -125,6 +125,8 @@ class AlbumMember(models.Model):
     added_by_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="created_album_memberships")
     datetime_added = models.DateTimeField()
 
+    last_access = models.DateTimeField(null=True, blank=True)
+
     class Meta:
         db_table = "photos_album_members"
         unique_together = ('user', 'album')
