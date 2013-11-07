@@ -38,9 +38,8 @@ class AlbumManager(models.Manager):
         return album
 
     def get_user_albums(self, user_id):
-        album_memberships = AlbumMember.objects.filter(user__pk=user_id).select_related("album").only("album__id")
-        album_ids = [am.album.pk for am in album_memberships]
-        return Album.objects.filter(pk__in=album_ids)
+        return Album.objects.filter(memberships__user__id=user_id)
+
 
 class Album(models.Model):
     date_created = models.DateTimeField()
@@ -117,6 +116,17 @@ class Album(models.Model):
     def get_member_users(self):
         return [membership.user for membership in AlbumMember.objects.filter(album=self).only('user')]
 
+    def get_num_new_photos(self, since_date):
+        if since_date:
+            return self.photo_set.filter(date_created__gt=since_date).count()
+        else:
+            return self.photo_set.count()
+
+
+class AlbumMemberManager(models.Manager):
+    def get_user_memberships(self, user_id):
+        return AlbumMember.objects.filter(user__id=user_id).select_related('album')
+
 
 class AlbumMember(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="album_membership")
@@ -127,12 +137,17 @@ class AlbumMember(models.Model):
 
     last_access = models.DateTimeField(null=True, blank=True)
 
+    objects = AlbumMemberManager()
+
     class Meta:
         db_table = "photos_album_members"
         unique_together = ('user', 'album')
 
     def __unicode__(self):
         return u"Member {0} of album {1} (Membership #{2})".format(self.user, self.album, self.pk)
+
+    def get_num_new_photos(self):
+        return self.album.get_num_new_photos(self.last_access)
 
 
 all_photo_buckets = (

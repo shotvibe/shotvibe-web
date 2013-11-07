@@ -3,7 +3,7 @@ from django.contrib import auth
 import phonenumbers
 from rest_framework import serializers
 
-from photos.models import Album, Photo
+from photos.models import Album, AlbumMember, Photo
 
 class ListField(serializers.WritableField):
     """
@@ -65,6 +65,23 @@ class AlbumNameSerializer(serializers.HyperlinkedModelSerializer):
     latest_photos = PhotoSerializer(source='get_latest_photos')
 
     id.read_only = True
+
+
+class AlbumMemberSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = AlbumMember
+        fields = ('id', 'url', 'name', 'last_updated', 'etag', 'latest_photos', 'num_new_photos', 'last_access')
+
+    id = serializers.IntegerField(source='album.id')
+    url = serializers.HyperlinkedRelatedField(view_name='album-detail', source='album')
+    name = serializers.Field(source='album.name')
+    last_updated = serializers.Field(source='album.last_updated')
+    etag = serializers.IntegerField(source='album.get_etag')
+    latest_photos = PhotoSerializer(source='album.get_latest_photos')
+    num_new_photos = serializers.IntegerField(source='get_num_new_photos')
+
+    id.read_only = True
+
 
 class PhotoListField(serializers.WritableField):
     def from_native(self, data):

@@ -38,7 +38,8 @@ from photos.image_uploads import handle_file_upload
 from photos.models import Album, PendingPhoto, AlbumMember, Photo
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
     UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer, \
-    QueryPhonesRequestSerializer, DeletePhotosSerializer
+    QueryPhonesRequestSerializer, DeletePhotosSerializer, \
+    AlbumMemberSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
 
@@ -259,23 +260,32 @@ class Albums(generics.ListAPIView):
     If there have been no updates to the resource, the server will return an
     empty response body, and a status code of: 304 Not Modified
     """
-    serializer_class = AlbumNameSerializer
     permission_classes = (IsAuthenticated,)
 
     def initial(self, request, *args, **kwargs):
         if request.user.is_staff:
+            self.is_album = True
             self.albums = Album.objects.all()
         elif request.user.is_authenticated():
-            self.albums = Album.objects.get_user_albums(self.request.user.id)
+            self.is_album = False
+            self.albums = AlbumMember.objects.get_user_memberships(self.request.user.id)
 
         return super(Albums, self).initial(request, *args, **kwargs)
 
     def last_modified(self, request):
-        last_modified = None
-        for album in self.albums:
-            if not last_modified or album.last_updated > last_modified:
-                last_modified = album.last_updated
-        return last_modified
+        if not self.albums:
+            return None
+
+        if self.is_album:
+            return max([a.last_updated for a in self.albums])
+        else:
+            return max([m.album.last_updated for m in self.albums])
+
+    def get_serializer_class(self):
+        if self.is_album:
+            return AlbumNameSerializer
+        else:
+            return AlbumMemberSerializer
 
     def get_queryset(self):
         return self.albums
