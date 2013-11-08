@@ -319,6 +319,59 @@ class NotModifiedTest(BaseTestCase):
         third_response = self.client.get('/albums/', HTTP_IF_MODIFIED_SINCE=date)
         self.assertEqual(third_response.status_code, 200)
 
+    def test_last_access(self):
+        # Get all albums
+        first_response = self.client.get('/albums/')
+        self.assertEqual(first_response.status_code, 200)
+
+        # Should have 3 new photos
+        album = self.get_album(first_response, 8)
+        self.assertEqual(album['num_new_photos'], 3)
+
+        # mark album 8 as seen
+        data = json.dumps({"timestamp": timezone.now().isoformat()})
+        view_response = self.client.post('/albums/8/view/', content_type='application/json', data=data)
+        self.assertEqual(view_response.status_code, 200)
+
+        # Get albums list again
+        second_response = self.client.get('/albums/')
+        self.assertEqual(first_response.status_code, 200)
+
+        # No new photos
+        album = self.get_album(second_response, 8)
+        self.assertEqual(album['num_new_photos'], 0)
+
+        # Add a new photo to the album
+        self.add_new_photo()
+
+        third_response = self.client.get('/albums/')
+        self.assertEqual(third_response.status_code, 200)
+
+        # One new photo
+        album = self.get_album(third_response, 8)
+        self.assertEqual(album['num_new_photos'], 1)
+
+    def add_new_photo(self):
+        upload_request_response = self.client.post('/photos/upload_request/')
+        upload_request_json = json.loads(upload_request_response.content)
+
+        photo_id = upload_request_json[0]['photo_id']
+        upload_url = upload_request_json[0]['upload_url']
+
+        test_photo_path = 'photos/test_photos/death-valley-sand-dunes.jpg'
+
+        with open(test_photo_path, 'rb') as f:
+            self.client.post(upload_url, { 'photo': f })
+
+        photo_list = { 'add_photos': [ { 'photo_id': photo_id } ] }
+        self.client.post('/albums/8/', content_type='application/json', data=json.dumps(photo_list))
+
+    def get_album(self, response, aid):
+        for album in json.loads(response.content):
+            if album['id'] == aid:
+                return album
+
+
 class Serializers(TestCase):
     def test_album_update(self):
         test_data = { 'add_photos': [
