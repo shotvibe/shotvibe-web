@@ -156,13 +156,12 @@ class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
         Save self if `save` is True.
         """
         try:
-            contact = PhoneContact.objects.\
-                only('anonymous_phone_number__avatar_file').\
-                get(anonymous_phone_number__phone_number=phone_number_str)
-        except PhoneContact.DoesNotExist:
+            apn = AnonymousPhoneNumber.objects.only('avatar_file').\
+                get(phone_number=phone_number_str)
+        except AnonymousPhoneNumber.DoesNotExist:
             pass
         else:
-            self.avatar_file = contact.anonymous_phone_number.avatar_file
+            self.avatar_file = apn.avatar_file
             if save:
                 self.save()
 
