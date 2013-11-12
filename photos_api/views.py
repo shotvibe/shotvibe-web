@@ -19,7 +19,7 @@ from photos_api.permissions import IsUserInAlbum, UserDetailsPagePermission, \
     IsSameUserOrStaff
 from photos_api.parsers import PhotoUploadParser
 from photos_api import device_push, is_phone_number_mobile
-from phone_auth.models import AnonymousPhoneNumber, random_default_avatar_file_data, PhoneContact, PhoneNumber
+from phone_auth.models import AnonymousPhoneNumber, random_default_avatar_file_data, User, PhoneContact, PhoneNumber
 from photos_api.signals import photos_added_to_album, member_leave_album
 
 from rest_framework import generics, serializers, mixins
@@ -420,6 +420,15 @@ class QueryPhoneNumbers(GenericAPIView):
                 contact_nickname=nickname
             )
 
+        user = phone_contact.user
+        if user:
+            if user.get_invite_status() == User.STATUS_JOINED:
+                user_id = user.id
+            else:
+                user_id = None
+        else:
+            user_id = None
+
         if phone_contact.user:
             avatar_url = phone_contact.user.get_avatar_url()
         else:
@@ -427,7 +436,7 @@ class QueryPhoneNumbers(GenericAPIView):
 
         data['phone_type'] = 'mobile' if apn.is_mobile else 'landline'
         data['avatar_url'] = avatar_url
-        data['user_id'] = phone_contact.user_id
+        data['user_id'] = user_id
         data['phone_number'] = apn.phone_number
         return data
 
