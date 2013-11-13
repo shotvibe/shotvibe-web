@@ -39,7 +39,7 @@ from photos.models import Album, PendingPhoto, AlbumMember, Photo
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
     UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer, \
     QueryPhonesRequestSerializer, DeletePhotosSerializer, \
-    AlbumMemberSerializer, AlbumViewSerializer
+    AlbumMemberNameSerializer, AlbumMemberSerializer, AlbumViewSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
 
@@ -83,7 +83,28 @@ class AlbumDetail(generics.RetrieveAPIView):
 
     def initial(self, request, pk, *args, **kwargs):
         self.album = get_object_or_404(Album, pk=pk)
+
+        if request.user.is_staff:
+            self.is_staff = True
+        elif request.user.is_authenticated():
+            self.is_staff = False
+
         return super(AlbumDetail, self).initial(request, pk, *args, **kwargs)
+
+    def get_object(self):
+        if self.is_staff:
+            return self.album
+        else:
+            return AlbumMember.objects\
+                .get_user_memberships(self.request.user.id)\
+                .filter(album=self.album)\
+                .get()
+
+    def get_serializer_class(self):
+        if self.is_staff:
+            return AlbumSerializer
+        else:
+            return AlbumMemberSerializer
 
     def get_etag(self, request, pk):
         return self.album.get_etag()
@@ -160,7 +181,7 @@ class ViewAlbum(GenericAPIView):
         obj = AlbumMember.objects.get(user=self.request.user, album__pk=album_pk)
         obj.update_last_access(timestamp)
 
-        return Response(obj.last_access)
+        return Response()
 
 
 class UserList(generics.ListCreateAPIView):
@@ -287,10 +308,10 @@ class Albums(generics.ListAPIView):
 
     def initial(self, request, *args, **kwargs):
         if request.user.is_staff:
-            self.is_album = True
+            self.is_staff = True
             self.albums = Album.objects.all()
         elif request.user.is_authenticated():
-            self.is_album = False
+            self.is_staff = False
             self.albums = AlbumMember.objects.get_user_memberships(self.request.user.id)
 
         return super(Albums, self).initial(request, *args, **kwargs)
@@ -299,16 +320,16 @@ class Albums(generics.ListAPIView):
         if not self.albums:
             return None
 
-        if self.is_album:
+        if self.is_staff:
             return max([a.last_updated for a in self.albums])
         else:
             return max([m.album.last_updated for m in self.albums])
 
     def get_serializer_class(self):
-        if self.is_album:
+        if self.is_staff:
             return AlbumNameSerializer
         else:
-            return AlbumMemberSerializer
+            return AlbumMemberNameSerializer
 
     def get_queryset(self):
         return self.albums

@@ -53,6 +53,23 @@ class AlbumSerializer(serializers.ModelSerializer):
     def get_name_field(self, model_field):
         return None
 
+
+class AlbumMemberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AlbumMember
+        fields = ('id', 'name', 'date_created', 'last_updated', 'members', 'photos', 'num_new_photos', 'last_access')
+
+    id = serializers.IntegerField(source='album.id')
+    name = serializers.Field(source='album.name')
+    date_created = serializers.Field(source='album.date_created')
+    last_updated = serializers.Field(source='album.last_updated')
+    photos = PhotoSerializer(source='album.get_photos')
+    members = UserSerializer(source='album.get_member_users')
+    num_new_photos = serializers.IntegerField(source='get_num_new_photos')
+
+    id.read_only = True
+
+
 class AlbumNameSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Album
@@ -67,7 +84,7 @@ class AlbumNameSerializer(serializers.HyperlinkedModelSerializer):
     id.read_only = True
 
 
-class AlbumMemberSerializer(serializers.HyperlinkedModelSerializer):
+class AlbumMemberNameSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = AlbumMember
         fields = ('id', 'url', 'name', 'last_updated', 'etag', 'latest_photos', 'num_new_photos', 'last_access')

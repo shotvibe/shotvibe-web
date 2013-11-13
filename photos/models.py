@@ -2,6 +2,7 @@ from django.contrib import auth
 from django.db.models import Max
 import os
 import random
+import datetime
 
 from django.conf import settings
 from django.db import models
@@ -118,6 +119,10 @@ class Album(models.Model):
 
     def get_num_new_photos(self, since_date):
         if since_date:
+            # due to serializer issues, since_date is accurate only up to a millisecond
+            # while the database is accurate up to a microsecond
+            correction = 999 - (since_date.microsecond % 1000)
+            since_date = since_date + datetime.timedelta(microseconds=correction)
             return self.photo_set.filter(date_created__gt=since_date).count()
         else:
             return self.photo_set.count()
