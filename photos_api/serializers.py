@@ -3,7 +3,7 @@ from django.contrib import auth
 import phonenumbers
 from rest_framework import serializers
 
-from photos.models import Album, Photo
+from photos.models import Album, AlbumMember, Photo
 
 class ListField(serializers.WritableField):
     """
@@ -53,6 +53,23 @@ class AlbumSerializer(serializers.ModelSerializer):
     def get_name_field(self, model_field):
         return None
 
+
+class AlbumMemberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AlbumMember
+        fields = ('id', 'name', 'date_created', 'last_updated', 'members', 'photos', 'num_new_photos', 'last_access')
+
+    id = serializers.IntegerField(source='album.id')
+    name = serializers.Field(source='album.name')
+    date_created = serializers.Field(source='album.date_created')
+    last_updated = serializers.Field(source='album.last_updated')
+    photos = PhotoSerializer(source='album.get_photos')
+    members = UserSerializer(source='album.get_member_users')
+    num_new_photos = serializers.IntegerField(source='get_num_new_photos')
+
+    id.read_only = True
+
+
 class AlbumNameSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Album
@@ -65,6 +82,23 @@ class AlbumNameSerializer(serializers.HyperlinkedModelSerializer):
     latest_photos = PhotoSerializer(source='get_latest_photos')
 
     id.read_only = True
+
+
+class AlbumMemberNameSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = AlbumMember
+        fields = ('id', 'url', 'name', 'last_updated', 'etag', 'latest_photos', 'num_new_photos', 'last_access')
+
+    id = serializers.IntegerField(source='album.id')
+    url = serializers.HyperlinkedRelatedField(view_name='album-detail', source='album')
+    name = serializers.Field(source='album.name')
+    last_updated = serializers.Field(source='album.last_updated')
+    etag = serializers.IntegerField(source='album.get_etag')
+    latest_photos = PhotoSerializer(source='album.get_latest_photos')
+    num_new_photos = serializers.IntegerField(source='get_num_new_photos')
+
+    id.read_only = True
+
 
 class PhotoListField(serializers.WritableField):
     def from_native(self, data):
@@ -154,11 +188,18 @@ class AlbumAdd(object):
 
 class AlbumAddSerializer(serializers.Serializer):
     album_name = serializers.CharField()
-    members = ListField(MemberIdentifierSerializer, blank=True)
-    photos = PhotoListField(blank=True)
+    members = ListField(MemberIdentifierSerializer, required=False)
+    photos = PhotoListField(required=False)
 
     def restore_object(self, attrs, instance=None):
         return AlbumAdd(album_name=attrs['album_name'], members=attrs['members'], photos=attrs['photos'])
+
+
+class AlbumViewSerializer(serializers.Serializer):
+    timestamp = serializers.DateTimeField()
+
+    def restore_object(self, attrs, instance=None):
+        return attrs['timestamp']
 
 
 class QueryPhonesRequestItemSerializer(serializers.Serializer):

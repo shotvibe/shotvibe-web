@@ -38,7 +38,8 @@ from photos.image_uploads import handle_file_upload
 from photos.models import Album, PendingPhoto, AlbumMember, Photo
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
     UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer, \
-    QueryPhonesRequestSerializer, DeletePhotosSerializer
+    QueryPhonesRequestSerializer, DeletePhotosSerializer, \
+    AlbumMemberNameSerializer, AlbumMemberSerializer, AlbumViewSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
 
@@ -82,7 +83,28 @@ class AlbumDetail(generics.RetrieveAPIView):
 
     def initial(self, request, pk, *args, **kwargs):
         self.album = get_object_or_404(Album, pk=pk)
+
+        if request.user.is_staff:
+            self.is_staff = True
+        elif request.user.is_authenticated():
+            self.is_staff = False
+
         return super(AlbumDetail, self).initial(request, pk, *args, **kwargs)
+
+    def get_object(self):
+        if self.is_staff:
+            return self.album
+        else:
+            return AlbumMember.objects\
+                .get_user_memberships(self.request.user.id)\
+                .filter(album=self.album)\
+                .get()
+
+    def get_serializer_class(self):
+        if self.is_staff:
+            return AlbumSerializer
+        else:
+            return AlbumMemberSerializer
 
     def get_etag(self, request, pk):
         return self.album.get_etag()
@@ -106,7 +128,7 @@ class AlbumDetail(generics.RetrieveAPIView):
 
         self.album.add_members(request.user, member_identifiers=serializer.object.add_members)
 
-        responseSerializer = AlbumSerializer(self.album)
+        responseSerializer = AlbumSerializer(self.album, context={'request': request})
         return Response(responseSerializer.data)
 
 class LeaveAlbum(generics.DestroyAPIView):
@@ -137,6 +159,29 @@ class LeaveAlbum(generics.DestroyAPIView):
             # This should never happen since we already checked if this records exists by checking permissions
             raise Http404(_(u"Album not found"))
         return obj
+
+
+class ViewAlbum(GenericAPIView):
+    permission_classes = (IsAuthenticated, IsUserInAlbum)
+    serializer_class = AlbumViewSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = AlbumViewSerializer(data=request.DATA)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        timestamp = serializer.object
+        if timestamp.tzinfo is None:
+            return Response(u"Missing timezone", status=status.HTTP_400_BAD_REQUEST)
+
+        album_pk = self.kwargs.get(self.pk_url_kwarg, None)
+        if album_pk is None:
+            raise AttributeError("Missing Album pk")
+
+        obj = AlbumMember.objects.get(user=self.request.user, album__pk=album_pk)
+        obj.update_last_access(timestamp)
+
+        return Response()
 
 
 class UserList(generics.ListCreateAPIView):
@@ -259,23 +304,32 @@ class Albums(generics.ListAPIView):
     If there have been no updates to the resource, the server will return an
     empty response body, and a status code of: 304 Not Modified
     """
-    serializer_class = AlbumNameSerializer
     permission_classes = (IsAuthenticated,)
 
     def initial(self, request, *args, **kwargs):
         if request.user.is_staff:
+            self.is_staff = True
             self.albums = Album.objects.all()
         elif request.user.is_authenticated():
-            self.albums = Album.objects.get_user_albums(self.request.user.id)
+            self.is_staff = False
+            self.albums = AlbumMember.objects.get_user_memberships(self.request.user.id)
 
         return super(Albums, self).initial(request, *args, **kwargs)
 
     def last_modified(self, request):
-        last_modified = None
-        for album in self.albums:
-            if not last_modified or album.last_updated > last_modified:
-                last_modified = album.last_updated
-        return last_modified
+        if not self.albums:
+            return None
+
+        if self.is_staff:
+            return max([a.last_updated for a in self.albums])
+        else:
+            return max([m.album.last_updated for m in self.albums])
+
+    def get_serializer_class(self):
+        if self.is_staff:
+            return AlbumNameSerializer
+        else:
+            return AlbumMemberNameSerializer
 
     def get_queryset(self):
         return self.albums
@@ -292,7 +346,7 @@ class Albums(generics.ListAPIView):
         for pending_photo in PendingPhoto.objects.filter(photo_id__in=serializer.object.photos):
             pending_photo.get_or_process_uploaded_image_and_create_photo(album, now)
 
-        responseSerializer = AlbumSerializer(album)
+        responseSerializer = AlbumSerializer(album, context={'request': request})
         return Response(responseSerializer.data)
 
 
