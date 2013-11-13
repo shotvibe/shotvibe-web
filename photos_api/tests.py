@@ -342,7 +342,7 @@ class NotModifiedTest(BaseTestCase):
         self.assertEqual(album['num_new_photos'], 0)
 
         # Add a new photo to the album
-        self.add_new_photo()
+        self.add_new_photo('3', 'barney')
 
         third_response = self.client.get('/albums/')
         self.assertEqual(third_response.status_code, 200)
@@ -351,7 +351,18 @@ class NotModifiedTest(BaseTestCase):
         album = self.get_album(third_response, 8)
         self.assertEqual(album['num_new_photos'], 1)
 
-    def add_new_photo(self):
+        # Same user adding a photo
+        self.add_new_photo('2', 'amanda')
+
+        # Still one photo (barney's)
+        fourth_response = self.client.get('/albums/8/')
+        self.assertEqual(fourth_response.status_code, 200)
+        fourth_response_json = json.loads(fourth_response.content)
+        self.assertEqual(1, fourth_response_json['num_new_photos'])
+
+    def add_new_photo(self, username, password):
+        self.client.login(username=username, password=password)
+
         upload_request_response = self.client.post('/photos/upload_request/')
         upload_request_json = json.loads(upload_request_response.content)
 
@@ -365,6 +376,8 @@ class NotModifiedTest(BaseTestCase):
 
         photo_list = { 'add_photos': [ { 'photo_id': photo_id } ] }
         self.client.post('/albums/8/', content_type='application/json', data=json.dumps(photo_list))
+
+        self.client.login(username='2', password='amanda')
 
     def get_album(self, response, aid):
         for album in json.loads(response.content):
