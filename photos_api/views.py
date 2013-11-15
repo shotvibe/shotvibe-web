@@ -181,7 +181,7 @@ class ViewAlbum(GenericAPIView):
         obj = AlbumMember.objects.get(user=self.request.user, album__pk=album_pk)
         obj.update_last_access(timestamp)
 
-        return Response()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class UserList(generics.ListCreateAPIView):

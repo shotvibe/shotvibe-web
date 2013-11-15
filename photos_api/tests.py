@@ -331,7 +331,7 @@ class NotModifiedTest(BaseTestCase):
         # mark album 8 as seen
         data = json.dumps({"timestamp": timezone.now().isoformat()})
         view_response = self.client.post('/albums/8/view/', content_type='application/json', data=data)
-        self.assertEqual(view_response.status_code, 200)
+        self.assertEqual(view_response.status_code, 204)
 
         # Get albums list again
         second_response = self.client.get('/albums/')
