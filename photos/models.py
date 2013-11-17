@@ -117,15 +117,16 @@ class Album(models.Model):
     def get_member_users(self):
         return [membership.user for membership in AlbumMember.objects.filter(album=self).only('user')]
 
-    def get_num_new_photos(self, since_date):
+    def get_num_new_photos(self, since_date, user_id):
+        queryset = self.photo_set.exclude(author__id=user_id)
+
         if since_date:
             # due to serializer issues, since_date is accurate only up to a millisecond
             # while the database is accurate up to a microsecond
-            correction = 999 - (since_date.microsecond % 1000)
-            since_date = since_date + datetime.timedelta(microseconds=correction)
-            return self.photo_set.filter(date_created__gt=since_date).count()
+            since_date = since_date + datetime.timedelta(milliseconds=1)
+            return queryset.filter(date_created__gt=since_date).count()
         else:
-            return self.photo_set.count()
+            return queryset.count()
 
 
 class AlbumMemberManager(models.Manager):
@@ -152,7 +153,7 @@ class AlbumMember(models.Model):
         return u"Member {0} of album {1} (Membership #{2})".format(self.user, self.album, self.pk)
 
     def get_num_new_photos(self):
-        return self.album.get_num_new_photos(self.last_access)
+        return self.album.get_num_new_photos(self.last_access, self.user.id)
 
     def update_last_access(self, timestamp):
         if self.last_access is None or self.last_access < timestamp:

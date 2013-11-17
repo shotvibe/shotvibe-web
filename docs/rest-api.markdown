@@ -85,6 +85,10 @@ Used to add photos or members to an album.
 
 Used to leave an album.
 
+### POST /albums/{aid}/view/
+
+Used to mark an album as viewed.
+
 ### POST /albums/
 
 Used to create a new album.
@@ -818,6 +822,30 @@ Used to leave an album.
 `aid` is the album that the user wishes to leave.
 
 The request body should be empty.
+
+The response will be 204 No Content.
+
+## POST /albums/{aid}/view/
+
+Used to mark an album as viewed.
+
+`aid` is the album that the user wishes to mark as viewed.
+
+The request JSON should contain a single field, "timestamp", with a date/time value.
+
+The date should be the same as the album's last_updated field at the time of viewing.
+
+Example request:
+
+    POST /albums/5/view/
+    Authorization: Token 01ba4719c80b6fe911b091a7c05124b64eeece96
+    Content-Type: application/json
+    Content-Length: 37
+
+    {
+        "timestamp": "2013-01-22T00:01:02.003Z"
+    }
+
 
 The response will be 204 No Content.
 
