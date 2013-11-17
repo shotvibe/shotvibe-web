@@ -292,6 +292,14 @@ been updated, so that only those need to be fetched.
 
 The `latest_photos` field contains only the latest two photos from each album.
 
+The `num_new_photos` field contains the number of photos that were added to the
+album since the user last reported that he viewed the album. (See `POST
+/albums/{aid}/view/`)
+
+The `last access` field contains the date that the user reported that he last
+viewed the album, or `null` if the user has not viewed the album yet. (See
+`POST /albums/{aid}/view/`)
+
 Example Request:
 
     GET /albums/
@@ -312,6 +320,8 @@ Example response:
             "name": "sprinkling guardhouses segment",
             "last_updated": "2009-11-12T20:20:03Z",
             "etag": "1",
+            "num_new_photos": 3,
+            "last_access": "2009-11-12T20:03:02Z",
             "latest_photos": [
                 {
                     "photo_id": "ea301d20b438dca24ffc7408d990629ca274a961f676e01f2e0be8f3911f1e1f",
@@ -332,6 +342,8 @@ Example response:
             "name": "licorice grindstone's heterosexual crunchier",
             "last_updated": "2009-08-30T08:29:34Z",
             "etag": "2",
+            "num_new_photos": 0,
+            "last_access": "2009-08-30T08:29:34Z",
             "latest_photos": [
                 {
                     "photo_id": "b6cf10999bb7c504dac93f9eeacc75f9c255ab5ab32d882618f80bd22e7ddd5b",
@@ -363,6 +375,8 @@ Example response:
             "name": "grandad's pep's",
             "last_updated": "2013-02-10T18:57:15.155Z",
             "etag": "3",
+            "num_new_photos": 0,
+            "last_access": null,
             "latest_photos": [
                 {
                     "photo_id": "d3b75ea7338a43983844ffff556288ed0183b9aa9f92e99b5a43fac1d8d2eba0",
@@ -383,6 +397,8 @@ Example response:
             "name": "Copperfield Olsen's explorations left's reproduce",
             "last_updated": "2009-08-14T13:27:43Z",
             "etag": "8",
+            "num_new_photos": 4,
+            "last_access": null,
             "latest_photos": [
                 {
                     "photo_id": "00a3ae517f40fd6bba76e25e4121a947822787683563950804553e47db54abfd",
@@ -462,6 +478,8 @@ Example response:
         "name": "sprinkling guardhouses segment",
         "date_created": "2009-10-26T20:53:49Z",
         "last_updated": "2009-11-12T20:20:03Z",
+        "num_new_photos": 3,
+        "last_access": "2009-11-12T20:03:02Z",
         "members": [
             {
                 "id": 1,
