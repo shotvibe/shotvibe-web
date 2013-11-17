@@ -3,7 +3,7 @@ from django.contrib import admin, auth
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.utils.html import format_html
 
-from phone_auth.models import User, UserEmail, AuthToken, PhoneNumber, PhoneNumberConfirmSMSCode, PhoneNumberLinkCode
+from phone_auth.models import User, UserEmail, AuthToken, PhoneNumber, PhoneNumberConfirmSMSCode, PhoneNumberLinkCode, AnonymousPhoneNumber, PhoneContact
 
 class AuthTokenAdmin(admin.ModelAdmin):
     list_display = ('user', 'description', 'date_created', 'key')
@@ -76,6 +76,18 @@ class UserEmailInline(admin.TabularInline):
 class PhoneNumberInline(admin.TabularInline):
     model = PhoneNumber
 
+class PhoneContactInline(admin.TabularInline):
+    model = PhoneContact
+    fk_name = 'created_by_user'
+
+    ordering = ('user', 'contact_nickname')
+
+    raw_id_fields = ('anonymous_phone_number', 'user')
+
+    readonly_fields = ('anonymous_phone_number', 'user', 'date_created', 'contact_nickname')
+
+    extra = 0
+
 class UserAdmin(auth.admin.UserAdmin):
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
@@ -105,7 +117,7 @@ class UserAdmin(auth.admin.UserAdmin):
 
     readonly_fields = ('avatar_full', 'primary_email',)
 
-    inlines = [UserEmailInline, PhoneNumberInline]
+    inlines = [UserEmailInline, PhoneNumberInline, PhoneContactInline]
 
     def first_phone_number(self, instance):
         return instance.phonenumber_set.all()[:1].get()
@@ -129,8 +141,16 @@ class PhoneNumberLinkCodeAdmin(admin.ModelAdmin):
     def invite_link(self, instance):
         return format_html(u'<a href="{0}">{1}</a>', instance.get_invite_page(), instance.invite_code)
 
+class AnonymousPhoneNumberAdmin(admin.ModelAdmin):
+    pass
+
+class PhoneContactAdmin(admin.ModelAdmin):
+    pass
+
 admin.site.register(User, UserAdmin)
 admin.site.register(AuthToken, AuthTokenAdmin)
 admin.site.register(PhoneNumber, PhoneNumberAdmin)
 admin.site.register(PhoneNumberConfirmSMSCode, PhoneNumberConfirmSMSCodeAdmin)
 admin.site.register(PhoneNumberLinkCode, PhoneNumberLinkCodeAdmin)
+admin.site.register(AnonymousPhoneNumber, AnonymousPhoneNumberAdmin)
+admin.site.register(PhoneContact, PhoneContactAdmin)

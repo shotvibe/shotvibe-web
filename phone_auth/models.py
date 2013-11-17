@@ -300,6 +300,9 @@ class AnonymousPhoneNumber(models.Model):
     def get_avatar_url(self):
         return avatar_url_from_avatar_file_data(self.avatar_file)
 
+    def __unicode__(self):
+        return self.phone_number
+
 
 class PhoneNumber(models.Model):
     phone_number = models.CharField(max_length=32, unique=True)
