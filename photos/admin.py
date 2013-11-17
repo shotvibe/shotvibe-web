@@ -11,7 +11,7 @@ class PhotoAdminInline(admin.TabularInline):
     fields = ('photo_id', 'bucket', 'date_created', 'author', 'album', 'photo_thumbnail', 'width', 'height')
     readonly_fields = ('bucket', 'date_created', 'author', 'album', 'photo_thumbnail', 'width', 'height')
 
-    ordering = ['date_created', 'photo_id']
+    ordering = ['album_index']
 
     # This inline suffers from the following Django bug:
     # https://code.djangoproject.com/ticket/19888

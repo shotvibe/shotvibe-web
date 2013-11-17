@@ -100,13 +100,13 @@ class Album(models.Model):
         return self.name
 
     def get_photos(self):
-        return self.photo_set.order_by('date_created', 'photo_id')
+        return self.photo_set.order_by('album_index')
 
     def get_latest_photos(self):
-        return self.photo_set.order_by('-date_created', '-photo_id')[:2]
+        return self.photo_set.order_by('-album_index')[:2]
 
     def get_invite_page_photos(self):
-        return self.photo_set.order_by('-date_created', '-photo_id')[:4]
+        return self.photo_set.order_by('-album_index')[:4]
 
     def is_user_member(self, user_id):
         return AlbumMember.objects.filter(album=self, user__pk=user_id).exists()
@@ -186,7 +186,8 @@ class Photo(models.Model):
     objects = PhotoManager()
 
     class Meta:
-        get_latest_by = 'date_created'
+        get_latest_by = 'album_index'
+        ordering = ['album_index']
 
     def __unicode__(self):
         return self.photo_id
