@@ -4,7 +4,7 @@ argparse==1.2.1
 boto==2.18.0
 distribute==0.6.49
 django-bootstrap-toolkit==2.10.0
-django-subdomains==2.0.3
+django-subdomains==2.0.4
 djangorestframework==2.3.8
 phonenumbers==5.9b1
 raven==3.5.2
