@@ -2,7 +2,7 @@ Django==1.5.1
 South==0.8.4
 argparse==1.2.1
 boto==2.18.0
-distribute==0.6.35
+distribute==0.6.49
 django-bootstrap-toolkit==2.10.0
 django-subdomains==2.0.3
 djangorestframework==2.3.8
