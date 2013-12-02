@@ -31,7 +31,7 @@ SECRET_KEY = '!d*b0kzmxdg-!d=o^!8j#cr6^e666e$#wm0!m(uk3d&ix2)2sf'
 LOCAL_PHOTO_BUCKETS_BASE_PATH = 'photo_buckets'
 LOCAL_PHOTO_BUCKET_URL_FORMAT_STR = '/photos/{0}/{1}.jpg'
 
-INSTALLED_APPS = sys.modules['shotvibe_site.settings'].INSTALLED_APPS + (
+INSTALLED_APPS = parent_settings.INSTALLED_APPS + (
     'django_extensions',
     'django_jenkins',
 )
