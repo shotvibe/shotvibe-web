@@ -7,6 +7,12 @@ ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
 
+DATABASES = {
+    'default': {
+        'ATOMIC_REQUESTS': True,
+    }
+}
+
 MANAGERS = ADMINS
 
 # Local time zone for this installation. Choices can be found here:

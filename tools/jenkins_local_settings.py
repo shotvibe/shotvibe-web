@@ -5,6 +5,8 @@ Settings used for Jenkins builds
 import os
 import sys
 
+parent_settings = sys.modules['shotvibe_site.settings']
+
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
@@ -16,16 +18,12 @@ except KeyError:
     print '*** You must set the needed environment variables'
     raise
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': JENKINS_DATABASE_NAME,
-        'USER': JENKINS_DATABASE_USER,
-        'PASSWORD': JENKINS_DATABASE_PASSWORD,
-        'HOST': 'localhost',
-        'PORT': '',
-    }
-}
+parent_settings.DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql_psycopg2'
+parent_settings.DATABASES['default']['NAME'] = JENKINS_DATABASE_NAME
+parent_settings.DATABASES['default']['USER'] = JENKINS_DATABASE_USER
+parent_settings.DATABASES['default']['PASSWORD'] = JENKINS_DATABASE_PASSWORD
+parent_settings.DATABASES['default']['HOST'] = 'localhost'
+parent_settings.DATABASES['default']['PORT'] = ''
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '!d*b0kzmxdg-!d=o^!8j#cr6^e666e$#wm0!m(uk3d&ix2)2sf'
