@@ -10,6 +10,7 @@ ADMINS = (
 DATABASES = {
     'default': {
         'ATOMIC_REQUESTS': True,
+        'CONN_MAX_AGE': None,
     }
 }
 
