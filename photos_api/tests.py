@@ -32,7 +32,7 @@ else:
 
 @override_settings(LOCAL_PHOTO_BUCKETS_BASE_PATH='.tmp_photo_buckets')
 class BaseTestCase(TestCase):
-    fixtures = ['tests/test_users', 'tests/test_albums']
+    fixtures = ['test_users', 'test_albums']
     urls = 'photos_api.urls'
 
 class AnonymousTest(BaseTestCase):

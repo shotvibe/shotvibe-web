@@ -15,7 +15,7 @@ from photos_api.serializers import MemberIdentifier
 
 
 class ModelTests(TestCase):
-    fixtures = ['tests/test_users']
+    fixtures = ['test_users']
 
     def test_create_auth_token(self):
         amanda = auth.get_user_model().objects.get(pk=2)
@@ -84,7 +84,7 @@ class ModelTests(TestCase):
         self.assertEqual(token.description, 'iPhone 3GS')
 
 class ViewTests(TestCase):
-    fixtures = ['tests/test_users']
+    fixtures = ['test_users']
     urls = 'phone_auth.urls'
 
     def test_authorize_phone_number(self):
