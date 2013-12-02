@@ -78,7 +78,7 @@ def send_sms_twilio(phone, message):
 
     client = TwilioRestClient(account, token)
     try:
-        client.sms.messages.create(
+        client.messages.create(
                 to=phone_e164,
                 from_=chosen_from_phone_number,
                 body=message)
