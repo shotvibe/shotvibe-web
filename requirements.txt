@@ -10,4 +10,4 @@ phonenumbers==5.9b1
 raven==3.5.2
 wsgiref==0.1.2
 requests==2.0.1
-twilio==3.5.1
+twilio==3.6.4
