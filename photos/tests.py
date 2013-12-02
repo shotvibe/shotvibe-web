@@ -25,7 +25,7 @@ def read_in_chunks(file_object, chunk_size=1024):
 
 @override_settings(LOCAL_PHOTO_BUCKETS_BASE_PATH='.tmp_photo_buckets')
 class ModelTest(TestCase):
-    fixtures = ['tests/test_users']
+    fixtures = ['test_users']
 
     def setUp(self):
         self.amanda = auth.get_user_model().objects.get(pk=2)
