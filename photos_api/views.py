@@ -40,7 +40,7 @@ from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
     UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer, \
     QueryPhonesRequestSerializer, DeletePhotosSerializer, \
     AlbumMemberNameSerializer, AlbumMemberSerializer, AlbumViewSerializer, \
-    MemberIdentifier, AlbumMembersSerializer
+    AlbumMembersSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
 
