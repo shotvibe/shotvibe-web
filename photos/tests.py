@@ -90,6 +90,57 @@ class ModelTest(TestCase):
 
         self.assertEqual(the_album.last_updated, update_date)
 
+    def test_millisecond_precision(self):
+        """
+        Precision of timestamps in the database should allow milliseconds
+        """
+        the_date = datetime.datetime(2010, 1, 1, tzinfo=utc)
+        album = Album.objects.create_album(self.amanda, 'Ski Trip', the_date)
+
+        millisecond_date = datetime.datetime(2010, 1, 1, 12, 0, 0, 123000, tzinfo=utc)
+
+        photo = Photo(
+                photo_id='xxxx',
+                bucket='xxxx',
+                date_created=millisecond_date,
+                author=self.amanda,
+                album=album,
+                album_index=0,
+                width=1,
+                height=1
+                )
+        photo.save()
+
+        photo = album.photo_set.first()
+        self.assertEqual(photo.date_created, millisecond_date)
+
+    def test_no_microsecond_precision(self):
+        """
+        Precision of timestamps in the database should be up to millisecond precision, but no more
+        """
+        the_date = datetime.datetime(2010, 1, 1, tzinfo=utc)
+        album = Album.objects.create_album(self.amanda, 'Ski Trip', the_date)
+
+        microsecond_date = datetime.datetime(2010, 1, 1, 12, 0, 0, 123123, tzinfo=utc)
+        millisecond_date = datetime.datetime(2010, 1, 1, 12, 0, 0, 123000, tzinfo=utc)
+
+        photo = Photo(
+                photo_id='xxxx',
+                bucket='xxxx',
+                date_created=microsecond_date,
+                author=self.amanda,
+                album=album,
+                album_index=0,
+                width=1,
+                height=1
+                )
+        photo.save()
+
+        photo = album.photo_set.first()
+        self.assertEqual(photo.date_created, millisecond_date)
+        self.assertNotEqual(photo.date_created, microsecond_date)
+
+
 class ImageUploads(TestCase):
     def test_box_fit_expanded(self):
         self.assertEqual(image_uploads.BoxFitExpanded(75, 75).get_image_dimensions(640, 480), (100, 75))
