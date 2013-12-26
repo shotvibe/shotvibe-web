@@ -8,6 +8,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
+from datetime_millisecond.fields import DateTimeMillisecondField
 from phone_auth.models import PhoneNumber, PhoneNumberLinkCode
 from photos import image_uploads
 from photos_api.signals import members_added_to_album, album_created
@@ -176,7 +177,7 @@ class PhotoManager(models.Manager):
 class Photo(models.Model):
     photo_id = models.CharField(primary_key=True, max_length=128)
     bucket = models.CharField(max_length=64)
-    date_created = models.DateTimeField(db_index=True)
+    date_created = DateTimeMillisecondField(db_index=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL)
     album = models.ForeignKey(Album)
     album_index = models.PositiveIntegerField(db_index=True)
