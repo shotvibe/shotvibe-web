@@ -430,7 +430,6 @@ class Serializers(TestCase):
             str(serializer._errors['non_field_errors'][0])
         )
 
-
     def test_album_add(self):
         test_data = {
                 'album_name': 'My New Album',
