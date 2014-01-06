@@ -296,7 +296,7 @@ The `num_new_photos` field contains the number of photos that were added to the
 album since the user last reported that he viewed the album. (See `POST
 /albums/{aid}/view/`)
 
-The `last access` field contains the date that the user reported that he last
+The `last_access` field contains the date that the user reported that he last
 viewed the album, or `null` if the user has not viewed the album yet. (See
 `POST /albums/{aid}/view/`)
 
@@ -446,6 +446,14 @@ members of the album.
 The HTTP `ETag` should be stored, and on the next request should be used in an
 `If-None-Match` HTTP header. If the album has not changed, the server will
 return: `304 Not Modified`
+
+The `num_new_photos` field contains the number of photos that were added to the
+album since the user last reported that he viewed the album. (See `POST
+/albums/{aid}/view/`)
+
+The `last_access` field contains the date that the user reported that he last
+viewed the album, or `null` if the user has not viewed the album yet. (See
+`POST /albums/{aid}/view/`)
 
 Each object in the `members` array contains the fields:
 

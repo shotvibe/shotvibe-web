@@ -55,6 +55,7 @@ def api_root(request, format=None):
     }
     return Response(response_data)
 
+
 class AlbumList(generics.ListAPIView):
     """
     The list of all albums in the database, of all users.
@@ -74,6 +75,7 @@ def parse_phone_number(phone_number, default_country):
         return None
 
     return phonenumbers.format_number(number, phonenumbers.PhoneNumberFormat.E164)
+
 
 @supports_etag
 class AlbumDetail(generics.RetrieveAPIView):
@@ -128,8 +130,9 @@ class AlbumDetail(generics.RetrieveAPIView):
 
         self.album.add_members(request.user, member_identifiers=serializer.object.add_members)
 
-        responseSerializer = AlbumSerializer(self.album, context={'request': request})
+        responseSerializer = (self.get_serializer_class())(self.get_object(), context={'request': request})
         return Response(responseSerializer.data)
+
 
 class LeaveAlbum(generics.DestroyAPIView):
     model = AlbumMember

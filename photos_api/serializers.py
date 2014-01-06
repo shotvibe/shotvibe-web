@@ -5,6 +5,7 @@ from rest_framework import serializers
 
 from photos.models import Album, AlbumMember, Photo
 
+
 class ListField(serializers.WritableField):
     """
     Utility class for a field that is a list of serializable elements
@@ -24,6 +25,7 @@ class ListField(serializers.WritableField):
             result.append(serializer.object)
         return result
 
+
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = auth.get_user_model()
@@ -34,6 +36,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     avatar_url = serializers.CharField(source='get_avatar_url')
     invite_status = serializers.CharField(source='get_invite_status')
 
+
 class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photo
@@ -42,13 +45,28 @@ class PhotoSerializer(serializers.ModelSerializer):
     photo_url = serializers.CharField(source='get_photo_url')
     author = UserSerializer(source='author')
 
+
+class StaticField(serializers.Field):
+    def __init__(self, field_value):
+        self.value = field_value
+        super(StaticField, self).__init__()
+
+    def field_to_native(self, obj, field_name):
+        return self.to_native(self.value)
+
+
 class AlbumSerializer(serializers.ModelSerializer):
     class Meta:
         model = Album
-        fields = ('id', 'name', 'date_created', 'last_updated', 'members', 'photos')
+        fields = ('id', 'name', 'date_created', 'last_updated', 'members', 'photos', 'num_new_photos', 'last_access')
 
     photos = PhotoSerializer(source='get_photos')
     members = UserSerializer(source='get_member_users')
+
+    # These fields are only relevant to AlbumMember, but we provide them here
+    # to ensure consistency in the API responses
+    num_new_photos = StaticField(0)
+    last_access = StaticField(None)
 
     def get_name_field(self, model_field):
         return None
@@ -168,10 +186,12 @@ class MemberIdentifierSerializer(serializers.Serializer):
                 contact_nickname=attrs['contact_nickname']
             )
 
+
 class AlbumUpdate(object):
     def __init__(self, add_photos=None, add_members=None):
         self.add_photos = add_photos or []
         self.add_members = add_members or []
+
 
 class AlbumUpdateSerializer(serializers.Serializer):
     add_photos = PhotoListField(required=False)
@@ -180,11 +200,13 @@ class AlbumUpdateSerializer(serializers.Serializer):
     def restore_object(self, attrs, instance=None):
         return AlbumUpdate(add_photos=attrs.get('add_photos'), add_members=attrs.get('add_members'))
 
+
 class AlbumAdd(object):
     def __init__(self, album_name=None, members=None, photos=None):
         self.album_name = album_name
         self.members = members
         self.photos = photos
+
 
 class AlbumAddSerializer(serializers.Serializer):
     album_name = serializers.CharField()

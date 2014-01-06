@@ -430,7 +430,6 @@ class Serializers(TestCase):
             str(serializer._errors['non_field_errors'][0])
         )
 
-
     def test_album_add(self):
         test_data = {
                 'album_name': 'My New Album',
@@ -633,6 +632,8 @@ class PhotoUpload(BaseTestCase):
         members_ids = [u['id'] for u in album_json['members']]
         self.assertIn(2, members_ids) # amanda
         self.assertIn(3, members_ids) # barney
+        self.assertEqual(album_json['num_new_photos'], 0)
+        self.assertEqual(album_json['last_access'], None)
 
     def test_create_empty_album(self):
         new_album_data = {
