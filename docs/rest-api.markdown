@@ -89,6 +89,10 @@ Used to leave an album.
 
 Used to mark an album as viewed.
 
+### POST /albums/{aid}/members/
+
+Used to add members to an album.
+
 ### POST /albums/
 
 Used to create a new album.
@@ -785,10 +789,7 @@ The request JSON can include the following fields:
 *   `add_photo`: Add new photos to the album. All of the photos specified
     should have already been uploaded.
 
-*   `add_members`: Add new members to the album. Each member is either a user
-    id, or a phone number. If a phone number is specified, then the user's
-    country should also be specified, as well as the name of the contact as it
-    appears in the phone's address book.
+*   `add_members`: Deprecated, use /albums/{aid}/members/ endpoint.
 
 Example request:
 
@@ -807,34 +808,6 @@ Example request:
             },
             {
                 "photo_id": "19191da2a395424c0abfa9ebfbfdda53cf77eb384125e18d587c63d732baf1be"
-            }
-        ]
-    }
-
-Another example request:
-
-    POST /albums/5/
-    Authorization: Token 01ba4719c80b6fe911b091a7c05124b64eeece96
-    Content-Type: application/json
-    Content-Length: 324
-
-    {
-        "add_members": [
-            {
-                "user_id": 4
-            },
-            {
-                "user_id": 6
-            },
-            {
-                "phone_number": "212-718-2000",
-                "default_country": "US",
-                "contact_nickname": "John Smith"
-            },
-            {
-                "phone_number": "212-718-3000",
-                "default_country": "US",
-                "contact_nickname": "Jane Doe"
             }
         ]
     }
@@ -874,6 +847,64 @@ Example request:
 
 
 The response will be 204 No Content.
+
+## POST /albums/{aid}/members/
+
+Add new members to the album. Each member is either a user
+id, or a phone number. If a phone number is specified, then the user's
+country should also be specified, as well as the name of the contact as it
+appears in the phone's address book.
+
+Example request:
+
+    POST /albums/5/members/
+    Authorization: Token 01ba4719c80b6fe911b091a7c05124b64eeece96
+    Content-Type: application/json
+    Content-Length: 324
+
+    {
+        "members": [
+            {
+                "user_id": 4
+            },
+            {
+                "user_id": 6
+            },
+            {
+                "phone_number": "hdff6df",
+                "default_country": "US",
+                "contact_nickname": "John Smith"
+            },
+            {
+                "phone_number": "212-718-3000",
+                "default_country": "US",
+                "contact_nickname": "Jane Doe"
+            }
+        ]
+    }
+
+Example response:
+
+    HTTP 200 OK
+    Content-Type: application/json
+
+    [
+        {
+            "success": true
+        },
+        {
+            "success": false,
+            "error": "invalid_user_id"
+        },
+        {
+            "success": false,
+            "error": "invalid_phone_number"
+        },
+        {
+            "success": true
+        }
+    ]
+
 
 ## POST /albums/
 

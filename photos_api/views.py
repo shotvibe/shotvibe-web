@@ -39,7 +39,8 @@ from photos.models import Album, PendingPhoto, AlbumMember, Photo
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
     UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer, \
     QueryPhonesRequestSerializer, DeletePhotosSerializer, \
-    AlbumMemberNameSerializer, AlbumMemberSerializer, AlbumViewSerializer
+    AlbumMemberNameSerializer, AlbumMemberSerializer, AlbumViewSerializer, \
+    AlbumMembersSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
 
@@ -132,6 +133,24 @@ class AlbumDetail(generics.RetrieveAPIView):
 
         responseSerializer = (self.get_serializer_class())(self.get_object(), context={'request': request})
         return Response(responseSerializer.data)
+
+
+class AlbumMembersView(generics.CreateAPIView):
+    model = Album
+    permission_classes = (IsUserInAlbum,)
+    serializer_class = AlbumMembersSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.DATA, files=request.FILES)
+
+        if serializer.is_valid():
+            album = Album.objects.get(pk=kwargs.get('pk'))
+            result = album.add_members(request.user,
+                                       serializer.object['members'])
+
+            return Response(result, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LeaveAlbum(generics.DestroyAPIView):

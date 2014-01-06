@@ -1,6 +1,5 @@
 from django.utils.translation import ugettext_lazy as _
 from django.contrib import auth
-import phonenumbers
 from rest_framework import serializers
 
 from photos.models import Album, AlbumMember, Photo
@@ -143,12 +142,10 @@ class MemberIdentifier(object):
     def __repr__(self):
         return repr(self.__dict__)
 
+
 class MemberIdentifierSerializer(serializers.Serializer):
     user_id = serializers.IntegerField(required=False)
-    phone_number = serializers.CharField(required=False, error_messages={
-        'invalid_phone_number':_('Phone number is invalid'),
-        'not_possible_phone_number':_('This phone number is not possible'),
-    })
+    phone_number = serializers.CharField(required=False)
     default_country = serializers.CharField(required=False, min_length=2, max_length=2)
     contact_nickname = serializers.CharField(required=False, error_messages={
         'required_with_phone_number':_('\'contact_nickname\' attribute is required when adding a new member using phone number.')
@@ -159,24 +156,10 @@ class MemberIdentifierSerializer(serializers.Serializer):
         if 'user_id' not in attrs and not attrs.get('contact_nickname'):
             raise serializers.ValidationError(self.fields['contact_nickname'].error_messages['required_with_phone_number'])
 
-        # Validate phone number
-        if 'user_id' not in attrs:
-            try:
-                number = phonenumbers.parse(attrs.get('phone_number'),
-                                            attrs.get('default_country'))
-            except phonenumbers.phonenumberutil.NumberParseException:
-                raise serializers.ValidationError(self.fields['phone_number'].error_messages['invalid_phone_number'])
-
-            if not phonenumbers.is_possible_number(number):
-                raise serializers.ValidationError(self.fields['phone_number'].error_messages['not_possible_phone_number'])
-
-            # Format final number.
-            attrs['phone_number'] = phonenumbers.format_number(number, phonenumbers.PhoneNumberFormat.E164)
-
         return attrs
 
-
     def restore_object(self, attrs, instance=None):
+
         if 'user_id' in attrs:
             return MemberIdentifier(user_id=attrs['user_id'])
         else:
@@ -185,6 +168,10 @@ class MemberIdentifierSerializer(serializers.Serializer):
                 default_country=attrs['default_country'],
                 contact_nickname=attrs['contact_nickname']
             )
+
+
+class AlbumMembersSerializer(serializers.Serializer):
+    members = ListField(MemberIdentifierSerializer, required=False)
 
 
 class AlbumUpdate(object):
