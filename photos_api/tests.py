@@ -414,7 +414,7 @@ class Serializers(TestCase):
         serializer = MemberIdentifierSerializer(data=test_data)
         if not serializer.is_valid():
             self.fail(serializer.errors)
-        expected_member = MemberIdentifier(phone_number='+12127189999', default_country='US', contact_nickname='qwer')
+        expected_member = MemberIdentifier(phone_number='212-718-9999', default_country='US', contact_nickname='qwer')
         self.assertEqual(serializer.object, expected_member)
 
     def test_member_identifier_required_nickname(self):
@@ -453,7 +453,7 @@ class Serializers(TestCase):
         self.assertEqual(serializer.object.members, [
             MemberIdentifier(user_id=3),
             MemberIdentifier(user_id=4),
-            MemberIdentifier(phone_number='+12127189999', default_country='US', contact_nickname='John Smith')
+            MemberIdentifier(phone_number='212-718-9999', default_country='US', contact_nickname='John Smith')
             ])
         self.assertEqual(serializer.object.photos, ['test_photo_1', 'test_photo_2'])
 
@@ -766,9 +766,24 @@ class MembersTests(BaseTestCase):
         u2 = [user['id'] for user in members_after]
         self.assertTrue(all([_u1 in u2 for _u1 in u1]))
 
-
         # Add member with invalid ID
-        data = {'members': [{'user_id': 23498273984}]}
+        data = {
+            'members': [
+                {
+                    'user_id': 23498273984
+                },
+                {
+                    'phone_number': '123',
+                    'default_country': 'US',
+                    'contact_nickname': 'John Doe'
+                },
+                {
+                    'phone_number': 'abc',
+                    'default_country': 'US',
+                    'contact_nickname': 'John Doe'
+                }
+            ]
+        }
         response = self.client.post(album_members_url,
                                     data=json.dumps(data),
                                     content_type='application/json')
@@ -778,7 +793,10 @@ class MembersTests(BaseTestCase):
             self.assertTrue("success" in item)
             self.assertTrue("error" in item)
             self.assertEqual(item.get('success'), False)
-            self.assertEqual(item.get('error'), 'invalid_user_id')
+
+        self.assertEqual(response_array[0].get('error'), 'invalid_user_id')
+        self.assertEqual(response_array[1].get('error'), 'not_possible_phone_number')
+        self.assertEqual(response_array[2].get('error'), 'invalid_phone_number')
 
     def test_add_new_phone(self):
         album_before_response = self.client.get('/albums/9/')

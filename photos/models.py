@@ -9,6 +9,8 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
+import phonenumbers
+
 from phone_auth.models import PhoneNumber, PhoneNumberLinkCode
 from photos import image_uploads
 from photos_api.signals import members_added_to_album, album_created
@@ -69,9 +71,24 @@ class Album(models.Model):
 
         for member_identifier in member_identifiers:
             if member_identifier.user_id is None:
+
+                try:
+                    number = phonenumbers.parse(member_identifier.phone_number,
+                                                member_identifier.default_country)
+                except phonenumbers.phonenumberutil.NumberParseException:
+                    result.append({"success": False, "error": "invalid_phone_number"})
+                    continue
+
+                if not phonenumbers.is_possible_number(number):
+                    result.append({"success": False, "error": "not_possible_phone_number"})
+                    continue
+
+                # Format final number.
+                formatted_number = phonenumbers.format_number(number, phonenumbers.PhoneNumberFormat.E164)
+
                 try:
                     phone_number = PhoneNumber.objects.get(
-                        phone_number=member_identifier.phone_number)
+                        phone_number=formatted_number)
                     if phone_number.should_send_invite():
                         PhoneNumberLinkCode.objects.\
                             invite_existing_phone_number(inviter, phone_number,
@@ -80,7 +97,7 @@ class Album(models.Model):
                 except PhoneNumber.DoesNotExist:
                     link_code_object = PhoneNumberLinkCode.objects.\
                         invite_new_phone_number(inviter,
-                                                member_identifier.phone_number,
+                                                formatted_number,
                                                 member_identifier.contact_nickname,
                                                 date_added)
                     new_users.append(link_code_object.phone_number.user)
@@ -97,9 +114,6 @@ class Album(models.Model):
                     result.append({"success": True})
                 except get_user_model().DoesNotExist, err:
                     result.append({"success": False, "error": "invalid_user_id"})
-
-
-
 
         # Create memberships
         for new_user in new_users:
