@@ -47,7 +47,6 @@ class AlbumManager(models.Manager):
 
 class Album(models.Model):
     date_created = models.DateTimeField()
-    name = models.CharField(max_length=255)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='+')
     last_updated = models.DateTimeField()
     revision_number = models.IntegerField()
@@ -171,6 +170,8 @@ class AlbumMemberManager(models.Manager):
 class AlbumMember(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="album_membership")
     album = models.ForeignKey(Album, related_name="memberships")
+
+    album_name = models.CharField(max_length=255)
 
     added_by_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="created_album_memberships")
     datetime_added = models.DateTimeField()
