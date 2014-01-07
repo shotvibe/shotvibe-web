@@ -16,7 +16,7 @@ def send_push_on_photos_added_to_album(sender, **kwargs):
     device_push.broadcast_photos_added_to_album(
         album_id=album.id,
         author_id=user.id,
-        album_name=album.name,
+        album_name=album.get_name(),
         author_name=user.nickname,
         num_photos=len(photos),
         user_ids=[membership.user.id for membership in membership_query])
@@ -64,7 +64,7 @@ def send_push_on_members_added_to_album(sender, **kwargs):
 
     # Send push notification
     device_push.broadcast_members_added_to_album(album.id,
-                                                 album.name,
+                                                 album.get_name(),
                                                  user.nickname,
                                                  [nu.id for nu in member_users])
 
