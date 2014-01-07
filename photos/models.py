@@ -25,7 +25,6 @@ class AlbumManager(models.Manager):
 
         album = self.create(
                 date_created = date_created,
-                name = name,
                 creator = creator,
                 last_updated = date_created,
                 revision_number = 0
@@ -34,6 +33,7 @@ class AlbumManager(models.Manager):
         AlbumMember.objects.create(
             user = creator,
             album = album,
+            album_name = name,
             datetime_added = date_created,
             added_by_user = creator
         )
@@ -130,7 +130,7 @@ class Album(models.Model):
         return result
 
     def __unicode__(self):
-        return self.name
+        return self.get_name()
 
     def get_photos(self):
         return self.photo_set.order_by('album_index')
@@ -160,6 +160,17 @@ class Album(models.Model):
             return queryset.filter(date_created__gt=since_date).count()
         else:
             return queryset.count()
+
+    def get_name(self):
+        if self.memberships.count() == 0:
+            # memberless album
+            return u"album#{0}".format(self.id)
+        elif self.is_user_member(self.creator.id):
+            # try getting the creator's album name first
+            return self.memberships.get(user=self.creator).album_name
+        else:
+            # get the album name from any member
+            return self.memberships.first().album_name
 
 
 class AlbumMemberManager(models.Manager):

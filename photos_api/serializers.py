@@ -64,6 +64,7 @@ class AlbumSerializer(serializers.ModelSerializer):
 
     # These fields are only relevant to AlbumMember, but we provide them here
     # to ensure consistency in the API responses
+    name = serializers.Field(source='get_name')
     num_new_photos = StaticField(0)
     last_access = StaticField(None)
 
@@ -77,7 +78,7 @@ class AlbumMemberSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'date_created', 'last_updated', 'members', 'photos', 'num_new_photos', 'last_access')
 
     id = serializers.IntegerField(source='album.id')
-    name = serializers.Field(source='album.name')
+    name = serializers.Field(source='album_name')
     date_created = serializers.Field(source='album.date_created')
     last_updated = serializers.Field(source='album.last_updated')
     photos = PhotoSerializer(source='album.get_photos')
@@ -93,10 +94,9 @@ class AlbumNameSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'url', 'name', 'last_updated', 'etag', 'latest_photos')
 
     id = serializers.IntegerField(source='id')
-
     etag = serializers.IntegerField(source='get_etag')
-
     latest_photos = PhotoSerializer(source='get_latest_photos')
+    name = serializers.Field(source='get_name')
 
     id.read_only = True
 
@@ -108,7 +108,7 @@ class AlbumMemberNameSerializer(serializers.HyperlinkedModelSerializer):
 
     id = serializers.IntegerField(source='album.id')
     url = serializers.HyperlinkedRelatedField(view_name='album-detail', source='album')
-    name = serializers.Field(source='album.name')
+    name = serializers.Field(source='album_name')
     last_updated = serializers.Field(source='album.last_updated')
     etag = serializers.IntegerField(source='album.get_etag')
     latest_photos = PhotoSerializer(source='album.get_latest_photos')

@@ -369,7 +369,8 @@ class Albums(generics.ListAPIView):
         for pending_photo in PendingPhoto.objects.filter(photo_id__in=serializer.object.photos):
             pending_photo.get_or_process_uploaded_image_and_create_photo(album, now)
 
-        responseSerializer = AlbumSerializer(album, context={'request': request})
+        album_member = album.memberships.get(user=album.creator)
+        responseSerializer = AlbumMemberSerializer(album_member, context={'request': request})
         return Response(responseSerializer.data)
 
 
