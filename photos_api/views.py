@@ -9,6 +9,7 @@ from django.core.files import File
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib import auth
+from django.db.models import Q
 
 #from django.http import HttpResponseNotModified
 from django.http import Http404
@@ -450,8 +451,8 @@ class QueryPhoneNumbers(GenericAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = QueryPhonesRequestSerializer
 
-    def __process_requested_item(self, user, country_code, phone_number,
-                                 nickname):
+    def __process_requested_item(self, user, country_code, existing_contacts,
+                                 phone_number, nickname):
 
         try:
             number = phonenumbers.parse(phone_number, country_code)
@@ -466,35 +467,38 @@ class QueryPhoneNumbers(GenericAPIView):
             phonenumbers.PhoneNumberFormat.E164
         )
 
-        data = {}
-
-        try:
-            apn = AnonymousPhoneNumber.objects.get(phone_number=phone_number_str)
-        except AnonymousPhoneNumber.DoesNotExist:
-            is_mobile = is_phone_number_mobile(number)
-            apn = AnonymousPhoneNumber.objects.create(
-                phone_number=phone_number_str,
-                date_created=timezone.now(),
-                avatar_file=random_default_avatar_file_data(),
-                is_mobile=is_mobile,
-                is_mobile_queried=timezone.now()
-            )
-
-        try:
-            phone_contact = apn.phonecontact_set.get(created_by_user=user)
-        except PhoneContact.DoesNotExist:
+        existing_phone_contact = existing_contacts.get(phone_number_str)
+        if existing_phone_contact:
+            phone_contact = existing_phone_contact
+            apn = phone_contact.anonymous_phone_number
+        else:
             try:
-                owner_user = PhoneNumber.objects.only('user').\
-                    get(phone_number=phone_number_str).user
-            except PhoneNumber.DoesNotExist:
-                owner_user = None
-            phone_contact = PhoneContact.objects.create(
-                anonymous_phone_number=apn,
-                user=owner_user,
-                created_by_user=user,
-                date_created=timezone.now(),
-                contact_nickname=nickname
-            )
+                apn = AnonymousPhoneNumber.objects.get(phone_number=phone_number_str)
+            except AnonymousPhoneNumber.DoesNotExist:
+                is_mobile = is_phone_number_mobile(number)
+                apn = AnonymousPhoneNumber.objects.create(
+                    phone_number=phone_number_str,
+                    date_created=timezone.now(),
+                    avatar_file=random_default_avatar_file_data(),
+                    is_mobile=is_mobile,
+                    is_mobile_queried=timezone.now()
+                )
+
+            try:
+                phone_contact = apn.phonecontact_set.get(created_by_user=user)
+            except PhoneContact.DoesNotExist:
+                try:
+                    owner_user = PhoneNumber.objects.only('user').\
+                        get(phone_number=phone_number_str).user
+                except PhoneNumber.DoesNotExist:
+                    owner_user = None
+                phone_contact = PhoneContact.objects.create(
+                    anonymous_phone_number=apn,
+                    user=owner_user,
+                    created_by_user=user,
+                    date_created=timezone.now(),
+                    contact_nickname=nickname
+                )
 
         user = phone_contact.user
         if user:
@@ -510,6 +514,7 @@ class QueryPhoneNumbers(GenericAPIView):
         else:
             avatar_url = apn.get_avatar_url()
 
+        data = {}
         data['phone_type'] = 'mobile' if apn.is_mobile else 'landline'
         data['avatar_url'] = avatar_url
         data['user_id'] = user_id
@@ -525,10 +530,29 @@ class QueryPhoneNumbers(GenericAPIView):
 
         default_country = serializer.data.get('default_country')
         phone_numbers = serializer.data.get('phone_numbers')
+
+        q = Q()
+        for pn in phone_numbers:
+            try:
+                number = phonenumbers.parse(pn['phone_number'], default_country)
+            except phonenumbers.phonenumberutil.NumberParseException as e:
+                continue
+
+            phone_number_str = phonenumbers.format_number(
+                    number,
+                    phonenumbers.PhoneNumberFormat.E164)
+
+            q = q | Q(anonymous_phone_number__phone_number=phone_number_str)
+
+        existing_contacts = {}
+        for existing_contact in PhoneContact.objects.filter(q, created_by_user=request.user):
+            existing_contacts[existing_contact.anonymous_phone_number.phone_number] = existing_contact
+
         response_items = []
         for pn in phone_numbers:
             item = self.__process_requested_item(request.user,
                                                  default_country,
+                                                 existing_contacts,
                                                  pn['phone_number'],
                                                  pn['contact_nickname'])
             response_items.append(item)
