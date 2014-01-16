@@ -12,14 +12,16 @@ def send_push_on_photos_added_to_album(sender, **kwargs):
     album = kwargs.get('to_album')
 
     # Send push notifications to the album members about just added photos
-    membership_query = AlbumMember.objects.filter(album=album).only('user__id')
-    device_push.broadcast_photos_added_to_album(
-        album_id=album.id,
-        author_id=user.id,
-        album_name=album.get_name(),
-        author_name=user.nickname,
-        num_photos=len(photos),
-        user_ids=[membership.user.id for membership in membership_query])
+    membership_query = AlbumMember.objects.filter(album=album).only('user__id', 'album_name')
+
+    for member in membership_query:
+        device_push.broadcast_photos_added_to_album(
+            album_id=album.id,
+            author_id=user.id,
+            album_name=member.album_name,
+            author_name=user.nickname,
+            num_photos=len(photos),
+            user_ids=[member.user.id])
 
     # #70 3)
     device_push.broadcast_album_sync(user.id, album.id)
