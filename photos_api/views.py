@@ -17,7 +17,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from phone_auth.signals import user_avatar_changed
 from photos_api.permissions import IsUserInAlbum, UserDetailsPagePermission, \
-    IsSameUserOrStaff
+    IsSameUserOrStaff, UpdateAllowedAttributesPermission
 from photos_api.parsers import PhotoUploadParser
 from photos_api import device_push, is_phone_number_mobile
 from phone_auth.models import AnonymousPhoneNumber, random_default_avatar_file_data, User, PhoneContact, PhoneNumber
@@ -80,10 +80,13 @@ def parse_phone_number(phone_number, default_country):
 
 
 @supports_etag
-class AlbumDetail(generics.RetrieveAPIView):
+class AlbumDetail(generics.RetrieveUpdateAPIView):
     model = Album
     serializer_class = AlbumSerializer
-    permission_classes = (IsUserInAlbum,)
+    permission_classes = (IsUserInAlbum, UpdateAllowedAttributesPermission)
+
+    # These attributes can be changed with PUT and PATCH request
+    allowed_attributes_to_change = ['name']
 
     def initial(self, request, pk, *args, **kwargs):
         self.album = get_object_or_404(Album, pk=pk)
@@ -134,6 +137,19 @@ class AlbumDetail(generics.RetrieveAPIView):
 
         responseSerializer = (self.get_serializer_class())(self.get_object(), context={'request': request})
         return Response(responseSerializer.data)
+
+    def put(self, request, *args, **kwargs):
+        return Response(u"PUT method not supported",
+            status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, *args, **kwargs):
+        """PATCH handler"""
+        if self.is_staff:
+            return Response(u"Update not possible for staff users",
+                status=status.HTTP_400_BAD_REQUEST)
+
+        self.check_permissions(request)
+        return super(AlbumDetail, self).patch(request, *args, **kwargs)
 
 
 class AlbumMembersView(generics.CreateAPIView):
@@ -221,17 +237,10 @@ class UserDetail(generics.RetrieveUpdateAPIView):
     """
     model = auth.get_user_model()
     serializer_class = UserSerializer
-    permission_classes = (UserDetailsPagePermission,)
+    permission_classes = (UserDetailsPagePermission, UpdateAllowedAttributesPermission)
 
     # These attributes can be changed with PUT or PATCH request
-    __allowed_attributes_to_change = ['nickname']
-
-    def __check_update_attr_permissions(self, request):
-        """Ensure that only allowed attributes can be changed"""
-        for key, value in request.DATA.iteritems():
-            if key not in self.__allowed_attributes_to_change:
-                raise PermissionDenied("You are not allowed to "
-                                       "change '{0}'".format(key))
+    allowed_attributes_to_change = ['nickname']
 
     def get_queryset(self):
         """For PUT and PATCH requests limit queryset to only user
@@ -244,13 +253,12 @@ class UserDetail(generics.RetrieveUpdateAPIView):
 
     def put(self, request, *args, **kwargs):
         """PUT handler"""
-        self.__check_update_attr_permissions(request)
+        self.check_permissions(request)
         return super(UserDetail, self).put(request, *args, **kwargs)
 
     def patch(self, request, *args, **kwargs):
         """PATCH handler"""
         self.check_permissions(request)
-        self.__check_update_attr_permissions(request)
         return super(UserDetail, self).patch(request, *args, **kwargs)
 
 

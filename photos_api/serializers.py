@@ -78,7 +78,7 @@ class AlbumMemberSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'date_created', 'last_updated', 'members', 'photos', 'num_new_photos', 'last_access')
 
     id = serializers.IntegerField(source='album.id')
-    name = serializers.Field(source='album_name')
+    name = serializers.CharField(source='album_name')
     date_created = serializers.Field(source='album.date_created')
     last_updated = serializers.Field(source='album.last_updated')
     photos = PhotoSerializer(source='album.get_photos')
