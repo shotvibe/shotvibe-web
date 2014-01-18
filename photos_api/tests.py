@@ -256,6 +256,44 @@ class UserTest(BaseTestCase):
         self.assertEqual(phone_numbers[0]['user_id'], fred.id)
         self.assertEqual(phone_numbers[0]['avatar_url'], initial_avatar)
 
+
+class AlbumTest(BaseTestCase):
+    def setUp(self):
+        self.client.login(username='2', password='amanda')
+
+    def test_update(self):
+        response = self.client.get('/albums/8/')
+        album = json.loads(response.content)
+        self.assertEqual(album['name'], u'hep make sandlots mechanisms')
+
+        # can't update any of these fields
+        disallowed_attrs = {
+            'id': 23423423,
+            'user_id': 123,
+            'album_id': 1234,
+            'url': 'http://example.com/123',
+            'date_created': timezone.now(),
+            'last_updated': timezone.now(),
+            'last_access': timezone.now()
+        }
+
+        for attr_name, value in disallowed_attrs.iteritems():
+            data = {attr_name: value}
+            response = self.client.post('/albums/8/', data,
+                REQUEST_METHOD=str('PATCH'))
+
+        """
+        # can update field name
+        data = {'name': 'zxc'}
+        response = self.client.post('/albums/8/', data,
+            REQUEST_METHOD=str('PATCH'))
+        self.assertEqual(response.status_code, 200)
+
+        album = json.loads(response.content)
+        self.assertEqual(album['name'], u'zxc')
+        """
+
+
 class NotModifiedTest(BaseTestCase):
     def setUp(self):
         self.client.login(username='2', password='amanda')
