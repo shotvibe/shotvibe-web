@@ -81,6 +81,10 @@ Delete photos that a user has uploaded.
 
 Used to add photos or members to an album.
 
+### PATCH /albums/{aid}/
+
+Used to change album properties (such as name).
+
 ### POST /albums/{aid}/leave/
 
 Used to leave an album.
@@ -812,7 +816,24 @@ Example request:
         ]
     }
 
-The response returned is the same as for `GET /albums/{aid}/`, with the updated album
+The response returned is the same as for `GET /albums/{aid}/`, with the updated album.
+
+## PATCH /albums/{aid}/
+
+Used to change album properties. Only the album name is supported at this time.
+
+Example request:
+
+    PATCH /albums/5/
+    Authorization: Token 01ba4719c80b6fe911b091a7c05124b64eeece96
+    Content-Type: application/json
+    Content-Length: 26
+
+    {
+        "name": "new name"
+    }
+
+The response returned is the same as for `GET /albums/{aid}/`, with the updated album.
 
 ## POST /albums/{aid}/leave/
 
