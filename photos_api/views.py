@@ -80,7 +80,7 @@ def parse_phone_number(phone_number, default_country):
 
 
 @supports_etag
-class AlbumDetail(generics.RetrieveUpdateAPIView):
+class AlbumDetail(generics.RetrieveAPIView):
     model = Album
     serializer_class = AlbumSerializer
     permission_classes = (IsUserInAlbum, UpdateAllowedAttributesPermission)
@@ -149,7 +149,22 @@ class AlbumDetail(generics.RetrieveUpdateAPIView):
                 status=status.HTTP_400_BAD_REQUEST)
 
         self.check_permissions(request)
-        return super(AlbumDetail, self).patch(request, *args, **kwargs)
+
+        album_member = self.get_object()
+
+        # this will update album_member
+        serializer = AlbumMemberSerializer(album_member,
+            data=request.DATA, partial=True)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST)
+
+        album_member.save()
+
+        responseSerializer = AlbumMemberSerializer(album_member,
+            context={'request': request})
+        return Response(responseSerializer.data)
 
 
 class AlbumMembersView(generics.CreateAPIView):

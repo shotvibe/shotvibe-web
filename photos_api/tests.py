@@ -282,7 +282,6 @@ class AlbumTest(BaseTestCase):
             response = self.client.post('/albums/8/', data,
                 REQUEST_METHOD=str('PATCH'))
 
-        """
         # can update field name
         data = {'name': 'zxc'}
         response = self.client.post('/albums/8/', data,
@@ -291,7 +290,6 @@ class AlbumTest(BaseTestCase):
 
         album = json.loads(response.content)
         self.assertEqual(album['name'], u'zxc')
-        """
 
 
 class NotModifiedTest(BaseTestCase):
