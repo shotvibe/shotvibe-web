@@ -14,6 +14,10 @@ from phone_auth.serializers import AuthorizePhoneNumberSerializer, ConfirmSMSCod
 
 from phone_auth.models import AuthToken, PhoneNumber, PhoneNumberLinkCode
 
+from photos.models import Album
+from phone_auth.models import User
+from photos_api.serializers import MemberIdentifier
+
 class AuthorizePhoneNumber(APIView):
     serializer_class = AuthorizePhoneNumberSerializer
 
@@ -48,6 +52,14 @@ class ConfirmSMSCode(APIView):
                 return Response({ 'detail': '"confirmation_key" has expired. Please request a new one.' }, status=status.HTTP_410_GONE)
             else:
                 raise NotImplementedError('Unknown failure')
+
+        custom_payload = request.GET.get('custom_payload')
+        if custom_payload:
+            if custom_payload == 'dolev-event-2014-01-24':
+                eventAlbum = Album.objects.get(id=1361)
+
+                inviter = User.objects.get(id=475535083)
+                eventAlbum.add_members(inviter, [MemberIdentifier(user_id=result.user.id)])
 
         return Response({
             'user_id': result.user.id,
@@ -110,6 +122,16 @@ def app_init(request):
         # invite link. The user will have to register with his phone number
         # inside the app. We still give the app the user's country_code, to
         # make it easier for him to enter his phone number.
+
+        custom_payload = request.session.get('custom_payload')
+        if custom_payload:
+            if app == 'android':
+                response['Location'] = app_url_scheme + '://shotvibe/start_unregistered/?country_code=' + country_code + '&custom_payload=' + custom_payload
+            elif app == 'iphone':
+                response['Location'] = app_url_scheme + '://shotvibe/start_unregistered/?country_code=' + country_code + '&custom_payload=' + custom_payload
+
+            return response
+
         if app == 'android':
             response['Location'] = app_url_scheme + '://shotvibe/start_unregistered/?country_code=' + country_code
         elif app == 'iphone':
