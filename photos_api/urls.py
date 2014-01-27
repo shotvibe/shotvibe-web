@@ -21,6 +21,8 @@ urlpatterns = patterns('',
     url(r'^photos/delete/$', views.DeletePhotosView.as_view(), name='photos-delete'),
     url(r'^photos/upload_request/$', views.photos_upload_request, name='photos-upload-request'),
     url(r'^photos/upload/(?P<photo_id>[\w-]+)/$', views.PhotoUpload.as_view(), name='photo-upload'),
+    url(r'^photos/auth/(?P<photo_id>[\w-]+)/$', views.photo_auth, name='photo-auth'),
+    url(r'^photos/notify/(?P<photo_id>[\w-]+)/$', views.photo_notify, name='photo-notify'),
     url(r'^query_phone_numbers/$', views.QueryPhoneNumbers.as_view(),
         name='query-phone-numbers')
 )

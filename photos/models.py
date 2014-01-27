@@ -4,6 +4,7 @@ from django.db.models import Max
 import os
 import random
 import datetime
+import requests
 
 from django.conf import settings
 from django.db import models
@@ -196,10 +197,7 @@ class AlbumMember(models.Model):
 
 
 all_photo_buckets = (
-        'local:photos01',
-        'local:photos02',
-        'local:photos03',
-        'local:photos04',
+        's3:shotvibe-upload-test',
         )
 
 
@@ -235,6 +233,8 @@ class Photo(models.Model):
         location, directory = self.bucket.split(':')
         if location == 'local':
             return settings.LOCAL_PHOTO_BUCKET_URL_FORMAT_STR.format(directory, self.photo_id)
+        elif location == 's3':
+            return 'http://s3.amazonaws.com/%s/%s.jpg' % (directory, self.photo_id)
         else:
             raise ValueError('Unknown photo bucket location: ' + location)
 
@@ -266,12 +266,55 @@ def get_pending_photo_default_photo_id():
 def get_pending_photo_default_bucket():
     return random.choice(all_photo_buckets)
 
+
 class PendingPhoto(models.Model):
     photo_id = models.CharField(primary_key=True, max_length=128, default=get_pending_photo_default_photo_id)
     bucket = models.CharField(max_length=64, choices=zip(all_photo_buckets, all_photo_buckets),
                               default=get_pending_photo_default_bucket)
     start_time = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(settings.AUTH_USER_MODEL)
+
+    def get_or_wait_for_photo(self, album, date_created):
+        try:
+            photo = Photo.objects.get(photo_id=self.photo_id)
+        except Photo.DoesNotExist:
+            pass
+        else:
+            return photo
+
+        # TODO: rewrite this
+        # get server address from self.server (set by notifyUpload)
+        r = requests.get('http://localhost:3333/photos/check?ids=' + self.photo_id)
+        if r.status_code != 200:
+            # TODO: handle error
+            # if a server is inacessible it is possible to choose any server
+            # in that case the chosen server will download the image from s3 and reprocess it
+            return
+
+        album_index_q = Photo.objects.filter(album=album)\
+            .aggregate(Max('album_index'))
+        album_index = album_index_q['album_index__max']
+        if album_index is None:
+            album_index = 0
+        else:
+            album_index += 1
+
+        new_photo = Photo.objects.create(
+            photo_id=self.photo_id,
+            bucket=self.bucket,
+            date_created=date_created,
+            author=self.author,
+            album=album,
+            album_index=album_index,
+            width=0,
+            height=0
+        )
+
+        self.delete()
+
+        album.save_revision(date_created)
+
+        return new_photo
 
     def get_or_process_uploaded_image_and_create_photo(self, album, date_created):
         """

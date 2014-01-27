@@ -123,7 +123,7 @@ class AlbumDetail(generics.RetrieveAPIView):
 
             # Upload pending photos. For photos that already uploaded this will simply return photo
             pending_photos = PendingPhoto.objects.filter(photo_id__in=serializer.object.add_photos)
-            photos = [pf.get_or_process_uploaded_image_and_create_photo(self.album, now) for pf in pending_photos]
+            photos = [pf.get_or_wait_for_photo(self.album, now) for pf in pending_photos]
 
             photos_added_to_album.send(sender=self,
                                        photos=photos,
@@ -414,10 +414,38 @@ def photos_upload_request(request, format=None):
         pending_photo = PendingPhoto.objects.create(author=request.user)
         response_data.append({
             'photo_id': pending_photo.photo_id,
-            'upload_url': reverse('photo-upload', [pending_photo.photo_id], request=request)
+            # TODO: get the load balancer url from settings
+            'upload_url': 'http://192.168.2.2:3333/photos/upload/' + pending_photo.photo_id
             })
 
     return Response(response_data)
+
+
+@api_view(['GET'])
+@permission_classes((IsAuthenticated, ))
+def photo_auth(request, photo_id):
+    # TODO: make sure only photo-upload-handler can access this endpoint
+
+    pending_photo = get_object_or_404(PendingPhoto, pk=photo_id)
+    if pending_photo.author != request.user:
+        return Response(status=403)
+
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['POST'])
+def photo_notify(request, photo_id):
+    # TODO: make sure only photo-upload-handler can access this endpoint
+
+    pending_photo = get_object_or_404(PendingPhoto, pk=photo_id)
+
+    # TODO: get s3 bucket and server from request body
+
+    #pending_photo.bucket = 's3:shotvibe-upload-test'
+    #pending_photo.server = 'localhost:3333'
+    #pending_photo.save()
+
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class PhotoUpload(views.APIView):
