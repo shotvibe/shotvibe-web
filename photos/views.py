@@ -12,11 +12,11 @@ def processed_photos(request):
     now_processed_photos = []
     num_processed = 0
     for photo in Photo.objects.all():
-        if image_uploads.photo_is_processed(photo.bucket, photo.photo_id):
+        if image_uploads.photo_is_processed(photo.storage_id):
             already_processed_photos.append(photo)
         else:
             if 'process_photos' in request.POST and num_processed < int(request.POST['num_photos']):
-                image_uploads.process_uploaded_image(photo.bucket, photo.photo_id)
+                image_uploads.process_uploaded_image(photo.storage_id)
                 now_processed_photos.append(photo)
                 num_processed += 1
             else:

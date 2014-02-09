@@ -101,21 +101,15 @@ image_sizes = {
         '940x570': BoxFitConstrainOnlyShrink(940, 570)
         }
 
-def photo_is_processed(bucket, photo_id):
-    location, directory = bucket.split(':')
-    if location != 'local':
-        raise ValueError('Unknown photo bucket location: ' + location)
-
-    bucket_directory = os.path.join(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, directory)
-
+def photo_is_processed(storage_id):
     # Check that the original file exists
-    img_file_path = os.path.join(bucket_directory, photo_id + '.jpg')
+    img_file_path = os.path.join(settings.LOCAL_PHOTOS_DIRECTORY, storage_id + '.jpg')
     if not os.path.isfile(img_file_path):
         return False
 
     # Check that all the processed resized images exist
     for image_size_str in image_sizes.iterkeys():
-        resized_img_file_path = os.path.join(bucket_directory, photo_id + '_' + image_size_str + '.jpg')
+        resized_img_file_path = os.path.join(settings.LOCAL_PHOTOS_DIRECTORY, storage_id + '_' + image_size_str + '.jpg')
         if not os.path.isfile(resized_img_file_path):
             return False
 
@@ -194,13 +188,8 @@ def get_best_mipmap(mipmaps, width, height):
     # No matches found, return the largest mipmap (will be the original image):
     return mipmaps[-1][1]
 
-def process_uploaded_image(bucket, photo_id):
-    location, directory = bucket.split(':')
-    if location != 'local':
-        raise ValueError('Unknown photo bucket location: ' + location)
-
-    bucket_directory = os.path.join(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, directory)
-    img_file_path = os.path.join(bucket_directory, photo_id + '.jpg')
+def process_uploaded_image(storage_id):
+    img_file_path = os.path.join(settings.LOCAL_PHOTOS_DIRECTORY, storage_id + '.jpg')
 
     img = load_image_correct_orientation(img_file_path)
     (img_width, img_height) = (img.size[0], img.size[1])
@@ -218,11 +207,11 @@ def process_uploaded_image(bucket, photo_id):
     for image_size_str, image_dimensions_calculator in image_sizes.iteritems():
         (new_width, new_height) = image_dimensions_calculator.get_image_dimensions(img_width, img_height)
 
-        filename = photo_id + '_' + image_size_str + '.jpg'
+        filename = storage_id + '_' + image_size_str + '.jpg'
 
         saved_image = get_matching_saved_image(new_width, new_height)
         if saved_image:
-            symlink_name = os.path.join(bucket_directory, filename)
+            symlink_name = os.path.join(settings.LOCAL_PHOTOS_DIRECTORY, filename)
             if os.path.isfile(symlink_name):
                 os.remove(symlink_name)
             os.symlink(saved_image, symlink_name)
@@ -235,19 +224,24 @@ def process_uploaded_image(bucket, photo_id):
             new_img = mipmap.resize((new_width, new_height), Image.BILINEAR)
         else:
             new_img = ImageOps.fit(mipmap, (new_width, new_height), Image.BILINEAR, 0, (0.5, 0.5))
-        new_img.save(os.path.join(bucket_directory, filename))
+        new_img.save(os.path.join(settings.LOCAL_PHOTOS_DIRECTORY, filename))
         saved_images.append(((new_width, new_height), filename))
 
     return (img_width, img_height)
 
-def handle_file_upload(directory, photo_id, chunks):
-    bucket_directory = os.path.join(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, directory)
-    mkdir_p(bucket_directory)
-    save_file_path = os.path.join(bucket_directory, photo_id + '.jpg')
+def process_file_upload(pending_photo, chunks):
+    mkdir_p(settings.LOCAL_PHOTOS_DIRECTORY)
+    save_file_path = os.path.join(settings.LOCAL_PHOTOS_DIRECTORY, pending_photo.storage_id + '.jpg')
 
     with open(save_file_path, 'wb') as f:
         for chunk in chunks:
             f.write(chunk)
+
+    # TODO verify image
+
+    process_uploaded_image(pending_photo.storage_id)
+
+    pending_photo.set_uploaded()
 
 # Taken from <http://stackoverflow.com/a/600612>
 def mkdir_p(path):

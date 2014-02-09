@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import auth
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
@@ -5,7 +6,7 @@ from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.utils import timezone
 
-from photos.models import Album, Photo, PendingPhoto, AlbumMember
+from photos.models import Album, Photo, AlbumMember
 from photos import image_uploads
 from photos_api.serializers import MemberIdentifier
 from photos_api.signals import photos_added_to_album
@@ -45,26 +46,28 @@ def album(request, pk):
 
     if request.POST:
         if 'add_photos' in request.POST:
-            pending_photos = []
+            pending_photo_ids = []
             for f in request.FILES.getlist('photo_files'):
 
-                pending_photo = PendingPhoto.objects.create(author=request.user)
-                location, directory = pending_photo.bucket.split(':')
-                if location != 'local':
-                    raise ValueError('Unknown photo bucket location: ' + location)
+                pending_photo = Photo.objects.upload_request(author=request.user)
 
-                image_uploads.handle_file_upload(directory, pending_photo.photo_id, f.chunks())
-                pending_photos.append(pending_photo)
+                if settings.USING_LOCAL_PHOTOS:
+                    image_uploads.process_file_upload(pending_photo, f.chunks())
+                else:
+                    # TODO Forward request to upload server
+                    pass
+
+                pending_photo_ids.append(pending_photo.photo_id)
                 num_photos_added += 1
 
             # Upload pending photos
             now = timezone.now()
-            photos = [pf.get_or_process_uploaded_image_and_create_photo(album, now) for pf in pending_photos]
+            Photo.objects.add_pending_photos_to_album(pending_photo_ids, album, now)
 
             # TODO: If this function will be refactored to use Class Based Views
             # change sender from `request` to `self` (View instance)
             photos_added_to_album.send(sender=request,
-                                       photos=photos,
+                                       photos=pending_photo_ids,
                                        by_user=request.user,
                                        to_album=album)
 

@@ -195,27 +195,105 @@ class AlbumMember(models.Model):
             self.save(update_fields=['last_access'])
 
 
-all_photo_buckets = (
-        'local:photos01',
-        'local:photos02',
-        'local:photos03',
-        'local:photos04',
+all_photo_subdomains = (
+        'photos01',
+        'photos02',
+        'photos03',
+        'photos04',
         )
 
 
 class PhotoManager(models.Manager):
-    pass
+    def upload_request(self, author):
+        success = False
+        while not success:
+            new_photo_id = Photo.generate_photo_id()
+            new_storage_id = Photo.generate_photo_id()
+
+            new_pending_photo = PendingPhoto.objects.create(
+                    photo_id = new_photo_id,
+                    storage_id = new_storage_id,
+                    file_uploaded = False,
+                    start_time = timezone.now(),
+                    author = author
+                    )
+
+            # Make sure that there is no existing Photo with the same id
+
+            if (not Photo.objects.filter(photo_id=new_photo_id).exists() and
+                   not Photo.objects.filter(storage_id=new_storage_id).exists()):
+                success = True
+            else:
+                new_pending_photo.delete()
+
+        return new_pending_photo
+
+    def add_pending_photos_to_album(self, photo_ids, album, date_created):
+        """
+        May throw 'AddPhotoException'
+        """
+
+        def photo_not_already_added(photo_id):
+            try:
+                Photo.objects.get(photo_id=photo_id)
+            except Photo.DoesNotExist:
+                return True
+            else:
+                return False
+
+        # Skip photos that have already been added
+        photo_ids = filter(photo_not_already_added, photo_ids)
+
+        # Make sure that all photos have been already uploaded
+        for photo_id in photo_ids:
+            try:
+                pending_photo = PendingPhoto.objects.get(photo_id=photo_id)
+            except PendingPhoto.DoesNotExist:
+                raise Photo.InvalidPhotoIdAddPhotoException()
+
+            if not pending_photo.file_uploaded:
+                raise Photo.PhotoNotUploadedAddPhotoException()
+
+        if not settings.USING_LOCAL_PHOTOS:
+            # TODO Check with the photo upload handler that all photos have completed processing
+            pass
+
+        album_index_q = Photo.objects.filter(album=album).aggregate(Max('album_index'))
+
+        max_album_index = album_index_q['album_index__max']
+        if max_album_index is None:
+            next_album_index = 0
+        else:
+            next_album_index = max_album_index + 1
+
+        for photo_id in photo_ids:
+            pending_photo = PendingPhoto.objects.get(photo_id=photo_id)
+
+            Photo.objects.create(
+                photo_id=photo_id,
+                storage_id = pending_photo.storage_id,
+                subdomain = random.choice(all_photo_subdomains),
+                date_created = date_created,
+                author=pending_photo.author,
+                album=album,
+                album_index = next_album_index,
+            )
+
+            next_album_index += 1
+
+            pending_photo.delete()
+
+        album.save_revision(date_created)
 
 
 class Photo(models.Model):
     photo_id = models.CharField(primary_key=True, max_length=128)
-    bucket = models.CharField(max_length=64)
+    storage_id = models.CharField(max_length=128, db_index=True)
+    subdomain = models.CharField(max_length=64)
     date_created = models.DateTimeField(db_index=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL)
     album = models.ForeignKey(Album)
     album_index = models.PositiveIntegerField(db_index=True)
-    width = models.IntegerField()
-    height = models.IntegerField()
 
     objects = PhotoManager()
 
@@ -226,17 +304,25 @@ class Photo(models.Model):
     def __unicode__(self):
         return self.photo_id
 
+    class AddPhotoException(Exception):
+        pass
+
+    class PhotoNotUploadedAddPhotoException(AddPhotoException):
+        pass
+
+    class InvalidPhotoIdAddPhotoException(AddPhotoException):
+        pass
+
     @staticmethod
     def generate_photo_id():
         key_bitsize = 256
         return ''.join(["{0:02x}".format(ord(c)) for c in os.urandom(key_bitsize / 8)])
 
     def get_photo_url(self):
-        location, directory = self.bucket.split(':')
-        if location == 'local':
-            return settings.LOCAL_PHOTO_BUCKET_URL_FORMAT_STR.format(directory, self.photo_id)
+        if settings.USING_LOCAL_PHOTOS:
+            return '/photos/' + self.subdomain + '/' + self.photo_id + '.jpg'
         else:
-            raise ValueError('Unknown photo bucket location: ' + location)
+            return settings.PHOTO_SERVER_URL_FORMAT_STR.format(self.subdomain, self.photo_id + '.jpg')
 
     def get_photo_url_no_ext(self):
         """
@@ -263,52 +349,13 @@ def get_pending_photo_default_photo_id():
         photo_id_generated = True
     return photo_id
 
-def get_pending_photo_default_bucket():
-    return random.choice(all_photo_buckets)
-
 class PendingPhoto(models.Model):
-    photo_id = models.CharField(primary_key=True, max_length=128, default=get_pending_photo_default_photo_id)
-    bucket = models.CharField(max_length=64, choices=zip(all_photo_buckets, all_photo_buckets),
-                              default=get_pending_photo_default_bucket)
+    photo_id = models.CharField(primary_key=True, max_length=128)
+    storage_id = models.CharField(unique=True, max_length=128)
+    file_uploaded = models.BooleanField()
     start_time = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(settings.AUTH_USER_MODEL)
 
-    def get_or_process_uploaded_image_and_create_photo(self, album, date_created):
-        """
-        For already uploaded photos it will simply return photo.
-        For pending photo it will process uploaded image, create Photo object and return it.
-        """
-        try:
-            photo = Photo.objects.get(photo_id=self.photo_id)
-        except Photo.DoesNotExist:
-            pass
-        else:
-            return photo
-
-        # TODO catch exception:
-        width, height = image_uploads.process_uploaded_image(self.bucket, self.photo_id)
-
-        album_index_q = Photo.objects.filter(album=album)\
-            .aggregate(Max('album_index'))
-        album_index = album_index_q['album_index__max']
-        if album_index is None:
-            album_index = 0
-        else:
-            album_index += 1
-
-        new_photo = Photo.objects.create(
-            photo_id=self.photo_id,
-            bucket=self.bucket,
-            date_created=date_created,
-            author=self.author,
-            album=album,
-            album_index=album_index,
-            width=width,
-            height=height
-        )
-
-        self.delete()
-
-        album.save_revision(date_created)
-
-        return new_photo
+    def set_uploaded(self):
+        self.file_uploaded = True
+        self.save(update_fields=['file_uploaded'])

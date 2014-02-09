@@ -30,7 +30,8 @@ else:
     User = get_user_model()
 
 
-@override_settings(LOCAL_PHOTO_BUCKETS_BASE_PATH='.tmp_photo_buckets')
+@override_settings(USING_LOCAL_PHOTOS=True)
+@override_settings(LOCAL_PHOTOS_DIRECTORY='.tmp_photos')
 class BaseTestCase(TestCase):
     fixtures = ['tests/test_users', 'tests/test_albums']
     urls = 'photos_api.urls'
@@ -464,7 +465,7 @@ class PhotoTests(BaseTestCase):
         self.client.login(username='2', password='amanda')
 
     def tearDown(self):
-        shutil.rmtree(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, ignore_errors=True)
+        shutil.rmtree(settings.LOCAL_PHOTOS_DIRECTORY, ignore_errors=True)
 
     def upload_and_add_photo_to_album(self, album_id, client=None):
         if not client:
@@ -528,7 +529,7 @@ class PhotoUpload(BaseTestCase):
         self.client.login(username='2', password='amanda')
 
     def tearDown(self):
-        shutil.rmtree(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, ignore_errors=True)
+        shutil.rmtree(settings.LOCAL_PHOTOS_DIRECTORY, ignore_errors=True)
 
     def test_upload_single_post(self):
         upload_request_response = self.client.post('/photos/upload_request/')
@@ -546,8 +547,8 @@ class PhotoUpload(BaseTestCase):
         self.assertEqual(upload_response.status_code, 200)
 
         photo_pending = PendingPhoto.objects.get(pk=photo_id)
-        directory = photo_pending.bucket.split(':')[1]
-        uploaded_photo_path = os.path.join(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, directory, photo_id + '.jpg')
+        storage_id = photo_pending.storage_id
+        uploaded_photo_path = os.path.join(settings.LOCAL_PHOTOS_DIRECTORY, storage_id + '.jpg')
         self.assertTrue(filecmp.cmp(test_photo_path, uploaded_photo_path, shallow=False))
 
     def test_upload_single_put(self):
@@ -566,8 +567,8 @@ class PhotoUpload(BaseTestCase):
         self.assertEqual(upload_response.status_code, 200)
 
         photo_pending = PendingPhoto.objects.get(pk=photo_id)
-        directory = photo_pending.bucket.split(':')[1]
-        uploaded_photo_path = os.path.join(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, directory, photo_id + '.jpg')
+        storage_id = photo_pending.storage_id
+        uploaded_photo_path = os.path.join(settings.LOCAL_PHOTOS_DIRECTORY, storage_id + '.jpg')
         self.assertTrue(filecmp.cmp(test_photo_path, uploaded_photo_path, shallow=False))
 
     def test_add_to_album(self):

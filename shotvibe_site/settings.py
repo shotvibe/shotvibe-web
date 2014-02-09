@@ -91,6 +91,8 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+USING_LOCAL_PHOTOS = False
+
 ROOT_URLCONF = 'shotvibe_site.urls'
 
 SUBDOMAIN_URLCONFS = {
