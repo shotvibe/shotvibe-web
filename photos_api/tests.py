@@ -995,7 +995,7 @@ class PrivateApiTestCase(BaseTestCase):
                 content_type="application/json")
         self.assertEqual(result.status_code, 400)
 
-    def test_photo_upload_user_auth_failed(self):
+    def test_photo_upload_init_user_auth_failed(self):
         body = { 'user_auth_token': 'invalid-token' }
         response = self.client.post(reverse('photo-upload-init', kwargs={'photo_id':'dummy-photo-id'}),
                 HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY,
@@ -1006,7 +1006,7 @@ class PrivateApiTestCase(BaseTestCase):
         self.assertEqual(response_data['success'], False)
         self.assertEqual(response_data['error'], 'user_auth_failed')
 
-    def test_photo_upload_invalid_photo_id(self):
+    def test_photo_upload_init_invalid_photo_id(self):
         amanda = User.objects.get(nickname='amanda')
         user_auth_token = AuthToken.objects.create_auth_token(amanda, 'Test Token', timezone.now())
         body = { 'user_auth_token': user_auth_token.key }
@@ -1017,7 +1017,7 @@ class PrivateApiTestCase(BaseTestCase):
 
         self.assertEqual(response.status_code, 404)
 
-    def test_photo_upload_ok(self):
+    def test_photo_upload_init_ok(self):
         amanda = User.objects.get(nickname='amanda')
         user_auth_token = AuthToken.objects.create_auth_token(amanda, 'Test Token', timezone.now())
         pending_photo = Photo.objects.upload_request(amanda)
