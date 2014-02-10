@@ -1,3 +1,5 @@
+from django.shortcuts import get_object_or_404
+
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -10,7 +12,7 @@ from photos.models import PendingPhoto
 
 @api_view(['POST'])
 @permission_classes((IsAllowedPrivateAPI, ))
-def photo_upload_init(request):
+def photo_upload_init(request, photo_id):
     serializer = PhotoUploadInitSerializer(data=request.DATA)
 
     if not serializer.is_valid():
@@ -25,13 +27,7 @@ def photo_upload_init(request):
             'detail': e.detail
             })
 
-    try:
-        pending_photo = PendingPhoto.objects.get(photo_id=serializer.object['photo_id'])
-    except PendingPhoto.DoesNotExist:
-        return Response({
-            'success': False,
-            'error': 'invalid_photo_id'
-            })
+    pending_photo = get_object_or_404(PendingPhoto, pk=photo_id)
 
     if pending_photo.author != user:
         return Response({

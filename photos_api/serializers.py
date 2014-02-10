@@ -225,5 +225,4 @@ class QueryPhonesRequestSerializer(serializers.Serializer):
         return attrs
 
 class PhotoUploadInitSerializer(serializers.Serializer):
-    photo_id = serializers.CharField()
     user_auth_token = serializers.CharField()

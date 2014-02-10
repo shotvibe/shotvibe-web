@@ -974,33 +974,30 @@ class TestPhoneNumberMobile(TestCase):
 @override_settings(PRIVATE_API_KEY="the-secret-api-key")
 class PrivateApiTestCase(BaseTestCase):
     def test_no_authorization_header(self):
-        result = self.client.post(reverse('photo-upload-init'))
+        result = self.client.post(reverse('photo-upload-init', kwargs={'photo_id':'dummy-photo-id'}))
         self.assertEqual(result.status_code, 401)
 
     def test_wrong_authorization_header(self):
-        result = self.client.post(reverse('photo-upload-init'),
+        result = self.client.post(reverse('photo-upload-init', kwargs={'photo_id':'dummy-photo-id'}),
                 HTTP_AUTHORIZATION='Key wrong-secret')
         self.assertEqual(result.status_code, 401)
 
     def test_correct_authentication(self):
-        result = self.client.post(reverse('photo-upload-init'),
+        result = self.client.post(reverse('photo-upload-init', kwargs={'photo_id':'dummy-photo-id'}),
                 HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY)
         self.assertNotEqual(result.status_code, 401)
 
     def test_photo_upload_init_bad_request(self):
         bad_data = { 'foo': 'bar' }
-        result = self.client.post(reverse('photo-upload-init'),
+        result = self.client.post(reverse('photo-upload-init', kwargs={'photo_id':'dummy-photo-id'}),
                 HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY,
                 data=json.dumps(bad_data),
                 content_type="application/json")
         self.assertEqual(result.status_code, 400)
 
     def test_photo_upload_user_auth_failed(self):
-        body = {
-                'photo_id': 'blah',
-                'user_auth_token': 'invalid-token'
-                }
-        response = self.client.post(reverse('photo-upload-init'),
+        body = { 'user_auth_token': 'invalid-token' }
+        response = self.client.post(reverse('photo-upload-init', kwargs={'photo_id':'dummy-photo-id'}),
                 HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY,
                 data=json.dumps(body),
                 content_type="application/json")
@@ -1012,29 +1009,20 @@ class PrivateApiTestCase(BaseTestCase):
     def test_photo_upload_invalid_photo_id(self):
         amanda = User.objects.get(nickname='amanda')
         user_auth_token = AuthToken.objects.create_auth_token(amanda, 'Test Token', timezone.now())
-        body = {
-                'photo_id': 'invalid-photo-id',
-                'user_auth_token': user_auth_token.key
-                }
-        response = self.client.post(reverse('photo-upload-init'),
+        body = { 'user_auth_token': user_auth_token.key }
+        response = self.client.post(reverse('photo-upload-init', kwargs={'photo_id':'invalid-photo-id'}),
                 HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY,
                 data=json.dumps(body),
                 content_type="application/json")
 
-        self.assertEqual(response.status_code, 200)
-        response_data = json.loads(response.content)
-        self.assertEqual(response_data['success'], False)
-        self.assertEqual(response_data['error'], 'invalid_photo_id')
+        self.assertEqual(response.status_code, 404)
 
     def test_photo_upload_ok(self):
         amanda = User.objects.get(nickname='amanda')
         user_auth_token = AuthToken.objects.create_auth_token(amanda, 'Test Token', timezone.now())
         pending_photo = Photo.objects.upload_request(amanda)
-        body = {
-                'photo_id': pending_photo.photo_id,
-                'user_auth_token': user_auth_token.key
-                }
-        response = self.client.post(reverse('photo-upload-init'),
+        body = { 'user_auth_token': user_auth_token.key }
+        response = self.client.post(reverse('photo-upload-init', kwargs={'photo_id':pending_photo.photo_id}),
                 HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY,
                 data=json.dumps(body),
                 content_type="application/json")
