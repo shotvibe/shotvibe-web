@@ -54,6 +54,12 @@ DEFAULT_AVATAR_FILES = [
     # ('foo:bar2:avatar_{0}', 41, 78)
 ]
 
+# This is they key that clients must use to authenticate with the private API
+# endpoints.
+#
+# Make sure to change it to something secret!
+PRIVATE_API_KEY = 'ANBQn8iCYxU2evwwg2mrCVIxXaCVZJEo9iZJ16cadd8csMvGwY5UCF2yMfoQIxUE'
+
 # AWS Credentials
 AWS_ACCESS_KEY = "************"
 AWS_SECRET_ACCESS_KEY = "*******************"

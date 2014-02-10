@@ -3,6 +3,7 @@ from django.conf.urls import patterns, url, include
 from rest_framework.urlpatterns import format_suffix_patterns
 
 from photos_api import views
+from photos_api import private_urls
 from photos_api import device_push
 
 urlpatterns = patterns('',
@@ -31,4 +32,8 @@ urlpatterns = format_suffix_patterns(urlpatterns, allowed=['json', 'api'])
 # Default login/logout views
 urlpatterns += patterns('',
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+)
+
+urlpatterns += patterns('',
+    url(r'^private/', include(private_urls))
 )

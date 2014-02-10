@@ -223,3 +223,7 @@ class QueryPhonesRequestSerializer(serializers.Serializer):
     def validate_default_country(self, attrs, source):
         attrs['default_country'] = attrs['default_country'].upper()
         return attrs
+
+class PhotoUploadInitSerializer(serializers.Serializer):
+    photo_id = serializers.CharField()
+    user_auth_token = serializers.CharField()
