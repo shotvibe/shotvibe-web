@@ -1031,3 +1031,14 @@ class PrivateApiTestCase(BaseTestCase):
         response_data = json.loads(response.content)
         self.assertEqual(response_data['success'], True)
         self.assertEqual(response_data['storage_id'], pending_photo.storage_id)
+
+    def test_photo_upload_complete_ok(self):
+        amanda = User.objects.get(nickname='amanda')
+        pending_photo = Photo.objects.upload_request(amanda)
+        self.assertEqual(pending_photo.file_uploaded, False)
+        response = self.client.put(reverse('photo-upload-complete', kwargs={'photo_id':pending_photo.photo_id}),
+                HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY)
+        self.assertEqual(response.status_code, 204)
+        # Refresh pending_photo to get latest data from DB
+        pending_photo = PendingPhoto.objects.get(photo_id=pending_photo.photo_id)
+        self.assertEqual(pending_photo.file_uploaded, True)

@@ -39,3 +39,11 @@ def photo_upload_init(request, photo_id):
         'success': True,
         'storage_id': pending_photo.storage_id
         })
+
+
+@api_view(['PUT'])
+@permission_classes((IsAllowedPrivateAPI, ))
+def photo_upload_complete(request, photo_id):
+    pending_photo = get_object_or_404(PendingPhoto, pk=photo_id)
+    pending_photo.set_uploaded()
+    return Response(status=status.HTTP_204_NO_CONTENT)
