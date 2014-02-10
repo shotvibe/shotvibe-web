@@ -213,7 +213,7 @@ class PhotoManager(models.Manager):
             new_pending_photo = PendingPhoto.objects.create(
                     photo_id = new_photo_id,
                     storage_id = new_storage_id,
-                    file_uploaded = False,
+                    file_uploaded_time = None,
                     start_time = timezone.now(),
                     author = author
                     )
@@ -251,7 +251,7 @@ class PhotoManager(models.Manager):
             except PendingPhoto.DoesNotExist:
                 raise Photo.InvalidPhotoIdAddPhotoException()
 
-            if not pending_photo.file_uploaded:
+            if not pending_photo.is_file_uploaded():
                 raise Photo.PhotoNotUploadedAddPhotoException()
 
         if not settings.USING_LOCAL_PHOTOS:
@@ -352,10 +352,16 @@ def get_pending_photo_default_photo_id():
 class PendingPhoto(models.Model):
     photo_id = models.CharField(primary_key=True, max_length=128)
     storage_id = models.CharField(unique=True, max_length=128)
-    file_uploaded = models.BooleanField()
+    file_uploaded_time = models.DateTimeField(null=True)
     start_time = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(settings.AUTH_USER_MODEL)
 
-    def set_uploaded(self):
-        self.file_uploaded = True
-        self.save(update_fields=['file_uploaded'])
+    def set_uploaded(self, upload_time):
+        if upload_time is None:
+            raise TypeError('upload_time must not be None')
+
+        self.file_uploaded_time = upload_time
+        self.save(update_fields=['file_uploaded_time'])
+
+    def is_file_uploaded(self):
+        return not (self.file_uploaded_time is None)

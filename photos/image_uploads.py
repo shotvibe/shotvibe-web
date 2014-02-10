@@ -4,6 +4,7 @@ from PIL import Image
 from PIL import ImageOps
 
 from django.conf import settings
+from django.utils import timezone
 
 import os, errno
 
@@ -241,7 +242,8 @@ def process_file_upload(pending_photo, chunks):
 
     process_uploaded_image(pending_photo.storage_id)
 
-    pending_photo.set_uploaded()
+    now = timezone.now()
+    pending_photo.set_uploaded(now)
 
 # Taken from <http://stackoverflow.com/a/600612>
 def mkdir_p(path):

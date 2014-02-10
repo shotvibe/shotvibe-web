@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework import status
@@ -45,5 +46,8 @@ def photo_upload_init(request, photo_id):
 @permission_classes((IsAllowedPrivateAPI, ))
 def photo_upload_complete(request, photo_id):
     pending_photo = get_object_or_404(PendingPhoto, pk=photo_id)
-    pending_photo.set_uploaded()
+
+    now = timezone.now()
+    pending_photo.set_uploaded(now)
+
     return Response(status=status.HTTP_204_NO_CONTENT)
