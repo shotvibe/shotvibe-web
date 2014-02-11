@@ -1,6 +1,5 @@
 from django.contrib import auth
 from django.contrib.auth import get_user_model
-from django.db.models import Max
 import os
 import random
 import datetime
@@ -195,14 +194,6 @@ class AlbumMember(models.Model):
             self.save(update_fields=['last_access'])
 
 
-all_photo_subdomains = (
-        'photos01',
-        'photos02',
-        'photos03',
-        'photos04',
-        )
-
-
 class PhotoManager(models.Manager):
     def upload_request(self, author):
         success = False
@@ -214,6 +205,7 @@ class PhotoManager(models.Manager):
                     photo_id = new_photo_id,
                     storage_id = new_storage_id,
                     file_uploaded_time = None,
+                    processing_done_time = None,
                     start_time = timezone.now(),
                     author = author
                     )
@@ -227,63 +219,6 @@ class PhotoManager(models.Manager):
                 new_pending_photo.delete()
 
         return new_pending_photo
-
-    def add_pending_photos_to_album(self, photo_ids, album, date_created):
-        """
-        May throw 'AddPhotoException'
-        """
-
-        def photo_not_already_added(photo_id):
-            try:
-                Photo.objects.get(photo_id=photo_id)
-            except Photo.DoesNotExist:
-                return True
-            else:
-                return False
-
-        # Skip photos that have already been added
-        photo_ids = filter(photo_not_already_added, photo_ids)
-
-        # Make sure that all photos have been already uploaded
-        for photo_id in photo_ids:
-            try:
-                pending_photo = PendingPhoto.objects.get(photo_id=photo_id)
-            except PendingPhoto.DoesNotExist:
-                raise Photo.InvalidPhotoIdAddPhotoException()
-
-            if not pending_photo.is_file_uploaded():
-                raise Photo.PhotoNotUploadedAddPhotoException()
-
-        if not settings.USING_LOCAL_PHOTOS:
-            # TODO Check with the photo upload handler that all photos have completed processing
-            pass
-
-        album_index_q = Photo.objects.filter(album=album).aggregate(Max('album_index'))
-
-        max_album_index = album_index_q['album_index__max']
-        if max_album_index is None:
-            next_album_index = 0
-        else:
-            next_album_index = max_album_index + 1
-
-        for photo_id in photo_ids:
-            pending_photo = PendingPhoto.objects.get(photo_id=photo_id)
-
-            Photo.objects.create(
-                photo_id=photo_id,
-                storage_id = pending_photo.storage_id,
-                subdomain = random.choice(all_photo_subdomains),
-                date_created = date_created,
-                author=pending_photo.author,
-                album=album,
-                album_index = next_album_index,
-            )
-
-            next_album_index += 1
-
-            pending_photo.delete()
-
-        album.save_revision(date_created)
 
 
 class Photo(models.Model):
@@ -303,15 +238,6 @@ class Photo(models.Model):
 
     def __unicode__(self):
         return self.photo_id
-
-    class AddPhotoException(Exception):
-        pass
-
-    class PhotoNotUploadedAddPhotoException(AddPhotoException):
-        pass
-
-    class InvalidPhotoIdAddPhotoException(AddPhotoException):
-        pass
 
     @staticmethod
     def generate_photo_id():
@@ -353,6 +279,7 @@ class PendingPhoto(models.Model):
     photo_id = models.CharField(primary_key=True, max_length=128)
     storage_id = models.CharField(unique=True, max_length=128)
     file_uploaded_time = models.DateTimeField(null=True)
+    processing_done_time = models.DateTimeField(null=True)
     start_time = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(settings.AUTH_USER_MODEL)
 
@@ -365,3 +292,16 @@ class PendingPhoto(models.Model):
 
     def is_file_uploaded(self):
         return not (self.file_uploaded_time is None)
+
+    def set_processing_done(self, done_time):
+        if done_time is None:
+            raise TypeError('upload_time must not be None')
+
+        if not self.is_file_uploaded():
+            raise ValueError("can't set_processing_done when not yet is_file_uploaded")
+
+        self.processing_done_time = done_time
+        self.save(update_fields=['processing_done_time'])
+
+    def is_processing_done(self):
+        return not (self.processing_done_time is None)

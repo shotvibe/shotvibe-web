@@ -240,10 +240,13 @@ def process_file_upload(pending_photo, chunks):
 
     # TODO verify image
 
+    now = timezone.now()
+
+    pending_photo.set_uploaded(now)
+
     process_uploaded_image(pending_photo.storage_id)
 
-    now = timezone.now()
-    pending_photo.set_uploaded(now)
+    pending_photo.set_processing_done(now)
 
 # Taken from <http://stackoverflow.com/a/600612>
 def mkdir_p(path):

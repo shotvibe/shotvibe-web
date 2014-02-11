@@ -10,6 +10,7 @@ from django.test.utils import override_settings
 
 from photos.models import Album, Photo, PendingPhoto, AlbumMember
 from photos import image_uploads
+from photos import photo_operations
 
 def read_in_chunks(file_object, chunk_size=1024):
     """
@@ -57,7 +58,7 @@ class ModelTest(TestCase):
         with open('photos/test_photos/death-valley-sand-dunes.jpg') as f:
             image_uploads.process_file_upload(pending_photo, read_in_chunks(f))
 
-        Photo.objects.add_pending_photos_to_album([pending_photo.photo_id], album, the_date)
+        photo_operations.add_pending_photos_to_album([pending_photo.photo_id], album.id, the_date)
 
         self.assertFalse(PendingPhoto.objects.filter(photo_id=pending_photo.photo_id).exists())
 
@@ -76,8 +77,10 @@ class ModelTest(TestCase):
         with open('photos/test_photos/death-valley-sand-dunes.jpg') as f:
             image_uploads.process_file_upload(pending_photo, read_in_chunks(f))
 
-        Photo.objects.add_pending_photos_to_album([pending_photo.photo_id], the_album, update_date)
+        photo_operations.add_pending_photos_to_album([pending_photo.photo_id], the_album.id, update_date)
 
+        # Refresh the_album to get the latest data from the DB
+        the_album = Album.objects.get(pk=the_album.id)
         self.assertEqual(the_album.last_updated, update_date)
 
 class ImageUploads(TestCase):

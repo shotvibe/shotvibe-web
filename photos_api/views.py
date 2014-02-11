@@ -44,6 +44,8 @@ from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
     AlbumMembersSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
+from photos import photo_operations
+
 
 @api_view(['GET'])
 def api_root(request, format=None):
@@ -124,10 +126,10 @@ class AlbumDetail(generics.RetrieveAPIView):
             photo_ids = serializer.object.add_photos
 
             try:
-                Photo.objects.add_pending_photos_to_album(photo_ids, self.album, now)
-            except Photo.PhotoNotUploadedAddPhotoException:
+                photo_operations.add_pending_photos_to_album(photo_ids, self.album.id, now)
+            except photo_operations.PhotoNotUploadedAddPhotoException:
                 return Response(u"Trying to add a Photo that has not yet been uploaded", status=status.HTTP_400_BAD_REQUEST)
-            except Photo.InvalidPhotoIdAddPhotoException:
+            except photo_operations.InvalidPhotoIdAddPhotoException:
                 return Response(u"Trying to add a Photo with an invalid photo_id", status=status.HTTP_400_BAD_REQUEST)
 
             photos_added_to_album.send(sender=self,
@@ -374,10 +376,10 @@ class Albums(generics.ListAPIView):
         photo_ids = serializer.object.photos
 
         try:
-            Photo.objects.add_pending_photos_to_album(photo_ids, album, now)
-        except Photo.PhotoNotUploadedAddPhotoException:
+            photo_operations.add_pending_photos_to_album(photo_ids, album.id, now)
+        except photo_operations.PhotoNotUploadedAddPhotoException:
             return Response(u"Trying to add a Photo that has not yet been uploaded", status=status.HTTP_400_BAD_REQUEST)
-        except Photo.InvalidPhotoIdAddPhotoException:
+        except photo_operations.InvalidPhotoIdAddPhotoException:
             return Response(u"Trying to add a Photo with an invalid photo_id", status=status.HTTP_400_BAD_REQUEST)
 
         photos_added_to_album.send(sender=self,

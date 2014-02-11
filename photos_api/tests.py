@@ -1036,9 +1036,23 @@ class PrivateApiTestCase(BaseTestCase):
         amanda = User.objects.get(nickname='amanda')
         pending_photo = Photo.objects.upload_request(amanda)
         self.assertFalse(pending_photo.is_file_uploaded())
-        response = self.client.put(reverse('photo-upload-complete', kwargs={'photo_id':pending_photo.photo_id}),
+        response = self.client.put(reverse('photo-file-uploaded', kwargs={'photo_id':pending_photo.photo_id}),
                 HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY)
         self.assertEqual(response.status_code, 204)
         # Refresh pending_photo to get latest data from DB
         pending_photo = PendingPhoto.objects.get(photo_id=pending_photo.photo_id)
         self.assertTrue(pending_photo.is_file_uploaded())
+
+    def test_photo_upload_processing_done_ok(self):
+        amanda = User.objects.get(nickname='amanda')
+        pending_photo = Photo.objects.upload_request(amanda)
+        self.assertFalse(pending_photo.is_processing_done())
+        response = self.client.put(reverse('photo-file-uploaded', kwargs={'photo_id':pending_photo.photo_id}),
+                HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY)
+        self.assertEqual(response.status_code, 204)
+        response = self.client.put(reverse('photo-processing-done', kwargs={'photo_id':pending_photo.photo_id}),
+                HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY)
+        self.assertEqual(response.status_code, 204)
+        # Refresh pending_photo to get latest data from DB
+        pending_photo = PendingPhoto.objects.get(photo_id=pending_photo.photo_id)
+        self.assertTrue(pending_photo.is_processing_done())
