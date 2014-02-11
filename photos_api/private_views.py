@@ -55,8 +55,8 @@ def photo_file_uploaded(request, photo_id):
 
 @api_view(['PUT'])
 @permission_classes((IsAllowedPrivateAPI, ))
-def photo_processing_done(request, photo_id):
-    pending_photo = get_object_or_404(PendingPhoto, pk=photo_id)
+def photo_processing_done(request, storage_id):
+    pending_photo = get_object_or_404(PendingPhoto, storage_id=storage_id)
 
     now = timezone.now()
     pending_photo.set_processing_done(now)

@@ -1050,7 +1050,7 @@ class PrivateApiTestCase(BaseTestCase):
         response = self.client.put(reverse('photo-file-uploaded', kwargs={'photo_id':pending_photo.photo_id}),
                 HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY)
         self.assertEqual(response.status_code, 204)
-        response = self.client.put(reverse('photo-processing-done', kwargs={'photo_id':pending_photo.photo_id}),
+        response = self.client.put(reverse('photo-processing-done', kwargs={'storage_id':pending_photo.storage_id}),
                 HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY)
         self.assertEqual(response.status_code, 204)
         # Refresh pending_photo to get latest data from DB
