@@ -8,6 +8,7 @@ from django.utils import timezone
 
 from photos.models import Album, Photo, AlbumMember
 from photos import image_uploads
+from photos import photo_operations
 from photos_api.serializers import MemberIdentifier
 from photos_api.signals import photos_added_to_album
 
@@ -62,7 +63,7 @@ def album(request, pk):
 
             # Upload pending photos
             now = timezone.now()
-            Photo.objects.add_pending_photos_to_album(pending_photo_ids, album, now)
+            photo_operations.add_pending_photos_to_album(pending_photo_ids, album.id, now)
 
             # TODO: If this function will be refactored to use Class Based Views
             # change sender from `request` to `self` (View instance)
