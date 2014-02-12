@@ -233,6 +233,7 @@ class Photo(models.Model):
     objects = PhotoManager()
 
     class Meta:
+        unique_together = (('album', 'album_index'),)
         get_latest_by = 'album_index'
         ordering = ['album_index']
 
