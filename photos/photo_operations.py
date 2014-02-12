@@ -2,9 +2,12 @@ import Queue
 import random
 import sys
 import threading
+import time
 
 from django.conf import settings
 from django.db.models import Max
+from django.db import IntegrityError
+from django.db import transaction
 import django.db
 
 from photos.models import Album
@@ -71,28 +74,40 @@ class AddPendingPhotosToAlbumAction(ExThread):
         self.album_id = album_id
         self.date_created = date_created
 
-    def get_new_photo_ids(self):
-        def photo_not_already_added(photo_id):
-            try:
-                Photo.objects.get(photo_id=photo_id)
-            except Photo.DoesNotExist:
-                return True
-            else:
-                return False
-
-        # Skip photos that have already been added
-        return filter(photo_not_already_added, self.photo_ids)
-
     def verify_all_uploaded(self, photo_ids):
         # Make sure that all photos have been already uploaded
         for photo_id in photo_ids:
             try:
                 pending_photo = PendingPhoto.objects.get(photo_id=photo_id)
             except PendingPhoto.DoesNotExist:
-                raise InvalidPhotoIdAddPhotoException()
+                # If there is no PendingPhoto but there is a Photo, then we are ok
+                try:
+                    Photo.objects.get(photo_id=photo_id)
+                except Photo.DoesNotExist:
+                    raise InvalidPhotoIdAddPhotoException()
+                else:
+                    pass
+            else:
+                if not pending_photo.is_file_uploaded():
+                    raise PhotoNotUploadedAddPhotoException()
 
-            if not pending_photo.is_file_uploaded():
-                raise PhotoNotUploadedAddPhotoException()
+    def all_processing_done(self, photo_ids):
+        for photo_id in photo_ids:
+            try:
+                pending_photo = PendingPhoto.objects.get(photo_id=photo_id)
+            except PendingPhoto.DoesNotExist:
+                # If there is no PendingPhoto but there is a Photo, then we are ok
+                try:
+                    Photo.objects.get(photo_id=photo_id)
+                except Photo.DoesNotExist:
+                    raise InvalidPhotoIdAddPhotoException()
+                else:
+                    pass
+            else:
+                if not pending_photo.is_processing_done():
+                    return False
+
+        return True
 
     def add_photos_to_db(self, photo_ids):
         album = Album.objects.get(pk=self.album_id)
@@ -105,23 +120,54 @@ class AddPendingPhotosToAlbumAction(ExThread):
             next_album_index = max_album_index + 1
 
         for photo_id in photo_ids:
-            pending_photo = PendingPhoto.objects.get(photo_id=photo_id)
+            try:
+                pending_photo = PendingPhoto.objects.get(photo_id=photo_id)
+            except PendingPhoto.DoesNotExist:
+                try:
+                    Photo.objects.get(pk=photo_id)
+                except Photo.DoesNotExist:
+                    raise InvalidPhotoIdAddPhotoException()
+                else:
+                    pass
+            else:
+                try:
+                    with transaction.atomic():
+                        Photo.objects.create(
+                            photo_id=photo_id,
+                            storage_id = pending_photo.storage_id,
+                            subdomain = random.choice(all_photo_subdomains),
+                            date_created = self.date_created,
+                            author=pending_photo.author,
+                            album=album,
+                            album_index = next_album_index,
+                        )
+                except IntegrityError:
+                    t, v, tb = sys.exc_info()
+                    # Two possible scenarios:
+                    #
+                    # 1)  The album_index we tried to add was already added (by a
+                    #     concurrent request)
+                    #
+                    # 2)  photo_id was already added (by a concurrent request)
 
-            Photo.objects.create(
-                photo_id=photo_id,
-                storage_id = pending_photo.storage_id,
-                subdomain = random.choice(all_photo_subdomains),
-                date_created = self.date_created,
-                author=pending_photo.author,
-                album=album,
-                album_index = next_album_index,
-            )
+                    try:
+                        Photo.objects.get(pk=photo_id)
+                    except Photo.DoesNotExist:
+                        # This is most likely case (1). We let the original
+                        # exception bubble up (the calling code will retry this function)
+                        raise t, v, tb
+                    else:
+                        # This is case (2)
+                        # The photo is already added, so there is nothing to do
+                        pass
+                else:
+                    # Notice that this is only incremented if a new object was
+                    # actually inserted
+                    next_album_index += 1
 
-            next_album_index += 1
-
-            pending_photo.delete()
-
-        album.save_revision(self.date_created)
+                # This is safe to call even if it was already deleted by a
+                # concurrent request (will be a nop)
+                pending_photo.delete()
 
     def run_with_exception(self):
         try:
@@ -130,16 +176,31 @@ class AddPendingPhotosToAlbumAction(ExThread):
             django.db.close_old_connections()
 
     def perform_action(self):
-        new_photo_ids = self.get_new_photo_ids()
-
-        self.verify_all_uploaded(new_photo_ids)
+        self.verify_all_uploaded(self.photo_ids)
 
         if not settings.USING_LOCAL_PHOTOS:
-            # TODO Check with the photo upload handler that all photos have completed processing
-            pass
+            while not self.all_processing_done(self.photo_ids):
+                # TODO This should be more robust and also "kick" the photo
+                # upload server to make sure that no jobs got lost and to
+                # re-prioritize jobs
 
-        with django.db.transaction.atomic():
-            self.add_photos_to_db(new_photo_ids)
+                RETRY_TIME = 1
+
+                time.sleep(RETRY_TIME)
+
+        with transaction.atomic():
+            success = False
+            while not success:
+                try:
+                    with transaction.atomic():
+                        self.add_photos_to_db(self.photo_ids)
+                except IntegrityError:
+                    success = False
+                else:
+                    success = True
+
+            album = Album.objects.get(pk=self.album_id)
+            album.save_revision(self.date_created)
 
 
 def add_pending_photos_to_album(photo_ids, album_id, date_created):
