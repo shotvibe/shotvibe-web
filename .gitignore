@@ -2,4 +2,5 @@
 local_settings.py
 *.pyc
 
+/photo_storage/
 /docs/html/*.html
