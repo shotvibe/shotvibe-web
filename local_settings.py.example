@@ -24,6 +24,11 @@ LOCAL_PHOTOS_DIRECTORY = 'photo_storage'
 # This should be set when USING_LOCAL_PHOTOS = False
 PHOTO_SERVER_URL_FORMAT_STR = 'https://{0}.shotvibe.com/{1}'
 
+# This should be set when USING_LOCAL_PHOTOS = False
+# It is currently used for forwarding photo upload requests (coming into the
+# old photo upload url, and in the frontend)
+PHOTO_UPLOAD_SERVER_FORWARD_URL = 'https://uploads.shotvibe.com/photos/upload/{0}/full/'
+
 UNIVERSAL_PUSH_PROVIDER_URL = 'http://127.0.0.1:8800'
 
 # Internet links for the downloadable apps

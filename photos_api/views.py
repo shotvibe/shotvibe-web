@@ -10,6 +10,8 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib import auth
 from django.db.models import Q
+from django.db import transaction
+from django.views.decorators.csrf import csrf_exempt
 
 #from django.http import HttpResponseNotModified
 from django.http import Http404
@@ -32,6 +34,8 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework import status
 from rest_framework import views
+
+import requests
 
 import phonenumbers
 
@@ -443,6 +447,11 @@ class PhotoUpload(views.APIView):
 
     parser_classes = (PhotoUploadParser,)
 
+    @transaction.non_atomic_requests
+    @csrf_exempt
+    def dispatch(self, *args, **kwargs):
+        return super(PhotoUpload, self).dispatch(*args, **kwargs)
+
     def process_upload_request(self, request, photo_id, uploaded_chunks):
         pending_photo = get_object_or_404(PendingPhoto, pk=photo_id)
         if pending_photo.author != request.user:
@@ -451,8 +460,11 @@ class PhotoUpload(views.APIView):
         if settings.USING_LOCAL_PHOTOS:
             process_file_upload(pending_photo, uploaded_chunks)
         else:
-            # TODO Forward request to upload server ...
-            pass
+            # Forward request to photo upload server
+            r = requests.put(settings.PHOTO_UPLOAD_SERVER_FORWARD_URL.format(pending_photo.photo_id),
+                    headers = { 'Authorization': 'Token ' + request.auth.key },
+                    data = uploaded_chunks)
+            r.raise_for_status()
 
         return Response()
 

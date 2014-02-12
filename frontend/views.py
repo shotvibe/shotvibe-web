@@ -5,7 +5,11 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.utils import timezone
+from django.db import transaction
 
+import requests
+
+from phone_auth.models import AuthToken
 from photos.models import Album, Photo, AlbumMember
 from photos import image_uploads
 from photos import photo_operations
@@ -36,6 +40,7 @@ def home(request):
             }
     return render_to_response('frontend/home.html', data, context_instance=RequestContext(request))
 
+@transaction.non_atomic_requests
 def album(request, pk):
     album = get_object_or_404(Album, pk=pk)
     if not album.is_user_member(request.user.id):
@@ -55,8 +60,13 @@ def album(request, pk):
                 if settings.USING_LOCAL_PHOTOS:
                     image_uploads.process_file_upload(pending_photo, f.chunks())
                 else:
-                    # TODO Forward request to upload server
-                    pass
+                    # Forward request to photo upload server
+                    userAuthToken = AuthToken.objects.create_auth_token(request.user, 'Internal Photo Upload Auth Token', timezone.now())
+
+                    r = requests.put(settings.PHOTO_UPLOAD_SERVER_FORWARD_URL.format(pending_photo.photo_id),
+                            headers = { 'Authorization': 'Token ' + userAuthToken.key },
+                            data = f.chunks())
+                    r.raise_for_status()
 
                 pending_photo_ids.append(pending_photo.photo_id)
                 num_photos_added += 1
