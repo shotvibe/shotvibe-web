@@ -11,3 +11,5 @@ raven==3.5.2
 wsgiref==0.1.2
 requests==2.0.1
 twilio==3.6.4
+django-datetime-widget==0.6
+django-widget-tweaks==1.3

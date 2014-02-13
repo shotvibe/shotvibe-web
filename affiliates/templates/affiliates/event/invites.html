@@ -1,0 +1,77 @@
+{% extends "affiliates/base.html" %}
+
+{% load widget_tweaks %}
+
+{% block subcontent %}
+
+<h3>
+	<a href="{% url "affiliates.views.organization" organization.code %}">{{ organization.code }}</a>
+	-
+	<a href="{% url "affiliates.views.event_edit" organization.code event.id %}">{{ event.name }}</a>
+	-
+	Links
+</h3>
+
+{% include "affiliates/event/partials/menu.html" with active="invites" %}
+
+<div>
+	<fieldset>
+		<div class="row">
+			<div class="span6">
+				<form method="POST" action="">
+					{% csrf_token %}
+					<h3>Import CSV</h3>
+					<div>
+						{% render_field form.data class+="import_phone_data" %}
+					</div>
+					<button type="submit" class="btn btn-primary"><i class="icon-plus-sign icon-white"></i> Import</button>
+				</form>
+			</div>
+			<div class="span6">
+				{% if err %}
+					<h3>Error:</h3>
+					<p>{{ err_msg }}</p>
+					<ul>
+					{% for item in data %}
+						<li>{{ item }}</li>
+					{% endfor %}
+					</ul>
+				{% else %}
+					{% if data %}
+						<h3>Created:</h3>
+						<ul>
+						{% for item in data %}
+							<li>{{ item }}</li>
+						{% endfor %}
+						</ul>
+					{% endif %}
+				{% endif %}
+			</div>
+		</div>
+	</fieldset>
+</div>
+
+<hr>
+
+<table class="table table-hover table-striped">
+	<thead>
+		<tr>
+			<th>Invite</th>
+			<th>Number</th>
+		</tr>
+	</thead>
+	<tbody>
+{% for invite in event.eventinvitequeue %}
+	<tr>
+		<td>{{ invite.nickname }}</td>
+		<td>{{ invite.phone_number }}</td>
+	</tr>
+{% empty %}
+	<tr>
+		<td>No links</td>
+	</tr>
+{% endfor %}
+	</tbody>
+</table>
+
+{% endblock %}

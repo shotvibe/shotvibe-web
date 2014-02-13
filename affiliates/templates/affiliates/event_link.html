@@ -1,0 +1,22 @@
+{% extends "frontend/base.html" %}
+
+{% load static %}
+{% load bootstrap_toolkit %}
+
+{% block extra_js %}
+<script src="{% static "vendor/jquery-1.11.0.min.js" %}"></script>
+<script src="{% static "bootstrap/js/bootstrap.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+
+<h3>
+	{{ eventLink.event.name }}
+</h3>
+
+<p>
+	Viewed: {{ eventLink.visited_count }} <br>
+	Download: {{ eventLink.downloaded_count }} <br>
+</p>
+
+{% endblock %}

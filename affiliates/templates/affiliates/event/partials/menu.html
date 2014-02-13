@@ -1,0 +1,6 @@
+<ul class="nav nav-tabs">
+	<li{% if active == "" %} class="active"{% endif %}><a href="{% url "affiliates.views.event_edit" organization.code event.id %}">Edit</a></li>
+	<li{% if active == "links" %} class="active"{% endif %}><a href="{% url "affiliates.views.event_links" organization.code event.id %}">Links</a></li>
+	<li{% if active == "invites" %} class="active"{% endif %}><a href="{% url "affiliates.views.event_invites" organization.code event.id %}">Invites</a></li>
+	<li{% if active == "reports" %} class="active"{% endif %}><a href="{% url "affiliates.views.event_reports" organization.code event.id %}">Report</a></li>
+</ul>

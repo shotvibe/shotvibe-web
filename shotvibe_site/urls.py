@@ -4,6 +4,8 @@ from django.conf.urls.static import static
 from django.contrib import admin
 
 import frontend.urls
+import affiliates.urls
+import affiliates.event_urls
 
 admin.autodiscover()
 
@@ -16,6 +18,9 @@ urlpatterns = patterns('',
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     url(r'^', include(frontend.urls)),
+
+    url(r'^affiliates/', include(affiliates.urls)),
+    url(r'^go/', include(affiliates.event_urls)),
 
     url(r'^admin/processed_photos/', 'photos.views.processed_photos'),
     url(r'^admin/upp_status/', 'photos_api.device_push.upp_status'),

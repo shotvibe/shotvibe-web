@@ -121,13 +121,17 @@ INSTALLED_APPS = (
     'south',
     'rest_framework',
     'bootstrap_toolkit',
+    'datetimewidget',
+    'widget_tweaks',
     'frontend',
     'photos',
     'phone_auth',
     'photos_api',
+    'affiliates',
 )
 
 LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/login/'
 
 AUTH_USER_MODEL = 'phone_auth.User'
 

@@ -1,0 +1,49 @@
+from datetimewidget.widgets import DateTimeWidget
+from django.forms import Form, ModelForm, CharField, Textarea
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError, transaction
+
+from affiliates.models import Event, EventLink, EventInviteQueue, VALID_LINK_CHARS
+
+
+class EventForm(ModelForm):
+    class Meta:
+        model = Event
+        exclude = ['created_by', 'organization', 'album']
+        widgets = {
+            'time': DateTimeWidget()
+        }
+
+
+def validate_hash(h):
+    invalids = set(c for c in h if c not in VALID_LINK_CHARS)
+    if invalids:
+        msgs = ["Invalid characters: "]
+        msgs = msgs + list(invalids)
+        raise ValidationError("".join(msgs))
+
+
+class EventLinkForm(Form):
+    slug = CharField(
+        max_length=255,
+        validators=[validate_hash],
+        required=False
+    )
+
+    def create_link(self, event):
+        try:
+            eventLink = event.create_link(slug=self.cleaned_data['slug'])
+        except IntegrityError:
+            self._errors['slug'] = "Code already exists"
+            return None
+        else:
+            return eventLink
+
+
+class EventLinkImportForm(Form):
+    data = CharField(required=True, widget=Textarea)
+
+    def clean_data(self):
+        data = self.cleaned_data['data']
+        items = EventInviteQueue.import_data(data)
+        self._items = items
