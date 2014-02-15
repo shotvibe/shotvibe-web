@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect
 from functools import wraps
 
 from affiliates.models import Organization, OrganizationUser, Event, EventLink
-from affiliates.forms import EventForm, EventLinkForm, EventLinkImportForm
+from affiliates.forms import EventForm, EventLinkForm, EventInviteImportForm
 from photos.models import Album
 
 
@@ -133,17 +133,19 @@ def event_links(request, event):
 @login_required
 @event_mod_required
 def event_invites(request, event):
+    data = None
+    err = None
+    err_msg = None
     if request.method == 'POST':
-        form = EventLinkImportForm(request.POST)
+        form = EventInviteImportForm(request.POST)
         if form.is_valid():
-            data, err, err_msg = event.create_eventinvitequeue(form._items)
+            data, err, err_msg = event.create_eventinvites(form._items)
             if not err:
-                form = EventLinkImportForm()
+                form = EventInviteImportForm()
         else:
-            data, err, err_msg = None, True, "Invalid Request"
+            err, err_msg = True, "Invalid Request"
     else:
-        form = EventLinkImportForm()
-        data = None
+        form = EventInviteImportForm()
     return render(request, 'affiliates/event/invites.html', {
         'organization': event.organization,
         'event': event,

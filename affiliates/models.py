@@ -1,6 +1,7 @@
 import re
 import string
 import phonenumbers
+from phonenumbers.phonenumberutil import NumberParseException
 
 from django.db import models, transaction, IntegrityError
 from django.conf import settings
@@ -45,7 +46,8 @@ class OrganizationUser(models.Model):
     organization = models.ForeignKey(Organization)
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
 
-    unique_together = ('organization', 'user')
+    class Meta:
+        unique_together = ('organization', 'user')
 
 
 class Event(models.Model):
@@ -83,8 +85,11 @@ class Event(models.Model):
     def links(self):
         return EventLink.objects.filter(event=self)
 
-    def create_eventinvitequeue(self, items):
-        eiqs = []
+    def public_links(self):
+        return EventLink.objects.filter(event=self, invite__isnull=True)
+
+    def create_eventinvites(self, items):
+        invites = []
         errs = []
         if not items:
             return None, True, "No items given"
@@ -96,43 +101,49 @@ class Event(models.Model):
             try:
                 phone_number = phonenumbers.parse(phone_number, None)
                 if not phonenumbers.is_possible_number(phone_number):
-                    raise phonenumbers.phonenumberutil.NumberParseException(None, None)
-            except phonenumbers.phonenumberutil.NumberParseException:
+                    raise NumberParseException(None, None)
+            except NumberParseException:
                 errs.append(item[1])
             else:
-                eiq = EventInviteQueue(
+                invite = EventInvite(
                     nickname=item[0],
-                    phone_number=item[1],
+                    phone_number=phonenumbers.format_number(
+                        phone_number,
+                        phonenumbers.PhoneNumberFormat.E164,
+                    ),
                 )
-                eiqs.append(eiq)
+                invites.append(invite)
         if errs:
             return errs, True, "Unable to parse the following:"
 
         added = []
-        for eiq in eiqs:
+        for invite in invites:
             with transaction.atomic():
                 try:
-                    self.eventinvitequeue_set.add(eiq)
-                except IntegrityError:
+                    self.eventinvite_set.add(invite)
+                except IntegrityError as e:
                     pass
                 else:
-                    added.append(eiq)
+                    added.append(invite)
         if added:
             return added, False, None
         else:
             return None, True, "All duplicates"
 
-    def eventinvitequeue(self):
-        return self.eventinvitequeue_set.all()
+    def eventinvites(self):
+        return self.eventinvite_set.all()
 
     def __unicode__(self):
         return u"{0}: {1}".format(self.organization.name, self.name)
 
 
-class EventInviteQueue(models.Model):
+class EventInvite(models.Model):
     event = models.ForeignKey(Event)
     nickname = models.CharField(max_length=255)
-    phone_number = models.CharField(max_length=32, unique=True)
+    phone_number = models.CharField(max_length=32)
+
+    class Meta:
+        unique_together = ('event', 'phone_number')
 
     @staticmethod
     def import_data(data):
@@ -156,7 +167,7 @@ VALID_LINK_CHARS = tuple(string.ascii_letters + string.digits)
 class EventLink(models.Model):
     slug = models.CharField(max_length=255, unique=True, null=True, blank=True)
     event = models.ForeignKey(Event, null=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True)
+    invite = models.ForeignKey(EventInvite, null=True)
     time_sent = models.DateTimeField(null=True, blank=True)
     visited_count = models.IntegerField(default=0)
     downloaded_count = models.IntegerField(default=0)
@@ -174,7 +185,7 @@ class EventLink(models.Model):
 
     @property
     def is_personal(self):
-        return self.user is not None
+        return self.invite is not None
 
     @property
     def is_public(self):

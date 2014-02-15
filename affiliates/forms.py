@@ -3,7 +3,7 @@ from django.forms import Form, ModelForm, CharField, Textarea
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 
-from affiliates.models import Event, EventLink, EventInviteQueue, VALID_LINK_CHARS
+from affiliates.models import Event, EventLink, EventInvite, VALID_LINK_CHARS
 
 
 class EventForm(ModelForm):
@@ -40,10 +40,10 @@ class EventLinkForm(Form):
             return eventLink
 
 
-class EventLinkImportForm(Form):
+class EventInviteImportForm(Form):
     data = CharField(required=True, widget=Textarea)
 
     def clean_data(self):
         data = self.cleaned_data['data']
-        items = EventInviteQueue.import_data(data)
+        items = EventInvite.import_data(data)
         self._items = items

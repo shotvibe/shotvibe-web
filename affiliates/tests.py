@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db import IntegrityError, transaction
 import django.utils.timezone
 
-from affiliates.views import index, organization, create_event, edit_event
+from affiliates.views import index, organization, create_event, event_edit
 
 
 class ModelTests(TestCase):

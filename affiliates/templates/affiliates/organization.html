@@ -17,7 +17,7 @@
 	<tbody>
 {% for event in events %}
 	<tr>
-		<td><a href="{% url "affiliates.views.edit_event" organization.code event.id %}">{{ event.name }}</a></td>
+		<td><a href="{% url "affiliates.views.event_edit" organization.code event.id %}">{{ event.name }}</a></td>
 	</tr>
 {% empty %}
 	<tr>
