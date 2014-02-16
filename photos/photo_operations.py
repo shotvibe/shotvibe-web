@@ -19,12 +19,10 @@ from photos.models import PendingPhoto
 from photos.models import Photo
 from photos.models import PhotoServer
 
-all_photo_subdomains = (
-        'photos01',
-        'photos02',
-        'photos03',
-        'photos04',
-        )
+
+def choose_random_subdomain():
+    return random.choice(settings.ALL_PHOTO_SUBDOMAINS)
+
 
 # TODO This module should use be updated to use real background tasks instead
 # of a background thread
@@ -142,7 +140,7 @@ class AddPendingPhotosToAlbumAction(ExThread):
             else:
                 try:
                     with transaction.atomic():
-                        chosen_subdomain = random.choice(all_photo_subdomains)
+                        chosen_subdomain = choose_random_subdomain()
                         p = Photo.objects.create(
                             photo_id=photo_id,
                             storage_id = pending_photo.storage_id,
