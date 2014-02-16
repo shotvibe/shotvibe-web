@@ -220,8 +220,12 @@ class AddPendingPhotosToAlbumAction(ExThread):
                 for photo_server in PhotoServer.objects.filter(subdomain=subdomain, unreachable=False):
                     # TODO We should use concurrent requests for this
 
+                    num_retries = 5
+                    initial_retry_time = 4
+
                     try:
-                        photo_server_set_photos(photo_server.photos_update_url, photo_server.auth_key, photos)
+                        request_with_n_retries(num_retries, initial_retry_time,
+                                lambda: photo_server_set_photos(photo_server.photos_update_url, photo_server.auth_key, photos))
                     except requests.exceptions.RequestException:
                         # TODO Log this
                         photo_server.set_unreachable()
@@ -229,6 +233,21 @@ class AddPendingPhotosToAlbumAction(ExThread):
 
             album = Album.objects.get(pk=self.album_id)
             album.save_revision(self.date_created)
+
+
+def request_with_n_retries(num_retries, initial_retry_time, action):
+    num_retries_left = num_retries
+    retry_time = initial_retry_time
+    while True:
+        try:
+            return action()
+        except requests.exceptions.RequestException:
+            if num_retries_left > 0:
+                time.sleep(retry_time)
+                retry_time *= 2
+                num_retries_left -= 1
+            else:
+                raise
 
 
 def add_pending_photos_to_album(photo_ids, album_id, date_created):
