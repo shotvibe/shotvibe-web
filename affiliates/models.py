@@ -1,6 +1,7 @@
 import re
 import string
 import phonenumbers
+from operator import methodcaller
 from phonenumbers.phonenumberutil import NumberParseException
 
 from django.db import models, transaction, IntegrityError
@@ -74,11 +75,14 @@ class Event(models.Model):
             try:
                 with transaction.atomic():
                     eventLink.event = self
-                    eventLink.slug = slug if slug else EventLink.encode_hash(eventLink.pk)
+                    if slug:
+                        eventLink.slug = slug
+                    else:
+                        eventLink.slug = EventLink.encode_hash(eventLink.pk)
                     eventLink.save()
             except (IntegrityError) as e:
                 if slug:
-                    raise e 
+                    raise e
             else:
                 return eventLink
 
@@ -130,6 +134,14 @@ class Event(models.Model):
         else:
             return None, True, "All duplicates"
 
+    def send_invites(self, invitelinks):
+        to_memberidentifier = methodcaller("to_memberidentifier")
+        create_invitelink = methodcaller("create_invitelink")
+        map(create_invitelink, invitelinks)
+        member_identifiers = map(to_memberidentifier, invitelinks)
+        if member_identifiers:
+            self.album.add_members(self.created_by, member_identifiers)
+
     def eventinvites(self):
         return self.eventinvite_set.all()
 
@@ -145,13 +157,29 @@ class EventInvite(models.Model):
     class Meta:
         unique_together = ('event', 'phone_number')
 
+    def to_memberidentifier(self):
+        return MemberIdentifier(
+            phone_number=self.phone_number,
+            contact_nickname=self.nickname,
+        )
+
+    def create_invitelink(self):
+        try:
+            return self.eventlink
+        except EventLink.DoesNotExist:
+            pass
+        eventlink = self.event.create_link()
+        eventlink.invite = self
+        eventlink.save()
+        return eventlink
+
     @staticmethod
     def import_data(data):
         lines = data.splitlines()
         ret = []
         matcher = re.compile(r'^(.*)(\s+)((\+)?[0-9\- ]+)$')
         for line in lines:
-            matches = matcher.match(line.strip()) 
+            matches = matcher.match(line.strip())
             if matches:
                 ret.append((matches.group(1), matches.group(3)))
         return ret
@@ -160,14 +188,13 @@ class EventInvite(models.Model):
         return "{0} - {1}".format(self.nickname, self.phone_number)
 
 
-
 VALID_LINK_CHARS = tuple(string.ascii_letters + string.digits)
 
 
 class EventLink(models.Model):
     slug = models.CharField(max_length=255, unique=True, null=True, blank=True)
     event = models.ForeignKey(Event, null=True)
-    invite = models.ForeignKey(EventInvite, null=True)
+    invite = models.OneToOneField(EventInvite, null=True)
     time_sent = models.DateTimeField(null=True, blank=True)
     visited_count = models.IntegerField(default=0)
     downloaded_count = models.IntegerField(default=0)

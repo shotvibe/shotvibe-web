@@ -334,7 +334,13 @@ class PhoneNumberConfirmSMSCode(models.Model):
 
 class PhoneNumberLinkCodeManager(models.Manager):
     # phone_number must not exist in PhoneNumber model
-    def invite_new_phone_number(self, inviter, phone_number_str, nickname, date_invited=None):
+
+    @staticmethod
+    def default_sms_invite_formatter(link_code_object):
+        invite_url_prefix = 'https://www.shotvibe.com'
+        return link_code_object.inviting_user.nickname + ' has shared photos with you!\n' + link_code_object.get_invite_page(invite_url_prefix)
+
+    def invite_new_phone_number(self, inviter, phone_number_str, nickname, date_invited=None, message_formatter=None):
 
         if date_invited is None:
             date_invited = timezone.now()
@@ -350,12 +356,15 @@ class PhoneNumberLinkCodeManager(models.Manager):
 
         user_avatar_changed.send(sender=self, user=new_user)
 
-        return self.invite_existing_phone_number(inviter, phone_number, date_invited)
+        return self.invite_existing_phone_number(inviter, phone_number, date_invited, message_formatter)
 
-    def invite_existing_phone_number(self, inviter, phone_number, date_invited=None):
+    def invite_existing_phone_number(self, inviter, phone_number, date_invited=None, message_formatter=None):
 
         if date_invited is None:
             date_invited = timezone.now()
+
+        if message_formatter is None:
+            message_formatter = PhoneNumberLinkCodeManager.default_sms_invite_formatter
 
         link_code_object = PhoneNumberLinkCode.objects.create(
                 invite_code = PhoneNumberLinkCode.generate_invite_code(),
@@ -363,8 +372,7 @@ class PhoneNumberLinkCodeManager(models.Manager):
                 inviting_user = inviter,
                 date_created = date_invited)
 
-        invite_url_prefix = 'https://www.shotvibe.com'
-        send_sms(phone_number.phone_number, inviter.nickname + ' has shared photos with you!\n' + link_code_object.get_invite_page(invite_url_prefix))
+        send_sms(phone_number.phone_number, message_formatter(link_code_object))
 
         return link_code_object
 

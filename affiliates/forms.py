@@ -1,5 +1,7 @@
 from datetimewidget.widgets import DateTimeWidget
-from django.forms import Form, ModelForm, CharField, Textarea
+from django.forms import Form, ModelForm
+from django.forms import Textarea, CheckboxSelectMultiple
+from django.forms import CharField, ModelMultipleChoiceField
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 
@@ -47,3 +49,19 @@ class EventInviteImportForm(Form):
         data = self.cleaned_data['data']
         items = EventInvite.import_data(data)
         self._items = items
+
+
+class EventInviteSendForm(Form):
+    invites = ModelMultipleChoiceField(
+        queryset=EventInvite.objects.all(),
+        widget=CheckboxSelectMultiple(),
+    )
+
+    def __init__(self, *args, **kwargs):
+        try:
+            queryset = kwargs.pop('queryset')
+        except KeyError:
+            queryset = None
+        super(EventInviteSendForm, self).__init__(*args, **kwargs)
+        if queryset:
+            self.fields['invites'].queryset = queryset

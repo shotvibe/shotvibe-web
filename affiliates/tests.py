@@ -67,7 +67,10 @@ class EventLinkTests(TestCase):
         self.org.save()
         self.org.add_user(self.amanda)
         now = django.utils.timezone.now()
-        self.event = self.org.create_event(Event(name="event", time=now), self.amanda)
+        self.event = self.org.create_event(
+            Event(name="event", time=now),
+            self.amanda
+        )
 
     def test_url_hashing(self):
         # check first 10.000 values
@@ -117,7 +120,7 @@ class EventLinkTests(TestCase):
                     self.event.create_link(slug=slug)
 
     def test_url_collision_skip(self):
-        vals = (5,6,4,7,8,20)
+        vals = (5, 6, 4, 7, 8, 20)
         for i, val in enumerate(vals):
             slug = EventLink.encode_hash(val)
             eventLink = self.event.create_link(slug=slug)
@@ -129,4 +132,3 @@ class EventLinkTests(TestCase):
             eventLink = self.event.create_link()
         num_links = EventLink.objects.filter(event__isnull=False).count()
         self.assertEqual(num_links, n+len(vals))
-

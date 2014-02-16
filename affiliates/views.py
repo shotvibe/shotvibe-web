@@ -6,7 +6,8 @@ from django.http import HttpResponseRedirect
 from functools import wraps
 
 from affiliates.models import Organization, OrganizationUser, Event, EventLink
-from affiliates.forms import EventForm, EventLinkForm, EventInviteImportForm
+from affiliates.forms import EventForm, EventLinkForm, \
+    EventInviteImportForm, EventInviteSendForm
 from photos.models import Album
 
 
@@ -136,21 +137,36 @@ def event_invites(request, event):
     data = None
     err = None
     err_msg = None
+    import_form = None
+    invites_form = None
     if request.method == 'POST':
-        form = EventInviteImportForm(request.POST)
-        if form.is_valid():
-            data, err, err_msg = event.create_eventinvites(form._items)
-            if not err:
-                form = EventInviteImportForm()
+        action = request.POST.get("_action")
+        if action == "invite":
+            invites_form = EventInviteSendForm(
+                request.POST,
+                queryset=event.eventinvites(),
+            )
+            if invites_form.is_valid():
+                event.send_invites(invites_form.cleaned_data['invites'])
         else:
-            err, err_msg = True, "Invalid Request"
-    else:
-        form = EventInviteImportForm()
+            import_form = EventInviteImportForm(request.POST)
+            if import_form.is_valid():
+                items = import_form._items
+                data, err, err_msg = event.create_eventinvites(items)
+                if not err:
+                    import_form = EventInviteImportForm()
+            else:
+                err, err_msg = True, "Invalid Request"
+    if not import_form:
+        import_form = EventInviteImportForm()
+    if not invites_form:
+        invites_form = EventInviteSendForm(queryset=event.eventinvites())
     return render(request, 'affiliates/event/invites.html', {
         'organization': event.organization,
         'event': event,
-        'form': form,
+        'import_form': import_form,
         'data': data,
+        'invites_form_fields': invites_form.fields['invites'],
         'err': err,
         'err_msg': err_msg,
     })

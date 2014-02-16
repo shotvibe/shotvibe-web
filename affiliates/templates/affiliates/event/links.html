@@ -52,11 +52,7 @@
 {% for link in event.public_links %}
 	<tr>
 		<td>
-			{% if link.is_public %}
-				<i class="icon-globe"></i>
-			{% else %}
-				<i class="icon-user"></i>
-			{% endif %}
+			<i class="icon-globe"></i>
     	<a href="{{ link.get_absolute_url }}">{{ link }}</a>
 		</td>
 		<td>{{ link.visited_count }}</td>
