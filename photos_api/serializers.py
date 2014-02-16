@@ -226,3 +226,8 @@ class QueryPhonesRequestSerializer(serializers.Serializer):
 
 class PhotoUploadInitSerializer(serializers.Serializer):
     user_auth_token = serializers.CharField()
+
+class PhotoServerRegisterSerializer(serializers.Serializer):
+    update_url = serializers.CharField()
+    subdomain = serializers.CharField()
+    auth_key = serializers.CharField()

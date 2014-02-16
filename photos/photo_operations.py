@@ -3,16 +3,21 @@ import random
 import sys
 import threading
 import time
+import json
 
 from django.conf import settings
 from django.db.models import Max
 from django.db import IntegrityError
 from django.db import transaction
+from django.db import connection
 import django.db
+
+import requests
 
 from photos.models import Album
 from photos.models import PendingPhoto
 from photos.models import Photo
+from photos.models import PhotoServer
 
 all_photo_subdomains = (
         'photos01',
@@ -110,6 +115,11 @@ class AddPendingPhotosToAlbumAction(ExThread):
         return True
 
     def add_photos_to_db(self, photo_ids):
+        """
+        Returns a dictionary from subdomain values to lists of Photo objects
+        """
+        added_photos = {}
+
         album = Album.objects.get(pk=self.album_id)
         album_index_q = Photo.objects.filter(album=album).aggregate(Max('album_index'))
 
@@ -132,15 +142,20 @@ class AddPendingPhotosToAlbumAction(ExThread):
             else:
                 try:
                     with transaction.atomic():
-                        Photo.objects.create(
+                        chosen_subdomain = random.choice(all_photo_subdomains)
+                        p = Photo.objects.create(
                             photo_id=photo_id,
                             storage_id = pending_photo.storage_id,
-                            subdomain = random.choice(all_photo_subdomains),
+                            subdomain = chosen_subdomain,
                             date_created = self.date_created,
                             author=pending_photo.author,
                             album=album,
                             album_index = next_album_index,
                         )
+                        if chosen_subdomain in added_photos:
+                            added_photos[chosen_subdomain].append(p)
+                        else:
+                            added_photos[chosen_subdomain] = [p]
                 except IntegrityError:
                     t, v, tb = sys.exc_info()
                     # Two possible scenarios:
@@ -169,6 +184,8 @@ class AddPendingPhotosToAlbumAction(ExThread):
                 # concurrent request (will be a nop)
                 pending_photo.delete()
 
+        return added_photos
+
     def run_with_exception(self):
         try:
             self.perform_action()
@@ -193,11 +210,22 @@ class AddPendingPhotosToAlbumAction(ExThread):
             while not success:
                 try:
                     with transaction.atomic():
-                        self.add_photos_to_db(self.photo_ids)
+                        added_photos = self.add_photos_to_db(self.photo_ids)
                 except IntegrityError:
                     success = False
                 else:
                     success = True
+
+            for subdomain, photos in added_photos.iteritems():
+                for photo_server in PhotoServer.objects.filter(subdomain=subdomain, unreachable=False):
+                    # TODO We should use concurrent requests for this
+
+                    try:
+                        photo_server_set_photos(photo_server.photos_update_url, photo_server.auth_key, photos)
+                    except requests.exceptions.RequestException:
+                        # TODO Log this
+                        photo_server.set_unreachable()
+
 
             album = Album.objects.get(pk=self.album_id)
             album.save_revision(self.date_created)
@@ -219,3 +247,57 @@ def add_pending_photos_to_album(photo_ids, album_id, date_created):
         thread.daemon = False
         thread.start()
         thread.join_with_exception()
+
+
+def is_postgresql(conn):
+    return conn.settings_dict['ENGINE'].rsplit('.', 1)[-1] == 'postgresql_psycopg2'
+
+def register_photo_server(photos_update_url, subdomain, auth_key, date_registered):
+    # We need to lock the Photo table to make sure that nothing is changed
+    # between the time we send it the current data and the time we register it
+    # in the database.
+
+    if is_postgresql(connection):
+        # This mode will only block concurrent writes to the table
+        lock_mode = 'SHARE'
+
+        cursor = connection.cursor()
+        cursor.execute('LOCK TABLE %s IN %s MODE', [Photo._meta.db_table, lock_mode])
+
+    all_subdomain_photos = Photo.objects.filter(subdomain=subdomain)
+
+    photo_server_set_photos(photos_update_url, auth_key, all_subdomain_photos)
+
+    obj, created = PhotoServer.objects.get_or_create(
+            photos_update_url = photos_update_url,
+            defaults = {
+                'subdomain': subdomain,
+                'auth_key': auth_key,
+                'date_registered': date_registered,
+                'unreachable': False
+                })
+    if not created:
+        obj.subdomain = subdomain
+        obj.auth_key = auth_key
+        obj.date_registered = date_registered
+        obj.unreachable = False
+        obj.save()
+
+
+def photo_server_set_photos(photos_update_url, photo_server_auth_key, photos):
+    body = []
+    for p in photos:
+        body.append({
+            'cmd': 'set',
+            'key': p.photo_id,
+            'value': p.storage_id,
+            })
+
+    r = requests.post(photos_update_url,
+            headers = { 'Authorization': 'Key ' + photo_server_auth_key },
+            data = json.dumps(body))
+    r.raise_for_status()
+
+def photo_server_delete_photos(photos_update_url, photo_server_auth_key, photo_ids):
+    # TODO ...
+    pass

@@ -306,3 +306,23 @@ class PendingPhoto(models.Model):
 
     def is_processing_done(self):
         return not (self.processing_done_time is None)
+
+
+# This is a temporary solution until a more robust coordinator is implemented
+class PhotoServer(models.Model):
+    photos_update_url = models.CharField(max_length=255, unique=True)
+    subdomain = models.CharField(max_length=64, db_index=True)
+    auth_key = models.CharField(max_length=128)
+    date_registered = models.DateTimeField()
+    unreachable = models.BooleanField()
+
+    def __unicode__(self):
+        result = ''
+        if self.unreachable:
+            result += '[UNREACHABLE] '
+        result += self.subdomain + ': ' + self.photos_update_url
+        return result
+
+    def set_unreachable(self):
+        self.unreachable = True
+        self.save(update_fields=['unreachable'])
