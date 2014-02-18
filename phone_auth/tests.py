@@ -12,6 +12,9 @@ from phone_auth.views import app_init
 from photos.models import Album, AlbumMember
 from frontend.mobile_views import invite_page
 from photos_api.serializers import MemberIdentifier
+from affiliates.models import Organization, Event, EventLink
+from affiliates.views import event_link
+
 
 
 class ModelTests(TestCase):
@@ -355,3 +358,32 @@ class InviteTests(TestCase):
         self.assertEqual(r.status_code, 302)
 
         self.assertEqual(PhoneNumber.objects.get(phone_number='+12127184000').verified, True)
+
+    def test_app_init_with_event_session(self):
+        later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
+        org = Organization(code="a")
+        org.save()
+        event = org.create_event(
+            Event(name="event", time=later_on),
+            self.tom
+        )
+        eventLink = event.create_link()
+
+        # Visit the invite_page so that the session data is associated with the client
+        r = self.client.get(reverse(event_link, args=(eventLink.slug,)))
+        self.assertEqual(r.status_code, 200)
+
+        r = self.client.get(reverse(app_init) + '?app=android&device_description=test')
+        self.assertEqual(r.status_code, 302)
+        url = urlparse.urlparse(r['Location'])
+        query_str = url.query
+        if not query_str:
+            # Python's urlparse module sometimes will not parse the query
+            # string for schemes that it doesn't like, so we have to extract it
+            # manually
+            query_str = url.path[url.path.find('?')+1:]
+        self.assertEqual(url.scheme, 'shotvibe')
+        query = urlparse.parse_qs(query_str, strict_parsing=True)
+        self.assertEqual(len(query['country_code'][0]), 2)
+        self.assertEqual(int(query['event_id'][0]), event.id)
+        self.assertEqual(int(query['album_id'][0]), event.album.id)

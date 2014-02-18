@@ -13,6 +13,7 @@ from rest_framework.views import APIView
 from phone_auth.serializers import AuthorizePhoneNumberSerializer, ConfirmSMSCodeSerializer
 
 from phone_auth.models import AuthToken, PhoneNumber, PhoneNumberLinkCode
+from affiliates.models import Event
 
 class AuthorizePhoneNumber(APIView):
     serializer_class = AuthorizePhoneNumberSerializer
@@ -102,9 +103,24 @@ def app_init(request):
 
     response = HttpResponse(status=302)
 
-    try:
-        phone_number_str = request.session['phone_number']
-    except KeyError:
+    phone_number_str = request.session.get('phone_number')
+    event_str = request.session.get('event')
+
+    if event_str and not phone_number_str:
+        # There was no 'phone_number' session data, but an 'event' and 'album' was set.
+        # This means this user came in through an affiliate link.
+        try:
+            event = Event.objects.get(pk=event_str)
+        except Event.DoesNotExist:
+            del request.session['event']
+        else:
+            if app == 'android':
+                response['Location'] = app_url_scheme + '://shotvibe/start_from_event/?country_code=' + country_code + '&event_id=' + str(event.pk) + '&album_id=' + str(event.album.pk)
+            elif app == 'iphone':
+                response['Location'] = app_url_scheme + '://shotvibe/start_from_event/?country_code=' + country_code + '&event_id=' + str(event.pk) + '&album_id=' + str(event.album.pk)
+            return response
+
+    if phone_number_str is None:
         # There was no 'phone_number' session data, so this means that the app
         # has been installed manually by the user, without going through an
         # invite link. The user will have to register with his phone number

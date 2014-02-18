@@ -200,8 +200,8 @@ def event_link(request, slug):
     eventLink = get_object_or_404(EventLink, slug=slug)
     eventLink.incr_visited()
 
-    request.session['event'] = eventLink.event.pk
-    request.session['album'] = eventLink.event.album.pk
+    request.session['event'] = str(eventLink.event.pk)
+    request.session['album'] = str(eventLink.event.album.pk)
 
     return render(request, 'affiliates/event_link.html', {
         'eventLink': eventLink,
