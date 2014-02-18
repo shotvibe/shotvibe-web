@@ -1,22 +1,80 @@
-{% extends "frontend/base.html" %}
-
 {% load static %}
-{% load bootstrap_toolkit %}
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>{{ inviting_user.get_full_name }} Has Shared Photos</title>
+        <link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600" rel="stylesheet" />
+        <link rel="stylesheet" href="{% static "mobile/css/style.css" %}" />
+    </head>
+ <body>
+    <article>
+        <header id="header">
+            <p>Hello! You're invited to share photos on</p>
+	    <h1>ShotVibe</h1>
+        </header>
 
-{% block extra_js %}
-<script src="{% static "vendor/jquery-1.11.0.min.js" %}"></script>
-<script src="{% static "bootstrap/js/bootstrap.js" %}"></script>
-{% endblock %}
+        <section id="content">
+	    <br>
+            <h2>
+                {{ eventLink.event.name }}
+            </h2>
+	    <div>
+	     	{{ eventLink.event.location }},
+		{{ eventLink.event.time|date:"N j, Y" }} at
+		{{ eventLink.event.time|date:"P" }}
+	    </div>
+	    <br>
+            <div>
+                {{ eventLink.event.html_content|safe }}
+            </div>
+	    <br>
+	    <br>
+        </section>
 
-{% block content %}
+        <section id="about">
+            <p>
+                <strong>ShotVibe</strong> is the simplest way to share photos with your friends and family. Now for
+                {% if device == "android" %}
+                    Android + iPhone.
+                {% elif device == "iphone" %}
+                    iPhone + Android.
+                {% endif %}
+            </p>
+        </section>
 
-<h3>
-	{{ eventLink.event.name }}
-</h3>
-
-<p>
-	Viewed: {{ eventLink.visited_count }} <br>
-	Download: {{ eventLink.downloaded_count }} <br>
-</p>
-
-{% endblock %}
+        <section id="screenshots" class="{{ device }}">
+            <div class="screen">
+                <div class="reel">
+                    {# {% with "mobile/images/tmp-"|add:device|add:".jpg" as screenshot %} #}
+                    <div class="image">
+                        <img src="{% static "mobile/images/tmp-"|add:device|add:".jpg" %}" alt="" />
+                    </div>
+                    <div class="image">
+                        <img src="{% static "mobile/images/tmp-"|add:device|add:".jpg" %}" alt="" />
+                    </div>
+                    <div class="image">
+                        <img src="{% static "mobile/images/tmp-"|add:device|add:".jpg" %}" alt="" />
+                    </div>
+                    <div class="image">
+                        <img src="{% static "mobile/images/tmp-"|add:device|add:".jpg" %}" alt="" />
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="cta">
+            <a href="{{ app_url }}" class="button {{ device }}">Get the App</a>
+            <p>Also available for
+                {% if device == "android" %}
+                    <strong>iPhone</strong>
+                {% elif device == "iphone" %}
+                    <strong>Android</strong>
+                {% endif %}
+            </p>
+        </section>
+        <footer id="footer">
+	    &copy; {% now "Y" %} ShotVibe, Inc. All rights reserved.<br />
+            <a href="//www.shotvibe.com">shotvibe.com</a>
+        </footer>
+    </article>
+</body>

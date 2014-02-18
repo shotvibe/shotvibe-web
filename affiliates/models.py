@@ -62,7 +62,7 @@ class Event(models.Model):
     location = models.CharField(max_length=255)
     #logo =
     #banner
-    html_content = models.CharField(max_length=255)
+    html_content = models.TextField()
 
     def create_link(self, slug=None):
         if slug:

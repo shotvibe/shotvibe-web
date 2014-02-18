@@ -3,12 +3,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
+from django.conf import settings
 from functools import wraps
 
 from affiliates.models import Organization, OrganizationUser, Event, EventLink
 from affiliates.forms import EventForm, EventLinkForm, \
     EventInviteImportForm, EventInviteSendForm
 from photos.models import Album
+from frontend.mobile_views import get_device
 
 
 def organization_required(view_f):
@@ -88,7 +90,7 @@ def create_event(request, organization):
                 request.user,
             )
             return HttpResponseRedirect(reverse(
-                'affiliates.views.edit_event',
+                'affiliates.views.event_edit',
                 args=[organization.code, event.id]
             ))
     else:
@@ -103,7 +105,7 @@ def create_event(request, organization):
 @event_mod_required
 def event_edit(request, event):
     if request.method == 'POST':
-        form = EventForm(request.POST)
+        form = EventForm(request.POST, instance=event)
         if form.is_valid():
             event = form.save()
     else:
@@ -182,9 +184,27 @@ def event_reports(request, event):
 
 
 def event_link(request, slug):
+    device = get_device(request.META.get('HTTP_USER_AGENT', '').lower())
+
+    # pretend to be android in browsers
+    if device not in ('android', 'iphone'):
+        device = 'android'
+
+    if device == 'android':
+        app_url = settings.GOOGLE_PLAY_URL
+    elif device == 'iphone':
+        app_url = settings.APPLE_APP_STORE_URL
+    else:
+        app_url = None
+
     eventLink = get_object_or_404(EventLink, slug=slug)
     eventLink.incr_visited()
-    eventLink = get_object_or_404(EventLink, slug=slug)
+
+    request.session['event'] = eventLink.event.pk
+    request.session['album'] = eventLink.event.album.pk
+
     return render(request, 'affiliates/event_link.html', {
         'eventLink': eventLink,
+        'app_url': app_url,
+        'device': device,
     })
