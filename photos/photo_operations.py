@@ -279,7 +279,7 @@ def register_photo_server(photos_update_url, subdomain, auth_key, date_registere
         lock_mode = 'SHARE'
 
         cursor = connection.cursor()
-        cursor.execute('LOCK TABLE %s IN %s MODE', [Photo._meta.db_table, lock_mode])
+        cursor.execute('LOCK TABLE %s IN %s MODE' % (connection.ops.quote_name(Photo._meta.db_table), lock_mode))
 
     all_subdomain_photos = Photo.objects.filter(subdomain=subdomain)
 
