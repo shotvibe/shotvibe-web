@@ -7,7 +7,7 @@ from django.db import IntegrityError, transaction
 import django.utils.timezone
 
 from affiliates.views import index, organization, create_event, event_edit, \
-        event_link, event_download_link
+        event_links, event_invites, event_link, event_download_link
 
 
 class ModelTests(TestCase):
@@ -175,3 +175,103 @@ class EventLinkVisitTests(TestCase):
             #have to fetch link again
             eventLink = EventLink.objects.get(pk=pk)
             self.assertEqual(eventLink.downloaded_count, i + 1)
+
+
+class AffiliateCRUDTests(TestCase):
+    fixtures = ['tests/test_users']
+
+    def setUp(self):
+        self.amanda = auth.get_user_model().objects.get(pk=2)
+        self.org = Organization(code="a")
+        self.org.save()
+        self.org.add_user(self.amanda)
+        self.client.login(username='2', password='amanda')
+
+    def test_create_event(self):
+        r = self.client.get(reverse(create_event, args=[self.org.code,]))
+        self.assertEqual(r.status_code, 200)
+        data = {
+                'name':'Sample',
+                'time_0':'18/02/2014 13:45',
+                'sms_message':'Test',
+                'push_notification':'Test',
+                'location':'Test',
+                'html_content':"""<ul>
+                    <li>Hey</li>
+                    <li>Hey</li>
+                  </ul>""",
+               }
+        r = self.client.post(reverse(create_event, args=[self.org.code,]), data)
+        self.assertEqual(r.status_code, 302)
+
+        #should redirect to new event
+        event = self.org.event_set.all()[0]
+        self.assertEqual(r['Location'], 'http://testserver' + reverse(event_edit, args=[self.org.code, event.pk]))
+
+        #check fields were set correctly
+        for field in ('name', 'sms_message', 'push_notification', 'location', 'html_content'):
+            self.assertEqual(getattr(event, field), data.get(field))
+
+    def test_edit_event(self):
+        now = django.utils.timezone.now()
+        event = self.org.create_event(
+            Event(name="event", time=now),
+            self.amanda
+        )
+        r = self.client.get(reverse(event_edit, args=[self.org.code, event.pk]))
+        self.assertEqual(r.status_code, 200)
+        data = {
+                'name':'Sample',
+                'time_0':'18/02/2014 13:45',
+                'sms_message':'Test',
+                'push_notification':'Test',
+                'location':'Test',
+                'html_content':"""<ul>
+                    <li>Hey</li>
+                    <li>Hey</li>
+                  </ul>""",
+               }
+        r = self.client.post(reverse(event_edit, args=[self.org.code, event.pk]), data)
+        self.assertEqual(r.status_code, 200)
+
+        event = Event.objects.get(pk=event.pk)
+        #check fields were set correctly
+        for field in ('name', 'sms_message', 'push_notification', 'location', 'html_content'):
+            self.assertEqual(getattr(event, field), data.get(field))
+
+    def test_create_new_link(self):
+        now = django.utils.timezone.now()
+        event = self.org.create_event(
+            Event(name="event", time=now),
+            self.amanda
+        )
+        r = self.client.get(reverse(event_links, args=[self.org.code, event.pk]))
+        self.assertEqual(r.status_code, 200)
+
+        #test auto link creation
+        data = {}
+
+        for i in xrange(10):
+            r = self.client.post(reverse(event_links, args=[self.org.code, event.pk]), data)
+            self.assertEqual(r.status_code, 200)
+            self.assertEqual(event.links().count(), i+1)
+
+    def test_import_numbers(self):
+        now = django.utils.timezone.now()
+        event = self.org.create_event(
+            Event(name="event", time=now),
+            self.amanda
+        )
+        r = self.client.get(reverse(event_invites, args=[self.org.code, event.pk]))
+        self.assertEqual(r.status_code, 200)
+
+        #test auto link creation
+        data = {
+                'data': """somebody +18881231234
+somebody else +18881234444""",
+                }
+
+        r = self.client.post(reverse(event_invites, args=[self.org.code, event.pk]), data)
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(event.eventinvites().count(), 2)
+
