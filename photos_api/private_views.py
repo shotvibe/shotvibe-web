@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from photos_api.permissions import IsAllowedPrivateAPI
 from photos_api.serializers import PhotoUploadInitSerializer, PhotoServerRegisterSerializer
 from phone_auth.authentication import TokenAuthentication
-from photos.models import PendingPhoto
+from photos.models import PendingPhoto, Photo
 from photos import photo_operations
 
 @api_view(['POST'])
@@ -29,9 +29,12 @@ def photo_upload_init(request, photo_id):
             'detail': e.detail
             })
 
-    pending_photo = get_object_or_404(PendingPhoto, pk=photo_id)
+    try:
+        photo = PendingPhoto.objects.get(pk=photo_id)
+    except PendingPhoto.DoesNotExist:
+        photo = get_object_or_404(Photo, pk=photo_id)
 
-    if pending_photo.author != user:
+    if photo.author != user:
         return Response({
             'success': False,
             'error': 'user_not_permitted'
@@ -39,8 +42,8 @@ def photo_upload_init(request, photo_id):
 
     return Response({
         'success': True,
-        'storage_id': pending_photo.storage_id,
-        'uploaded': pending_photo.is_file_uploaded()
+        'storage_id': photo.storage_id,
+        'uploaded': True if isinstance(photo, Photo) else photo.is_file_uploaded()
         })
 
 
