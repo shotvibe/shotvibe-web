@@ -186,10 +186,6 @@ def event_reports(request, event):
 def event_download_link(request, slug):
     device = get_device(request.META.get('HTTP_USER_AGENT', '').lower())
 
-    # pretend to be android in browsers
-    if device not in ('android', 'iphone'):
-        device = 'android'
-
     if device == 'android':
         app_url = settings.GOOGLE_PLAY_URL
     elif device == 'iphone':
@@ -207,10 +203,6 @@ def event_download_link(request, slug):
 
 def event_link(request, slug):
     device = get_device(request.META.get('HTTP_USER_AGENT', '').lower())
-
-    # pretend to be android in browsers
-    if device not in ('android', 'iphone'):
-        device = 'android'
 
     if device == 'android':
         app_url = settings.GOOGLE_PLAY_URL
