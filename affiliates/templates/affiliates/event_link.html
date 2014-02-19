@@ -11,25 +11,25 @@
     <article>
         <header id="header">
             <p>Hello! You're invited to share photos on</p>
-	    <h1>ShotVibe</h1>
+      <h1>ShotVibe</h1>
         </header>
 
         <section id="content">
-	    <br>
+      <br>
             <h2>
                 {{ eventLink.event.name }}
             </h2>
-	    <div>
-	     	{{ eventLink.event.location }},
-		{{ eventLink.event.time|date:"N j, Y" }} at
-		{{ eventLink.event.time|date:"P" }}
-	    </div>
-	    <br>
+      <div>
+         {{ eventLink.event.location }},
+    {{ eventLink.event.time|date:"N j, Y" }} at
+    {{ eventLink.event.time|date:"P" }}
+      </div>
+      <br>
             <div>
                 {{ eventLink.event.html_content|safe }}
             </div>
-	    <br>
-	    <br>
+      <br>
+      <br>
         </section>
 
         <section id="about">
@@ -63,7 +63,7 @@
             </div>
         </section>
         <section id="cta">
-            <a href="{{ app_url }}" class="button {{ device }}">Get the App</a>
+            <a href="{% url "affiliates.views.event_download_link" eventLink.slug %}" class="button {{ device }}">Get the App</a>
             <p>Also available for
                 {% if device == "android" %}
                     <strong>iPhone</strong>
@@ -73,7 +73,7 @@
             </p>
         </section>
         <footer id="footer">
-	    &copy; {% now "Y" %} ShotVibe, Inc. All rights reserved.<br />
+            &copy; {% now "Y" %} ShotVibe, Inc. All rights reserved.<br />
             <a href="//www.shotvibe.com">shotvibe.com</a>
         </footer>
     </article>
