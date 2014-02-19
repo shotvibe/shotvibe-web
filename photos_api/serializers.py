@@ -189,19 +189,17 @@ class AlbumUpdateSerializer(serializers.Serializer):
 
 
 class AlbumAdd(object):
-    def __init__(self, album_name=None, members=None, photos=None):
+    def __init__(self, album_name=None, members=None):
         self.album_name = album_name
         self.members = members
-        self.photos = photos
 
 
 class AlbumAddSerializer(serializers.Serializer):
     album_name = serializers.CharField()
     members = ListField(MemberIdentifierSerializer, required=False)
-    photos = PhotoListField(required=False)
 
     def restore_object(self, attrs, instance=None):
-        return AlbumAdd(album_name=attrs['album_name'], members=attrs['members'], photos=attrs['photos'])
+        return AlbumAdd(album_name=attrs['album_name'], members=attrs['members'])
 
 
 class AlbumViewSerializer(serializers.Serializer):

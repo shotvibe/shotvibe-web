@@ -442,10 +442,6 @@ class Serializers(TestCase):
                         'phone_number': '212-718-9999',
                         'default_country': 'US',
                         'contact_nickname': 'John Smith' }
-                    ],
-                'photos': [
-                    { 'photo_id': 'test_photo_1' },
-                    { 'photo_id': 'test_photo_2' }
                     ]
                 }
         serializer = AlbumAddSerializer(data=test_data)
@@ -457,7 +453,6 @@ class Serializers(TestCase):
             MemberIdentifier(user_id=4),
             MemberIdentifier(phone_number='212-718-9999', default_country='US', contact_nickname='John Smith')
             ])
-        self.assertEqual(serializer.object.photos, ['test_photo_1', 'test_photo_2'])
 
 
 class PhotoTests(BaseTestCase):
@@ -617,10 +612,7 @@ class PhotoUpload(BaseTestCase):
 
         new_album_data = {
                 'album_name': 'My New Album',
-                'members': members,
-                'photos': [
-                    { 'photo_id': photo_id }
-                    ]
+                'members': members
                 }
 
         create_response = self.client.post('/albums/', content_type='application/json', data=json.dumps(new_album_data))
@@ -628,8 +620,6 @@ class PhotoUpload(BaseTestCase):
 
         album_json = json.loads(create_response.content)
         self.assertEqual(album_json['name'], 'My New Album')
-        self.assertEqual(len(album_json['photos']), 1)
-        self.assertEqual(album_json['photos'][0]['photo_id'], photo_id)
         self.assertEqual(len(album_json['members']), 2)
         members_ids = [u['id'] for u in album_json['members']]
         self.assertIn(2, members_ids) # amanda

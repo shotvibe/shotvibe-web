@@ -372,24 +372,9 @@ class Albums(generics.ListAPIView):
         serializer = AlbumAddSerializer(data=request.DATA)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        now = timezone.now()
 
         album = Album.objects.create_album(self.request.user, serializer.object.album_name)
         album.add_members(request.user, member_identifiers=serializer.object.members)
-
-        photo_ids = serializer.object.photos
-
-        try:
-            photo_operations.add_pending_photos_to_album(photo_ids, album.id, now)
-        except photo_operations.PhotoNotUploadedAddPhotoException:
-            return Response(u"Trying to add a Photo that has not yet been uploaded", status=status.HTTP_400_BAD_REQUEST)
-        except photo_operations.InvalidPhotoIdAddPhotoException:
-            return Response(u"Trying to add a Photo with an invalid photo_id", status=status.HTTP_400_BAD_REQUEST)
-
-        photos_added_to_album.send(sender=self,
-                                   photos=photo_ids,
-                                   by_user=request.user,
-                                   to_album=album)
 
         responseSerializer = AlbumSerializer(album, context={'request': request})
         return Response(responseSerializer.data)

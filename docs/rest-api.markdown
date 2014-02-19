@@ -917,9 +917,6 @@ The request JSON should have the following 3 required fields:
 *   `members`: A list of members that should be added to the album (same format
     as above)
 
-*   `photos`: A list of the photos that should be added to the album. All of
-    the photos specified should have already been uploaded.
-
 Example request:
 
     POST /albums/
@@ -929,17 +926,6 @@ Example request:
 
     {
         "album_name": "My New Album",
-        "photos": [
-            {
-                "photo_id": "5a7e5e6afd698dc0ae2221469fd25b6f9b9941ddab20c90d95f6cba9efa57905"
-            },
-            {
-                "photo_id": "906bf4bf2bdf3e80f32660786cd227596b2ffe173d4f3a233f5ab5ad672f87ae"
-            },
-            {
-                "photo_id": "19191da2a395424c0abfa9ebfbfdda53cf77eb384125e18d587c63d732baf1be"
-            }
-        ],
         "members": [
             {
                 "user_id": 4
