@@ -6,7 +6,8 @@ from django.conf import settings
 from django.db import IntegrityError, transaction
 import django.utils.timezone
 
-from affiliates.views import index, organization, create_event, event_edit
+from affiliates.views import index, organization, create_event, event_edit, \
+        event_link, event_download_link
 
 
 class ModelTests(TestCase):
@@ -132,3 +133,45 @@ class EventLinkTests(TestCase):
             eventLink = self.event.create_link()
         num_links = EventLink.objects.filter(event__isnull=False).count()
         self.assertEqual(num_links, n+len(vals))
+
+
+class EventLinkVisitTests(TestCase):
+    fixtures = ['tests/test_users']
+
+    def setUp(self):
+        self.amanda = auth.get_user_model().objects.get(pk=2)
+        self.org = Organization(code="a")
+        self.org.save()
+        self.org.add_user(self.amanda)
+        now = django.utils.timezone.now()
+        self.event = self.org.create_event(
+            Event(name="event", time=now),
+            self.amanda
+        )
+
+    def test_visited_count(self):
+        eventLink = self.event.create_link()
+        pk = eventLink.pk
+        slug = eventLink.slug
+
+        self.assertEqual(eventLink.visited_count, 0)
+
+        for i in xrange(20):
+            r = self.client.get(reverse(event_link, args=[slug,]))
+            #have to fetch link again
+            eventLink = EventLink.objects.get(pk=pk)
+            self.assertEqual(eventLink.visited_count, i + 1)
+
+    def test_downloaded_count(self):
+        eventLink = self.event.create_link()
+        pk = eventLink.pk
+        slug = eventLink.slug
+
+        self.assertEqual(eventLink.visited_count, 0)
+
+        for i in xrange(20):
+            r = self.client.get(reverse(event_download_link, args=[slug,]))
+            self.assertEqual(r.status_code, 302)
+            #have to fetch link again
+            eventLink = EventLink.objects.get(pk=pk)
+            self.assertEqual(eventLink.downloaded_count, i + 1)
