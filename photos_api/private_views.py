@@ -39,7 +39,8 @@ def photo_upload_init(request, photo_id):
 
     return Response({
         'success': True,
-        'storage_id': pending_photo.storage_id
+        'storage_id': pending_photo.storage_id,
+        'uploaded': pending_photo.is_file_uploaded()
         })
 
 
