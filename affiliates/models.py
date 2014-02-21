@@ -134,19 +134,26 @@ class Event(models.Model):
         else:
             return None, True, "All duplicates"
 
-    def send_invites(self, invitelinks):
-        to_memberidentifier = methodcaller("to_memberidentifier")
-        create_invitelink = methodcaller("create_invitelink")
-        map(create_invitelink, invitelinks)
-        member_identifiers = map(to_memberidentifier, invitelinks)
-        if member_identifiers:
-            self.album.add_members(self.created_by, member_identifiers)
+    def send_invites(self, eventinvites):
+        sms_template = string.Template(self.sms_message)
+        for eventinvite in eventinvites:
+            invitelink = eventinvite.create_invitelink()
+            memberidentifier = eventinvite.to_memberidentifier()
+            def sms_formatter(link_code_object):
+                formatted_sms = sms_template.safe_substitute(
+                    name=eventinvite.nickname,
+                )
+                return u"{0} https://www.shotvibe.com{1}".format(
+                    formatted_sms,
+                    invitelink.get_absolute_url(),
+                )
+            self.album.add_members(self.created_by, [memberidentifier], message_formatter=sms_formatter)
 
     def eventinvites(self):
         return self.eventinvite_set.all()
 
     def __unicode__(self):
-        return u"{0}: {1}".format(self.organization.name, self.name)
+        return u"{0}: {1}".format(self.organization.code, self.name)
 
 
 class EventInvite(models.Model):

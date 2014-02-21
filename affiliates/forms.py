@@ -63,5 +63,5 @@ class EventInviteSendForm(Form):
         except KeyError:
             queryset = None
         super(EventInviteSendForm, self).__init__(*args, **kwargs)
-        if queryset:
+        if queryset is not None:
             self.fields['invites'].queryset = queryset

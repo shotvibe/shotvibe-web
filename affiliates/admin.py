@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib import admin
 
-from affiliates.models import Organization, OrganizationUser, Event, EventLink
+from affiliates.models import Organization, OrganizationUser, Event, EventLink, EventInvite
 
 
 class OrganizationUserAdminInline(admin.TabularInline):
@@ -24,3 +24,5 @@ class EventAdmin(admin.ModelAdmin):
 
 admin.site.register(Organization, OrganizationAdmin)
 admin.site.register(Event, EventAdmin)
+admin.site.register(EventLink)
+admin.site.register(EventInvite)
