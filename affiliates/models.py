@@ -57,7 +57,8 @@ class Event(models.Model):
     album = models.ForeignKey(Album)
     name = models.CharField(max_length=255)
     time = models.DateTimeField()
-    sms_message = models.CharField(max_length=255)
+    sms_message = models.CharField(max_length=255, \
+        help_text="Hey ${name}, somebody invited you to an event")
     push_notification = models.CharField(max_length=255)
     location = models.CharField(max_length=255)
     #logo =
