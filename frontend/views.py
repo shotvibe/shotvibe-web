@@ -63,7 +63,7 @@ def album(request, pk):
                     # Forward request to photo upload server
                     userAuthToken = AuthToken.objects.create_auth_token(request.user, 'Internal Photo Upload Auth Token', timezone.now())
 
-                    r = requests.put(settings.PHOTO_UPLOAD_SERVER_FORWARD_URL.format(pending_photo.photo_id),
+                    r = requests.put(settings.PHOTO_UPLOAD_SERVER_URL + '/photos/upload/' + pending_photo.photo_id + '/original/',
                             headers = { 'Authorization': 'Token ' + userAuthToken.key },
                             data = f.chunks())
                     r.raise_for_status()

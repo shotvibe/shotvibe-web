@@ -422,10 +422,10 @@ def photos_upload_request(request, format=None):
 
         if settings.USING_LOCAL_PHOTOS:
             upload_url = reverse('photo-upload', [pending_photo.photo_id], request=request)
-            fullres_upload_url = None
+            fullres_upload_url = reverse('photo-upload', [pending_photo.photo_id], request=request)
         else:
-            upload_url = settings.PHOTO_UPLOAD_SERVER_URL.format(pending_photo.photo_id)
-            fullres_upload_url = settings.FULLRES_PHOTO_UPLOAD_SERVER_URL.format(pending_photo.photo_id)
+            upload_url = settings.PHOTO_UPLOAD_SERVER_URL + '/photos/upload/' + pending_photo.photo_id + '/'
+            fullres_upload_url = settings.PHOTO_UPLOAD_SERVER_URL + '/photos/upload/' + pending_photo.photo_id + '/original/'
 
         response_data.append({
             'photo_id': pending_photo.photo_id,
@@ -455,7 +455,7 @@ class PhotoUpload(views.APIView):
             process_file_upload(pending_photo, uploaded_chunks)
         else:
             # Forward request to photo upload server
-            r = requests.put(settings.FULLRES_PHOTO_UPLOAD_SERVER_URL.format(pending_photo.photo_id),
+            r = requests.put(settings.PHOTO_UPLOAD_SERVER_URL + '/photos/upload/' + pending_photo.photo_id + '/',
                     headers = { 'Authorization': 'Token ' + request.auth.key },
                     data = uploaded_chunks)
             r.raise_for_status()
