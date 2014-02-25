@@ -363,18 +363,22 @@ class PhoneNumberLinkCodeManager(models.Manager):
         if date_invited is None:
             date_invited = timezone.now()
 
-        if message_formatter is None:
-            message_formatter = PhoneNumberLinkCodeManager.default_sms_invite_formatter
-
         link_code_object = PhoneNumberLinkCode.objects.create(
                 invite_code = PhoneNumberLinkCode.generate_invite_code(),
                 phone_number = phone_number,
                 inviting_user = inviter,
                 date_created = date_invited)
 
-        send_sms(phone_number.phone_number, message_formatter(link_code_object))
+        self.send_sms(phone_number, link_code_object, message_formatter)
 
         return link_code_object
+
+    def send_sms(self, phone_number, link_code_object, message_formatter=None):
+        if message_formatter is None:
+            message_formatter = PhoneNumberLinkCodeManager.default_sms_invite_formatter
+
+        send_sms(phone_number.phone_number, message_formatter(link_code_object))
+
 
 class PhoneNumberLinkCode(models.Model):
     invite_code = models.CharField(max_length=32, primary_key=True)

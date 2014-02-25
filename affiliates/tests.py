@@ -279,3 +279,51 @@ somebody else +18881234444""",
         r = self.client.post(invites_url, data)
         self.assertEqual(r.status_code, 200)
         self.assertEqual(event.eventinvites().count(), 2)
+
+    def test_sms_send(self):
+        from mock import patch
+        now = django.utils.timezone.now()
+        event = self.org.create_event(
+            Event(name="event", time=now),
+            self.amanda
+        )
+        event.create_eventinvites([
+            ('test_user1', '+12127180000'),
+            ('test_user2', '+12127180001'),
+            ('test_user3', '+12127180002'),
+        ])
+
+        self.assertEqual(len(event.eventinvites()), 3)
+        with patch("phone_auth.models.send_sms") as mock:
+            event.send_invites(event.eventinvites())
+            self.assertEqual(mock.call_count, 3)
+
+    def test_multiple_sms_send(self):
+        from mock import patch
+        now = django.utils.timezone.now()
+        event_a = self.org.create_event(
+            Event(name="event_a", time=now),
+            self.amanda
+        )
+        event_a.create_eventinvites([
+            ('test_user1', '+12127180000'),
+            ('test_user2', '+12127180001'),
+        ])
+        self.assertEqual(len(event_a.eventinvites()), 2)
+        with patch("phone_auth.models.send_sms") as mock:
+            event_a.send_invites(event_a.eventinvites())
+            self.assertEqual(mock.call_count, 2)
+
+        event_b = self.org.create_event(
+            Event(name="event_b", time=now),
+            self.amanda
+        )
+        event_b.create_eventinvites([
+            ('test_user3', '+12127180000'),
+            ('test_user4', '+12127180001'),
+        ])
+
+        self.assertEqual(len(event_b.eventinvites()), 2)
+        with patch("phone_auth.models.send_sms") as mock:
+            event_b.send_invites(event_b.eventinvites())
+            self.assertEqual(mock.call_count, 2)

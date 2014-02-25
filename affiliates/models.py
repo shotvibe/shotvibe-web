@@ -57,7 +57,7 @@ class Event(models.Model):
     album = models.ForeignKey(Album)
     name = models.CharField(max_length=255)
     time = models.DateTimeField()
-    sms_message = models.CharField(max_length=255, \
+    sms_message = models.CharField(max_length=255,
         help_text="Hey ${name}, somebody invited you to an event")
     push_notification = models.CharField(max_length=255)
     location = models.CharField(max_length=255)
@@ -140,6 +140,7 @@ class Event(models.Model):
         for eventinvite in eventinvites:
             invitelink = eventinvite.create_invitelink()
             memberidentifier = eventinvite.to_memberidentifier()
+
             def sms_formatter(link_code_object):
                 formatted_sms = sms_template.safe_substitute(
                     name=eventinvite.nickname,
@@ -148,7 +149,7 @@ class Event(models.Model):
                     formatted_sms,
                     invitelink.get_absolute_url(),
                 )
-            self.album.add_members(self.created_by, [memberidentifier], message_formatter=sms_formatter)
+            self.album.add_members(self.created_by, [memberidentifier], message_formatter=sms_formatter, force_send=True)
 
     def eventinvites(self):
         return self.eventinvite_set.all()
