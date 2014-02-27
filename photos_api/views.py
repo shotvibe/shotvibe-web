@@ -455,7 +455,7 @@ class PhotoUpload(views.APIView):
             process_file_upload(pending_photo, uploaded_chunks)
         else:
             # Forward request to photo upload server
-            r = requests.put(settings.PHOTO_UPLOAD_SERVER_URL + '/photos/upload/' + pending_photo.photo_id + '/',
+            r = requests.put(settings.PHOTO_UPLOAD_SERVER_URL + '/photos/upload/' + pending_photo.photo_id + '/original/',
                     headers = { 'Authorization': 'Token ' + request.auth.key },
                     data = uploaded_chunks)
             r.raise_for_status()
