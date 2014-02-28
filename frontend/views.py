@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib import auth
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.utils import timezone
@@ -10,18 +10,44 @@ from django.db import transaction
 import requests
 
 from phone_auth.models import AuthToken
-from photos.models import Album, Photo, AlbumMember
+from photos.models import Album, Photo
 from photos import image_uploads
 from photos import photo_operations
 from photos_api.serializers import MemberIdentifier
 from photos_api.signals import photos_added_to_album
+from phone_auth import sms_send
 
+import phonenumbers
 
 def index(request):
     if request.user.is_authenticated():
         return home(request)
     else:
-        return render_to_response('frontend/index.html', {}, context_instance=RequestContext(request))
+        if request.method == 'POST':
+            phone_number = request.POST.get('phone_number')
+            country_code = request.POST.get('country_code')
+
+            try:
+                number = phonenumbers.parse(phone_number, country_code)
+            except phonenumbers.phonenumberutil.NumberParseException as e:
+                return HttpResponse(unicode(e), status=400)
+
+            if not phonenumbers.is_possible_number(number):
+                return HttpResponse("invalid number", status=400)
+
+            formatted_number = phonenumbers.format_number(number, phonenumbers.PhoneNumberFormat.E164)
+
+            if False:
+                sms_send.send_sms(formatted_number, "link")
+
+            return HttpResponse(formatted_number)
+
+        data = {
+            'apple_app_store_url': settings.APPLE_APP_STORE_URL,
+            'google_play_url': settings.GOOGLE_PLAY_URL
+        }
+
+        return render_to_response('glance/index.html', data, context_instance=RequestContext(request))
 
 def home(request):
     if request.method == 'POST' and 'create_album' in request.POST:
