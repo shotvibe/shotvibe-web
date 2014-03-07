@@ -1,0 +1,62 @@
+{% extends "affiliates/base.html" %}
+
+{% load widget_tweaks %}
+
+{% block subcontent %}
+
+<h3>
+	<a href="{% url "affiliates.views.organization" organization.code %}">{{ organization.code }}</a>
+	-
+	<a href="{% url "affiliates.views.event_edit" organization.code event.id %}">{{ event.name }}</a>
+	-
+	Links
+</h3>
+
+{% include "affiliates/event/partials/menu.html" with active="photos" %}
+
+<div>
+	<fieldset>
+		<div class="row">
+			<div class="span6">
+				<form class="form-horizontal well" method="post" enctype="multipart/form-data" action="{% url "affiliates.views.event_photos" organization.code event.id %}">
+					{% csrf_token %}
+					<h3>Add Photos</h3>
+					<div class="control-group">
+						<label class="control-label" for="inputEmail"><strong>Step 1:</strong></label>
+						<div class="controls">
+							<input name="photo_files" type="file" multiple>
+							<span class="help-block">
+								To select multiple photos, hold down the <em>Shift</em> or <em>Control</em> key.
+							</span>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label" for="inputEmail"><strong>Step 2:</strong></label>
+						<div class="controls">
+							<input name="add_photos" type="submit" class="btn btn-primary" value="Upload">
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="span6">
+				{% if num_photos_added %}
+				<div class="alert alert-success">
+					Added {{ num_photos_added }} Photos
+				</div>
+				{% endif %}
+				<ul class="thumbnails">
+					{% for photo in photos %}
+					<li>
+					<a href="{% url "frontend.views.photo" album.id photo.photo_id %}" class="thumbnail">
+						<img src="{{ photo.get_photo_url_no_ext }}_crop140.jpg" width="140" height="140" alt="">
+					</a>
+					</li>
+					{% endfor %}
+				</ul>
+			</div>
+		</div>
+	</fieldset>
+</div>
+
+
+{% endblock %}

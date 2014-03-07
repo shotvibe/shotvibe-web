@@ -9,5 +9,6 @@ urlpatterns = patterns('',
     url(r'^(?P<organization_code>[^/]+)/event/(?P<event_id>\d+)$', views.event_edit),
     url(r'^(?P<organization_code>[^/]+)/links/(?P<event_id>\d+)$', views.event_links),
     url(r'^(?P<organization_code>[^/]+)/invites/(?P<event_id>\d+)$', views.event_invites),
+    url(r'^(?P<organization_code>[^/]+)/photos/(?P<event_id>\d+)$', views.event_photos),
     url(r'^(?P<organization_code>[^/]+)/reports/(?P<event_id>\d+)$', views.event_reports),
 )

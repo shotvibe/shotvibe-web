@@ -9,8 +9,14 @@ from functools import wraps
 from affiliates.models import Organization, OrganizationUser, Event, EventLink
 from affiliates.forms import EventForm, EventLinkForm, \
     EventInviteImportForm, EventInviteSendForm
-from photos.models import Album
 from frontend.mobile_views import get_device
+
+from photos.models import Album, Photo, PendingPhoto, AlbumMember
+from photos import image_uploads
+from photos_api.serializers import MemberIdentifier
+from photos_api.signals import photos_added_to_album
+
+from django.utils import timezone
 
 
 def organization_required(view_f):
@@ -181,6 +187,51 @@ def event_reports(request, event):
         'organization': event.organization,
         'event': event,
     })
+
+
+@login_required
+@event_mod_required
+def event_photos(request, event):
+    album = event.album
+
+    num_photos_added = 0
+    num_photos_failed = 0
+
+    if request.POST:
+        if 'add_photos' in request.POST:
+            pending_photos = []
+            for f in request.FILES.getlist('photo_files'):
+
+                pending_photo = PendingPhoto.objects.create(author=request.user)
+                location, directory = pending_photo.bucket.split(':')
+                if location != 'local':
+                    raise ValueError('Unknown photo bucket location: ' + location)
+
+                image_uploads.handle_file_upload(directory, pending_photo.photo_id, f.chunks())
+                pending_photos.append(pending_photo)
+                num_photos_added += 1
+
+            # Upload pending photos
+            now = timezone.now()
+            photos = [pf.get_or_process_uploaded_image_and_create_photo(album, now) for pf in pending_photos]
+
+            # TODO: If this function will be refactored to use Class Based Views
+            # change sender from `request` to `self` (View instance)
+            photos_added_to_album.send(sender=request,
+                                       photos=photos,
+                                       by_user=request.user,
+                                       to_album=album)
+
+    data = {
+            'event': event,
+            'organization': event.organization,
+            'album': album,
+            'photos': album.get_photos(),
+            'members': album.get_member_users(),
+            'num_photos_added': num_photos_added,
+            'num_photos_failed': num_photos_failed
+            }
+    return render(request, 'affiliates/event/photos.html', data)
 
 
 def event_download_link(request, slug):
