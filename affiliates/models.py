@@ -194,7 +194,7 @@ class EventInvite(models.Model):
         return ret
 
     def __unicode__(self):
-        return "{0} - {1}".format(self.nickname, self.phone_number)
+        return u"{0} - {1}".format(self.nickname, self.phone_number)
 
 
 VALID_LINK_CHARS = tuple(string.ascii_letters + string.digits)

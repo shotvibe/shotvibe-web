@@ -280,6 +280,31 @@ somebody else +18881234444""",
         self.assertEqual(r.status_code, 200)
         self.assertEqual(event.eventinvites().count(), 2)
 
+    def test_import_numbers_with_rtl(self):
+        now = django.utils.timezone.now()
+        event = self.org.create_event(
+            Event(name="event", time=now),
+            self.amanda
+        )
+        invites_url = reverse(event_invites, args=[self.org.code, event.pk])
+        r = self.client.get(invites_url)
+        self.assertEqual(r.status_code, 200)
+
+        #test auto link creation
+        data = {
+            'data': '\xd7\xa2\xd7\x95\xd7\x9e\xd7\xa8 \xd7\xa7\xd7\x9c\xd7\x99\xd7\x99\xd7\x9f \t522222955\n' +
+                    '\xd7\x90\xd7\x99\xd7\x99\xd7\xa4\xd7\x95\xd7\x9f 5\t586277493\n' +
+                    '\xd7\xa0\xd7\xa7\xd7\xa1\xd7\x95\xd7\xa1 4 \t586277494\n' +
+                    '\xd7\x90\xd7\x99\xd7\x99\xd7\xa4\xd7\x95\xd7\x9f 4 \t587306619\n'
+        }
+
+        r = self.client.post(invites_url, data)
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(event.eventinvites().count(), 4)
+
+        r = self.client.get(invites_url)
+        self.assertEqual(r.status_code, 200)
+
     def test_sms_send(self):
         from mock import patch
         now = django.utils.timezone.now()
