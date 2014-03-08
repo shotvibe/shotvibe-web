@@ -266,8 +266,7 @@ def event_link(request, slug):
     eventLink.incr_visited()
     album = eventLink.event.album
 
-    request.session['event'] = str(eventLink.event.pk)
-    request.session['album'] = str(album.pk)
+    request.session['custom_payload'] = "event:{0}".format(eventLink.event.pk)
 
     return render(request, 'affiliates/event_link.html', {
         'eventLink': eventLink,
