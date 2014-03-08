@@ -13,4 +13,6 @@ urlpatterns = patterns('',
     url(r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'}),
     url(r'^i/(?P<invite_code>[\w_-]+)/$', mobile_views.invite_page, name="invite_page"),
     url(r'^app_init/$', phone_auth.views.app_init),
+    # Temporary event for Dolev 2014-01-24
+    url(r'^e/dolev/$', mobile_views.dolev_event, name="dolev_event"),
 )
