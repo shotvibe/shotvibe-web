@@ -185,7 +185,7 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.ScopedRateThrottle',
     ),
     'DEFAULT_THROTTLE_RATES': {
-        'request_sms': '3/hour',
+        'request_sms': '10/hour',
     },
 }
 

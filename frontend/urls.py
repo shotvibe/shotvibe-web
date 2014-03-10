@@ -14,4 +14,5 @@ urlpatterns = patterns('',
     url(r'^i/(?P<invite_code>[\w_-]+)/$', mobile_views.invite_page, name="invite_page"),
     url(r'^app_init/$', phone_auth.views.app_init),
     url(r'^app/$', mobile_views.get_app, name="get_app"),
+    url(r'^request_sms/$', phone_auth.views.RequestSMS.as_view(), name="request_sms"),
 )

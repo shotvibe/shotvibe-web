@@ -130,6 +130,55 @@ $(function() {
             return true;
         });
 
+        $("#sms-error").hide();
+        $("#sms-success").hide();
+        $("#sms-throttle").hide();
+
+        $('#sms-send').click(function() {
+            var country_code = $('#country_code').val();
+            var phone_number = $('#phone_number').val();
+
+            if (!phone_number) {
+                $('#phone_number').focus();
+                return false;
+            }
+
+            $('#sms-send').attr('disabled', 'disabled');
+            $("#sms-error").hide();
+
+            $.ajax('/request_sms/', {
+                contentType: 'application/json',
+                type: 'POST',
+                data: JSON.stringify({
+                    phone_number: phone_number,
+                    default_country: country_code
+                }),
+                success: function() {
+                    // success
+                    $("#sms-form").hide();
+                    $("#sms-success").show();
+                },
+                error: function(xhr, status, error) {
+                    if (xhr.status == 429) {
+                        // throttled
+                        $("#sms-form").hide();
+                        $("#sms-throttle").show();
+                    }
+                    else if (xhr.status == 400) {
+                        // bad request
+                        $("#sms-error").show();
+                    }
+                    else {
+                        // error, try again?
+                    }
+
+                    $('#sms-send').removeAttr('disabled');
+                }
+            });
+
+            return false;
+        });
+
     }
 
     // Alt Header

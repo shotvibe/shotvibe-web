@@ -57,8 +57,8 @@
 							<footer>
 								<ul class="actions">
 									<li class="default"><a href="#download" class="button big download">Get the App</a></li>
-									<li class="ios"><a href="#" class="button ios">Download iOS App</a><span>Also available for <a href="#">Android</a></span></li>
-									<li class="android"><a href="#" class="button android">Download Android App</a><span>Also available for <a href="#">iPhone</a></span></li>
+									<li class="ios"><a href="{{ apple_app_store_url }}" class="button ios">Download iOS App</a><span>Also available for <a href="{{ google_play_url }}">Android</a></span></li>
+									<li class="android"><a href="{{ google_play_url }}" class="button android">Download Android App</a><span>Also available for <a href="{{ apple_app_store_url }}">iPhone</a></span></li>
 								</ul>
 							</footer>
 						</div>
@@ -67,17 +67,17 @@
 			</section>
 			
 			<section id="download">
-				<div class="container">
+				<div id="sms-form" class="container">
 					<header>
 						<h2>Text download link<br class="only-mobile" />
 						to your phone</h2>
 						<span class="closer fa fa-times-circle"></span>
 					</header>
-					<form action="{% url "frontend.views.index" %}" method="post">
+					<form>
 						{% csrf_token %}
 						<div class="row half">
 							<div class="4u">
-								<div class="select"><select name="country_code">
+								<div class="select"><select id="country_code" name="country_code">
 									<option value="AF">Afghanistan (+93)</option>
 									<option value="AX">Åland Islands (+358)</option>
 									<option value="AL">Albania (+355)</option>
@@ -323,10 +323,15 @@
 								</select><span class="arrow"></span></div>
 							</div>
 							<div class="4u">
-								<input type="text" name="phone_number" placeholder="Your Phone Number" />
+								<input id="phone_number" type="text" name="phone_number" placeholder="Your Phone Number" />
 							</div>
 							<div class="2u">
-								<input type="submit" value="Send" class="button" />
+								<input id="sms-send" type="submit" value="Send" class="button" />
+							</div>
+						</div>
+						<div id="sms-error" class="row">
+							<div class="4u">
+								Error: Invalid phone number.
 							</div>
 						</div>
 						<div class="row">
@@ -336,6 +341,14 @@
 							</div>
 						</div>
 					</form>
+				</div>
+				<div id="sms-throttle" class="container">
+					Error: Too many requests, please try again later.
+				</div>
+				<div id="sms-success" class="container">
+					<header>
+						<h2>Success!</h2>
+					</header>
 				</div>
 			</section>
 			
@@ -371,7 +384,7 @@
 							<header>
 								<h2>Create albums with a single tap</h2>
 							</header>
-							<p>It's super fast to create a new album. Just tape a single button
+							<p>It's super fast to create a new album. Just tap a single button
 							and it's ready to go.</p>
 						</div>
 						<div class="6u">
@@ -471,8 +484,8 @@
 				<span class="logo">Glance</span>
 				<ul class="actions">
 					<li class="default"><a href="#download" class="button big download">Get the App</a></li>
-					<li class="ios"><a href="#" class="button ios">Download iOS App</a></li>
-					<li class="android"><a href="#" class="button android">Download Android App</a></li>
+					<li class="ios"><a href="{{ apple_app_store_url }}" class="button ios">Download iOS App</a></li>
+					<li class="android"><a href="{{ google_play_url }}" class="button android">Download Android App</a></li>
 				</ul>
 			</div>
 

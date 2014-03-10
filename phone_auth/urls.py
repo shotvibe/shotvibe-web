@@ -8,5 +8,4 @@ urlpatterns = patterns('',
     url(r'^logout/', views.logout),
     url(r'^delete_account/', views.delete_account),
     url(r'^country_lookup/$', views.country_lookup),
-    url(r'^request_sms/$', views.RequestSMS.as_view())
 )
