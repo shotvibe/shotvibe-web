@@ -9,7 +9,7 @@ from photos.photo_operations import choose_random_subdomain
 from photos.models import Photo
 
 
-def migrate_photos_to_s3(s3_bucket_name, aws_access_key, aws_secret_access_key):
+def migrate_photos_to_s3(s3_bucket_name, aws_access_key, aws_secret_access_key, lower='0', upper='g'):
     """
     This is used to copy legacy photos stored on the server in
     LOCAL_PHOTO_BUCKETS_BASE_PATH to the new photo storage system that stores
@@ -27,6 +27,8 @@ def migrate_photos_to_s3(s3_bucket_name, aws_access_key, aws_secret_access_key):
 
     # The default string set by the migration is 'temporary-placeholder'
     old_photos_collection = Photo.objects.filter(storage_id__exact='temporary-placeholder')
+
+    old_photos_collection = old_photos_collection.filter(photo_id__gte=lower, photo_id__lt=upper)
 
     total_photos = old_photos_collection.count()
 
