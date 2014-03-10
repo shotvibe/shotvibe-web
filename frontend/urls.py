@@ -5,7 +5,7 @@ from frontend import mobile_views
 import phone_auth.views
 
 urlpatterns = patterns('',
-    url(r'^$', views.index),
+    url(r'^$', views.index, name="index"),
     url(r'^album/(?P<pk>\d+)/$', views.album),
     url(r'^album/(?P<album_pk>\d+)/photo/(?P<photo_id>[\w-]+)/$', views.photo),
     url(r'^album/(?P<album_pk>\d+)/members/$', views.album_members),
@@ -13,4 +13,5 @@ urlpatterns = patterns('',
     url(r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'}),
     url(r'^i/(?P<invite_code>[\w_-]+)/$', mobile_views.invite_page, name="invite_page"),
     url(r'^app_init/$', phone_auth.views.app_init),
+    url(r'^app/$', mobile_views.get_app, name="get_app"),
 )

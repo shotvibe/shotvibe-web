@@ -4,6 +4,8 @@ from django.http import HttpResponseNotFound, HttpResponse
 from django.utils import timezone
 from django.views.decorators.cache import never_cache
 
+from subdomains.utils import reverse
+
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -11,8 +13,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from phone_auth.serializers import AuthorizePhoneNumberSerializer, ConfirmSMSCodeSerializer
-
 from phone_auth.models import AuthToken, PhoneNumber, PhoneNumberLinkCode
+from phone_auth.sms_send import send_sms
+
 
 class AuthorizePhoneNumber(APIView):
     serializer_class = AuthorizePhoneNumberSerializer
@@ -27,6 +30,7 @@ class AuthorizePhoneNumber(APIView):
         confirmation_key = PhoneNumber.objects.authorize_phone_number(phone_number_str)
 
         return Response({ 'confirmation_key': confirmation_key })
+
 
 class ConfirmSMSCode(APIView):
     serializer_class = ConfirmSMSCodeSerializer
@@ -54,6 +58,7 @@ class ConfirmSMSCode(APIView):
             'auth_token': result.auth_token
             })
 
+
 @api_view(['POST'])
 @permission_classes((IsAuthenticated,))
 def logout(request):
@@ -61,6 +66,7 @@ def logout(request):
     request.auth.logout()
 
     return Response()
+
 
 @api_view(['POST'])
 @permission_classes((IsAuthenticated,))
@@ -75,6 +81,7 @@ def delete_account(request):
     request.user.delete()
 
     return Response()
+
 
 # This view is called from the mobile app, after it has been installed, and is
 # being run for the first time
@@ -151,6 +158,7 @@ def app_init(request):
 
     return response
 
+
 @never_cache
 @api_view(['POST'])
 def country_lookup(request):
@@ -177,3 +185,23 @@ def country_lookup(request):
             }
 
     return Response(response_data)
+
+
+class RequestSMS(APIView):
+    serializer_class = AuthorizePhoneNumberSerializer
+
+    throttle_scope = 'request_sms'
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.DATA)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        phone_number_str = serializer.object['phone_number_str']
+
+        template = "Welcome to Glance! Click here and start enjoying sharing albums with your friends: %s"
+        sms_text = template % reverse('get_app', subdomain='www', scheme='https')
+
+        send_sms(phone_number_str, sms_text)
+
+        return Response(status=204)
