@@ -134,7 +134,10 @@ def broadcast_photos_added_to_album(album_id, author_id, album_name, author_name
             'apns' : {
                 'aps' : {
                     'alert' : author_name + ' added ' + str(num_photos) + ' photos to the album ' + album_name,
-                    'sound': 'default'
+                    'sound': 'default',
+                    'badge': num_photos,
+# TODO: badge should be the total number of new photos (for all albums) instead
+                    'content-available': 1
                     },
                 'type': 'photos_added',
                 'album_id': album_id,
@@ -160,7 +163,9 @@ def broadcast_members_added_to_album(album_id, album_name, adder_name, user_ids)
             'apns': {
                 'aps': {
                     'alert': adder_name + ' added you to the album ' + album_name,
-                    'sound': 'default'
+                    'sound': 'default',
+# TODO: add 'badge' with total number of new photos
+                    'content-available': 1
                     },
                 'type': 'added_to_album',
                 'album_id': album_id,
@@ -184,7 +189,10 @@ def broadcast_album_list_sync(user_ids):
                     }
                 },
             'apns': {
-                'aps': {},
+                'aps': {
+# TODO: add 'badge' with total number of new photos
+                    'content-available': 1
+                    },
                 'type': 'album_list_sync'
                 }
             }
@@ -205,7 +213,10 @@ def broadcast_album_sync(user_ids, album_id):
                     }
                 },
             'apns' : {
-                'aps' : {},
+                'aps' : {
+# TODO: add 'badge' with total number of new photos
+                    'content-available': 1
+                    },
                 'type': 'album_sync',
                 'album_id' : album_id
                 }
