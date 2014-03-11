@@ -1,6 +1,5 @@
 from django.contrib import auth
 from django.contrib.auth import get_user_model
-from django.db.models import Max
 import os
 import random
 import datetime
@@ -195,31 +194,46 @@ class AlbumMember(models.Model):
             self.save(update_fields=['last_access'])
 
 
-all_photo_buckets = (
-        'local:photos01',
-        'local:photos02',
-        'local:photos03',
-        'local:photos04',
-        )
-
-
 class PhotoManager(models.Manager):
-    pass
+    def upload_request(self, author):
+        success = False
+        while not success:
+            new_photo_id = Photo.generate_photo_id()
+            new_storage_id = Photo.generate_photo_id()
+
+            new_pending_photo = PendingPhoto.objects.create(
+                    photo_id = new_photo_id,
+                    storage_id = new_storage_id,
+                    file_uploaded_time = None,
+                    processing_done_time = None,
+                    start_time = timezone.now(),
+                    author = author
+                    )
+
+            # Make sure that there is no existing Photo with the same id
+
+            if (not Photo.objects.filter(photo_id=new_photo_id).exists() and
+                   not Photo.objects.filter(storage_id=new_storage_id).exists()):
+                success = True
+            else:
+                new_pending_photo.delete()
+
+        return new_pending_photo
 
 
 class Photo(models.Model):
     photo_id = models.CharField(primary_key=True, max_length=128)
-    bucket = models.CharField(max_length=64)
+    storage_id = models.CharField(max_length=128, db_index=True)
+    subdomain = models.CharField(max_length=64)
     date_created = models.DateTimeField(db_index=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL)
     album = models.ForeignKey(Album)
     album_index = models.PositiveIntegerField(db_index=True)
-    width = models.IntegerField()
-    height = models.IntegerField()
 
     objects = PhotoManager()
 
     class Meta:
+        unique_together = (('album', 'album_index'),)
         get_latest_by = 'album_index'
         ordering = ['album_index']
 
@@ -232,11 +246,10 @@ class Photo(models.Model):
         return ''.join(["{0:02x}".format(ord(c)) for c in os.urandom(key_bitsize / 8)])
 
     def get_photo_url(self):
-        location, directory = self.bucket.split(':')
-        if location == 'local':
-            return settings.LOCAL_PHOTO_BUCKET_URL_FORMAT_STR.format(directory, self.photo_id)
+        if settings.USING_LOCAL_PHOTOS:
+            return '/photos/' + self.subdomain + '/' + self.photo_id + '.jpg'
         else:
-            raise ValueError('Unknown photo bucket location: ' + location)
+            return settings.PHOTO_SERVER_URL_FORMAT_STR.format(self.subdomain, self.photo_id + '.jpg')
 
     def get_photo_url_no_ext(self):
         """
@@ -263,52 +276,53 @@ def get_pending_photo_default_photo_id():
         photo_id_generated = True
     return photo_id
 
-def get_pending_photo_default_bucket():
-    return random.choice(all_photo_buckets)
-
 class PendingPhoto(models.Model):
-    photo_id = models.CharField(primary_key=True, max_length=128, default=get_pending_photo_default_photo_id)
-    bucket = models.CharField(max_length=64, choices=zip(all_photo_buckets, all_photo_buckets),
-                              default=get_pending_photo_default_bucket)
+    photo_id = models.CharField(primary_key=True, max_length=128)
+    storage_id = models.CharField(unique=True, max_length=128)
+    file_uploaded_time = models.DateTimeField(null=True)
+    processing_done_time = models.DateTimeField(null=True)
     start_time = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(settings.AUTH_USER_MODEL)
 
-    def get_or_process_uploaded_image_and_create_photo(self, album, date_created):
-        """
-        For already uploaded photos it will simply return photo.
-        For pending photo it will process uploaded image, create Photo object and return it.
-        """
-        try:
-            photo = Photo.objects.get(photo_id=self.photo_id)
-        except Photo.DoesNotExist:
-            pass
-        else:
-            return photo
+    def set_uploaded(self, upload_time):
+        if upload_time is None:
+            raise TypeError('upload_time must not be None')
 
-        # TODO catch exception:
-        width, height = image_uploads.process_uploaded_image(self.bucket, self.photo_id)
+        self.file_uploaded_time = upload_time
+        self.save(update_fields=['file_uploaded_time'])
 
-        album_index_q = Photo.objects.filter(album=album)\
-            .aggregate(Max('album_index'))
-        album_index = album_index_q['album_index__max']
-        if album_index is None:
-            album_index = 0
-        else:
-            album_index += 1
+    def is_file_uploaded(self):
+        return not (self.file_uploaded_time is None)
 
-        new_photo = Photo.objects.create(
-            photo_id=self.photo_id,
-            bucket=self.bucket,
-            date_created=date_created,
-            author=self.author,
-            album=album,
-            album_index=album_index,
-            width=width,
-            height=height
-        )
+    def set_processing_done(self, done_time):
+        if done_time is None:
+            raise TypeError('upload_time must not be None')
 
-        self.delete()
+        if not self.is_file_uploaded():
+            raise ValueError("can't set_processing_done when not yet is_file_uploaded")
 
-        album.save_revision(date_created)
+        self.processing_done_time = done_time
+        self.save(update_fields=['processing_done_time'])
 
-        return new_photo
+    def is_processing_done(self):
+        return not (self.processing_done_time is None)
+
+
+# This is a temporary solution until a more robust coordinator is implemented
+class PhotoServer(models.Model):
+    photos_update_url = models.CharField(max_length=255, unique=True)
+    subdomain = models.CharField(max_length=64, db_index=True)
+    auth_key = models.CharField(max_length=128)
+    date_registered = models.DateTimeField()
+    unreachable = models.BooleanField()
+
+    def __unicode__(self):
+        result = ''
+        if self.unreachable:
+            result += '[UNREACHABLE] '
+        result += self.subdomain + ': ' + self.photos_update_url
+        return result
+
+    def set_unreachable(self):
+        self.unreachable = True
+        self.save(update_fields=['unreachable'])

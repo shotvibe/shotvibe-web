@@ -15,8 +15,9 @@ from django.test import TestCase, Client
 from django.test.utils import override_settings
 from django.utils import timezone
 
+from phone_auth.models import AuthToken
 from phone_auth.models import PhoneNumber, PhoneContact, AnonymousPhoneNumber, PhoneNumberLinkCode
-from photos.models import PendingPhoto, AlbumMember
+from photos.models import Photo, PendingPhoto, AlbumMember
 from photos_api import is_phone_number_mobile
 
 from photos_api.serializers import AlbumUpdateSerializer, MemberIdentifier, MemberIdentifierSerializer, AlbumAddSerializer
@@ -30,7 +31,8 @@ else:
     User = get_user_model()
 
 
-@override_settings(LOCAL_PHOTO_BUCKETS_BASE_PATH='.tmp_photo_buckets')
+@override_settings(USING_LOCAL_PHOTOS=True)
+@override_settings(LOCAL_PHOTOS_DIRECTORY='.tmp_photos')
 class BaseTestCase(TestCase):
     fixtures = ['tests/test_users', 'tests/test_albums']
     urls = 'photos_api.urls'
@@ -440,10 +442,6 @@ class Serializers(TestCase):
                         'phone_number': '212-718-9999',
                         'default_country': 'US',
                         'contact_nickname': 'John Smith' }
-                    ],
-                'photos': [
-                    { 'photo_id': 'test_photo_1' },
-                    { 'photo_id': 'test_photo_2' }
                     ]
                 }
         serializer = AlbumAddSerializer(data=test_data)
@@ -455,7 +453,6 @@ class Serializers(TestCase):
             MemberIdentifier(user_id=4),
             MemberIdentifier(phone_number='212-718-9999', default_country='US', contact_nickname='John Smith')
             ])
-        self.assertEqual(serializer.object.photos, ['test_photo_1', 'test_photo_2'])
 
 
 class PhotoTests(BaseTestCase):
@@ -464,7 +461,7 @@ class PhotoTests(BaseTestCase):
         self.client.login(username='2', password='amanda')
 
     def tearDown(self):
-        shutil.rmtree(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, ignore_errors=True)
+        shutil.rmtree(settings.LOCAL_PHOTOS_DIRECTORY, ignore_errors=True)
 
     def upload_and_add_photo_to_album(self, album_id, client=None):
         if not client:
@@ -528,7 +525,7 @@ class PhotoUpload(BaseTestCase):
         self.client.login(username='2', password='amanda')
 
     def tearDown(self):
-        shutil.rmtree(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, ignore_errors=True)
+        shutil.rmtree(settings.LOCAL_PHOTOS_DIRECTORY, ignore_errors=True)
 
     def test_upload_single_post(self):
         upload_request_response = self.client.post('/photos/upload_request/')
@@ -546,8 +543,8 @@ class PhotoUpload(BaseTestCase):
         self.assertEqual(upload_response.status_code, 200)
 
         photo_pending = PendingPhoto.objects.get(pk=photo_id)
-        directory = photo_pending.bucket.split(':')[1]
-        uploaded_photo_path = os.path.join(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, directory, photo_id + '.jpg')
+        storage_id = photo_pending.storage_id
+        uploaded_photo_path = os.path.join(settings.LOCAL_PHOTOS_DIRECTORY, storage_id + '.jpg')
         self.assertTrue(filecmp.cmp(test_photo_path, uploaded_photo_path, shallow=False))
 
     def test_upload_single_put(self):
@@ -566,8 +563,8 @@ class PhotoUpload(BaseTestCase):
         self.assertEqual(upload_response.status_code, 200)
 
         photo_pending = PendingPhoto.objects.get(pk=photo_id)
-        directory = photo_pending.bucket.split(':')[1]
-        uploaded_photo_path = os.path.join(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, directory, photo_id + '.jpg')
+        storage_id = photo_pending.storage_id
+        uploaded_photo_path = os.path.join(settings.LOCAL_PHOTOS_DIRECTORY, storage_id + '.jpg')
         self.assertTrue(filecmp.cmp(test_photo_path, uploaded_photo_path, shallow=False))
 
     def test_add_to_album(self):
@@ -615,10 +612,7 @@ class PhotoUpload(BaseTestCase):
 
         new_album_data = {
                 'album_name': 'My New Album',
-                'members': members,
-                'photos': [
-                    { 'photo_id': photo_id }
-                    ]
+                'members': members
                 }
 
         create_response = self.client.post('/albums/', content_type='application/json', data=json.dumps(new_album_data))
@@ -626,8 +620,6 @@ class PhotoUpload(BaseTestCase):
 
         album_json = json.loads(create_response.content)
         self.assertEqual(album_json['name'], 'My New Album')
-        self.assertEqual(len(album_json['photos']), 1)
-        self.assertEqual(album_json['photos'][0]['photo_id'], photo_id)
         self.assertEqual(len(album_json['members']), 2)
         members_ids = [u['id'] for u in album_json['members']]
         self.assertIn(2, members_ids) # amanda
@@ -967,3 +959,90 @@ class TestPhoneNumberMobile(TestCase):
         self.assertTrue(is_phone_number_mobile(phonenumbers.parse("+972581231212")))
         self.assertFalse(is_phone_number_mobile(phonenumbers.parse("+97231231212")))
         self.assertTrue(is_phone_number_mobile(phonenumbers.parse("+12127184000")))
+
+
+@override_settings(PRIVATE_API_KEY="the-secret-api-key")
+class PrivateApiTestCase(BaseTestCase):
+    def test_no_authorization_header(self):
+        result = self.client.post(reverse('photo-upload-init', kwargs={'photo_id':'dummy-photo-id'}))
+        self.assertEqual(result.status_code, 401)
+
+    def test_wrong_authorization_header(self):
+        result = self.client.post(reverse('photo-upload-init', kwargs={'photo_id':'dummy-photo-id'}),
+                HTTP_AUTHORIZATION='Key wrong-secret')
+        self.assertEqual(result.status_code, 401)
+
+    def test_correct_authentication(self):
+        result = self.client.post(reverse('photo-upload-init', kwargs={'photo_id':'dummy-photo-id'}),
+                HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY)
+        self.assertNotEqual(result.status_code, 401)
+
+    def test_photo_upload_init_bad_request(self):
+        bad_data = { 'foo': 'bar' }
+        result = self.client.post(reverse('photo-upload-init', kwargs={'photo_id':'dummy-photo-id'}),
+                HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY,
+                data=json.dumps(bad_data),
+                content_type="application/json")
+        self.assertEqual(result.status_code, 400)
+
+    def test_photo_upload_init_user_auth_failed(self):
+        body = { 'user_auth_token': 'invalid-token' }
+        response = self.client.post(reverse('photo-upload-init', kwargs={'photo_id':'dummy-photo-id'}),
+                HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY,
+                data=json.dumps(body),
+                content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.content)
+        self.assertEqual(response_data['success'], False)
+        self.assertEqual(response_data['error'], 'user_auth_failed')
+
+    def test_photo_upload_init_invalid_photo_id(self):
+        amanda = User.objects.get(nickname='amanda')
+        user_auth_token = AuthToken.objects.create_auth_token(amanda, 'Test Token', timezone.now())
+        body = { 'user_auth_token': user_auth_token.key }
+        response = self.client.post(reverse('photo-upload-init', kwargs={'photo_id':'invalid-photo-id'}),
+                HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY,
+                data=json.dumps(body),
+                content_type="application/json")
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_photo_upload_init_ok(self):
+        amanda = User.objects.get(nickname='amanda')
+        user_auth_token = AuthToken.objects.create_auth_token(amanda, 'Test Token', timezone.now())
+        pending_photo = Photo.objects.upload_request(amanda)
+        body = { 'user_auth_token': user_auth_token.key }
+        response = self.client.post(reverse('photo-upload-init', kwargs={'photo_id':pending_photo.photo_id}),
+                HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY,
+                data=json.dumps(body),
+                content_type="application/json")
+
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.content)
+        self.assertEqual(response_data['success'], True)
+        self.assertEqual(response_data['storage_id'], pending_photo.storage_id)
+
+    def test_photo_upload_complete_ok(self):
+        amanda = User.objects.get(nickname='amanda')
+        pending_photo = Photo.objects.upload_request(amanda)
+        self.assertFalse(pending_photo.is_file_uploaded())
+        response = self.client.put(reverse('photo-file-uploaded', kwargs={'photo_id':pending_photo.photo_id}),
+                HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY)
+        self.assertEqual(response.status_code, 204)
+        # Refresh pending_photo to get latest data from DB
+        pending_photo = PendingPhoto.objects.get(photo_id=pending_photo.photo_id)
+        self.assertTrue(pending_photo.is_file_uploaded())
+
+    def test_photo_upload_processing_done_ok(self):
+        amanda = User.objects.get(nickname='amanda')
+        pending_photo = Photo.objects.upload_request(amanda)
+        self.assertFalse(pending_photo.is_processing_done())
+        response = self.client.put(reverse('photo-file-uploaded', kwargs={'photo_id':pending_photo.photo_id}),
+                HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY)
+        self.assertEqual(response.status_code, 204)
+        response = self.client.put(reverse('photo-processing-done', kwargs={'storage_id':pending_photo.storage_id}),
+                HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY)
+        self.assertEqual(response.status_code, 204)
+        # Refresh pending_photo to get latest data from DB
+        pending_photo = PendingPhoto.objects.get(photo_id=pending_photo.photo_id)
+        self.assertTrue(pending_photo.is_processing_done())

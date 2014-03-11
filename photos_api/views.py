@@ -10,6 +10,8 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib import auth
 from django.db.models import Q
+from django.db import transaction
+from django.views.decorators.csrf import csrf_exempt
 
 #from django.http import HttpResponseNotModified
 from django.http import Http404
@@ -33,9 +35,11 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework import status
 from rest_framework import views
 
+import requests
+
 import phonenumbers
 
-from photos.image_uploads import handle_file_upload
+from photos.image_uploads import process_file_upload
 from photos.models import Album, PendingPhoto, AlbumMember, Photo
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
     UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer, \
@@ -43,6 +47,8 @@ from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
     AlbumMemberNameSerializer, AlbumMemberSerializer, AlbumViewSerializer, \
     AlbumMembersSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
+
+from photos import photo_operations
 
 
 @api_view(['GET'])
@@ -121,12 +127,17 @@ class AlbumDetail(generics.RetrieveAPIView):
         if serializer.object.add_photos:
             now = timezone.now()
 
-            # Upload pending photos. For photos that already uploaded this will simply return photo
-            pending_photos = PendingPhoto.objects.filter(photo_id__in=serializer.object.add_photos)
-            photos = [pf.get_or_process_uploaded_image_and_create_photo(self.album, now) for pf in pending_photos]
+            photo_ids = serializer.object.add_photos
+
+            try:
+                photo_operations.add_pending_photos_to_album(photo_ids, self.album.id, now)
+            except photo_operations.PhotoNotUploadedAddPhotoException:
+                return Response(u"Trying to add a Photo that has not yet been uploaded", status=status.HTTP_400_BAD_REQUEST)
+            except photo_operations.InvalidPhotoIdAddPhotoException:
+                return Response(u"Trying to add a Photo with an invalid photo_id", status=status.HTTP_400_BAD_REQUEST)
 
             photos_added_to_album.send(sender=self,
-                                       photos=photos,
+                                       photos=photo_ids,
                                        by_user=request.user,
                                        to_album=self.album)
 
@@ -361,13 +372,9 @@ class Albums(generics.ListAPIView):
         serializer = AlbumAddSerializer(data=request.DATA)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        now = timezone.now()
 
         album = Album.objects.create_album(self.request.user, serializer.object.album_name)
         album.add_members(request.user, member_identifiers=serializer.object.members)
-
-        for pending_photo in PendingPhoto.objects.filter(photo_id__in=serializer.object.photos):
-            pending_photo.get_or_process_uploaded_image_and_create_photo(album, now)
 
         responseSerializer = AlbumSerializer(album, context={'request': request})
         return Response(responseSerializer.data)
@@ -411,10 +418,19 @@ def photos_upload_request(request, format=None):
 
     response_data = []
     for i in xrange(num_photos):
-        pending_photo = PendingPhoto.objects.create(author=request.user)
+        pending_photo = Photo.objects.upload_request(author=request.user)
+
+        if settings.USING_LOCAL_PHOTOS:
+            upload_url = reverse('photo-upload', [pending_photo.photo_id], request=request)
+            fullres_upload_url = reverse('photo-upload', [pending_photo.photo_id], request=request)
+        else:
+            upload_url = settings.PHOTO_UPLOAD_SERVER_URL + '/photos/upload/' + pending_photo.photo_id + '/'
+            fullres_upload_url = settings.PHOTO_UPLOAD_SERVER_URL + '/photos/upload/' + pending_photo.photo_id + '/original/'
+
         response_data.append({
             'photo_id': pending_photo.photo_id,
-            'upload_url': reverse('photo-upload', [pending_photo.photo_id], request=request)
+            'upload_url': upload_url,
+            'fullres_upload_url': fullres_upload_url
             })
 
     return Response(response_data)
@@ -425,16 +441,24 @@ class PhotoUpload(views.APIView):
 
     parser_classes = (PhotoUploadParser,)
 
+    @transaction.non_atomic_requests
+    @csrf_exempt
+    def dispatch(self, *args, **kwargs):
+        return super(PhotoUpload, self).dispatch(*args, **kwargs)
+
     def process_upload_request(self, request, photo_id, uploaded_chunks):
         pending_photo = get_object_or_404(PendingPhoto, pk=photo_id)
         if pending_photo.author != request.user:
             return Response(status=403)
 
-        location, directory = pending_photo.bucket.split(':')
-        if location != 'local':
-            raise ValueError('Unknown photo bucket location: ' + location)
-
-        handle_file_upload(directory, photo_id, uploaded_chunks)
+        if settings.USING_LOCAL_PHOTOS:
+            process_file_upload(pending_photo, uploaded_chunks)
+        else:
+            # Forward request to photo upload server
+            r = requests.put(settings.PHOTO_UPLOAD_SERVER_URL + '/photos/upload/' + pending_photo.photo_id + '/original/',
+                    headers = { 'Authorization': 'Token ' + request.auth.key },
+                    data = uploaded_chunks)
+            r.raise_for_status()
 
         return Response()
 
