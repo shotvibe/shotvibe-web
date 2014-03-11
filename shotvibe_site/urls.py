@@ -23,6 +23,13 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
 )
 
+if settings.DEBUG:
+    import photos_api.urls
+
+    urlpatterns += (
+            url(r'^api/', include(photos_api.urls)),
+            )
+
 # During development, serve the photos from the local photo storage directory
 if settings.USING_LOCAL_PHOTOS:
     def parse_filename(photo_filename):
