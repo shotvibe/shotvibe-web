@@ -3,6 +3,8 @@ from django.contrib.gis.geoip import GeoIP, GeoIPException
 from django.http import HttpResponseNotFound, HttpResponse
 from django.utils import timezone
 from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_protect
+from django.utils.decorators import method_decorator
 
 from subdomains.utils import reverse
 
@@ -192,6 +194,7 @@ class RequestSMS(APIView):
 
     throttle_scope = 'request_sms'
 
+    @method_decorator(csrf_protect)
     def post(self, request):
         serializer = self.serializer_class(data=request.DATA)
         if not serializer.is_valid():
