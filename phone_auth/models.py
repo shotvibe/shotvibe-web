@@ -147,6 +147,9 @@ class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
         """Returns URL of the user's avatar image"""
         return avatar_url_from_avatar_file_data(self.avatar_file)
 
+    def get_primary_phone_number(self):
+        return PhoneNumber.objects.filter(user=self).order_by('date_created').first()
+
     def pick_anonymous_avatar(self, phone_number_str, save=False):
         """Picks up avatar used for anonymous contact data for the given
         phone_number_str.
@@ -364,7 +367,14 @@ class PhoneNumberLinkCodeManager(models.Manager):
                 date_created = date_invited)
 
         invite_url_prefix = 'https://www.shotvibe.com'
-        send_sms(phone_number.phone_number, inviter.nickname + ' has shared photos with you!\n' + link_code_object.get_invite_page(invite_url_prefix))
+
+        inviter_phone = inviter.get_primary_phone_number()
+        if inviter_phone:
+            sender_phone = inviter_phone.phone_number
+        else:
+            sender_phone = None
+
+        send_sms(phone_number.phone_number, inviter.nickname + ' has shared photos with you!\n' + link_code_object.get_invite_page(invite_url_prefix), sender_phone)
 
         return link_code_object
 
