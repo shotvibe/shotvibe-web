@@ -72,7 +72,9 @@ def upp_status(request):
                     'aps' : {
                         'alert' : 'Test Message: ' + message,
                         'sound': 'default'
-                        }
+                        },
+                    'type': 'test_message',
+                    'message': message
                     }
                 }
         r = requests.post(settings.UNIVERSAL_PUSH_PROVIDER_URL + '/send', data=json.dumps(rq))
@@ -134,10 +136,11 @@ def broadcast_photos_added_to_album(album_id, author_id, album_name, author_name
                     'alert' : author_name + ' added ' + str(num_photos) + ' photos to the album ' + album_name,
                     'sound': 'default'
                     },
-
-                # TODO More Data needed
-
-                'album_id' : album_id
+                'type': 'photos_added',
+                'album_id': album_id,
+                'author': author_name,
+                'album_name': album_name,
+                'num_photos': num_photos
                 }
             }
     send_message_or_log_errors(rq)
@@ -159,10 +162,10 @@ def broadcast_members_added_to_album(album_id, album_name, adder_name, user_ids)
                     'alert': adder_name + ' added you to the album ' + album_name,
                     'sound': 'default'
                     },
-
-                # TODO More Data needed
-
-                'album_id': album_id
+                'type': 'added_to_album',
+                'album_id': album_id,
+                'adder': adder_name,
+                'album_name': album_name
                 }
             }
     send_message_or_log_errors(rq)
