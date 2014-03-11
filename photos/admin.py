@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.db import models
 from django.utils.html import format_html
 
-from photos.models import Album, Photo
+from photos.models import Album, Photo, PendingPhoto
 from photos.models import PhotoServer
 
 class PhotoAdminInline(admin.TabularInline):
@@ -50,9 +50,13 @@ class PhotoAdmin(admin.ModelAdmin):
     def photo_thumbnail(self, instance):
         return format_html(u'<img src="{0}" />', instance.get_photo_url_no_ext() + '_thumb75.jpg')
 
+class PendingPhotoAdmin(admin.ModelAdmin):
+    pass
+
 class PhotoServerAdmin(admin.ModelAdmin):
     pass
 
 admin.site.register(Photo, PhotoAdmin)
+admin.site.register(PendingPhoto, PendingPhotoAdmin)
 admin.site.register(Album, AlbumAdmin)
 admin.site.register(PhotoServer, PhotoServerAdmin)
