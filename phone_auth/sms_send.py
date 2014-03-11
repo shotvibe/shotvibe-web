@@ -35,9 +35,13 @@ def in_testing_mode():
     # http://stackoverflow.com/questions/6957016/detect-django-testing-mode
     return hasattr(mail, 'outbox')
 
-def send_sms(destination_phone, message):
+def send_sms(destination_phone, message, sender_phone=None):
     """
     destination_phone must be formatted as international E164
+
+    sender_phone must be formatted as international E164, or it may be "None"
+    Note that the system will make a "best effort" to make the SMS appear to be
+    sent from sender_phone, but it may not succeed
     """
     p = phonenumbers.parse(destination_phone)
 
@@ -55,11 +59,15 @@ def send_sms(destination_phone, message):
         }
 
     sender = country_overrides.get(p.country_code, default_sender)
-    sender(p, message)
+    sender(p, message, sender_phone)
 
     # TODO Log that the SMS was sent
 
-def send_sms_twilio(phone, message):
+def send_sms_twilio(phone, message, sender_phone=None):
+    """
+    Twilio does not support setting a source number, so the "sender_phone"
+    argument is ignored
+    """
     if not isinstance(phone, phonenumbers.phonenumber.PhoneNumber):
         raise ValueError('phone must be a PhoneNumber object')
 
@@ -88,7 +96,7 @@ def send_sms_twilio(phone, message):
 
 # Used to send SMS to phone numbers in Israel
 # http://www.smartsms.co.il
-def send_sms_smartsms(phone, message):
+def send_sms_smartsms(phone, message, sender_phone=None):
     if not isinstance(phone, phonenumbers.phonenumber.PhoneNumber):
         raise ValueError('phone must be a PhoneNumber object')
 
@@ -102,8 +110,12 @@ def send_sms_smartsms(phone, message):
 
     smartsms_url = 'http://smartsms.co.il/member/http_sms_api.php'
 
-    # This can be any phone number:
-    source_phone_number = '1555'
+    if sender_phone:
+        # Strip the leading plus:
+        source_phone_number = sender_phone[1:]
+    else:
+        # This can be any phone number:
+        source_phone_number = '1555'
 
     username = settings.SMARTSMS_CREDENTIALS['username']
     password = settings.SMARTSMS_CREDENTIALS['password']
