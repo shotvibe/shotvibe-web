@@ -9,15 +9,15 @@
 		<!--[if lte IE 8]>
 			<script src="/static/glance/js/html5shiv.js"></script>
 		<![endif]-->
-		<script src="/static/glance/js/jquery.min.js"></script>
-		<script src="/static/glance/js/skel.min.js"></script>
-		<script src="/static/glance/js/init.js"></script>
+		<script src="{% static "glance/js/jquery.min.js" %}"></script>
+		<script src="{% static "glance/js/skel.min.js" %}"></script>
+		<script src="{% static "glance/js/init.js" %}"></script>
 		<noscript>
-			<link rel="stylesheet" href="/static/glance/css/skel-noscript.css" />
-			<link rel="stylesheet" href="/static/glance/css/style.css" />
+			<link rel="stylesheet" href="{% static "glance/css/skel-noscript.css" %}" />
+			<link rel="stylesheet" href="{% static "glance/css/style.css" %}" />
 		</noscript>
 		<!--[if lte IE 8]>
-			<link rel="stylesheet" href="/static/glance/css/ie8.css" />
+			<link rel="stylesheet" href="{% static "glance/css/ie8.css" %}" />
 		<![endif]-->
 		<link rel="icon" type="image/png" href="{% static "glance/images/icon48px.png" %}">
 	</head>
@@ -36,10 +36,10 @@
 					<div class="row half">
 						<div class="5u">
 							<div class="image full phone">
-								<img src="/static/glance/images/banner.png" alt="" />
+								<img src="{% static "glance/images/banner.png" %}" alt="" />
 								<div class="screen">
 									<div class="reel">
-										<div class="image"><img src="/static/glance/images/screenshot01.jpg" alt="" /></div><div class="image"><img src="/static/glance/images/screenshot02.jpg" alt="" /></div><div class="image"><img src="/static/glance/images/screenshot03.jpg" alt="" /></div><div class="image"><img src="/static/glance/images/screenshot04.jpg" alt="" /></div><div class="image"><img src="/static/glance/images/screenshot05.jpg" alt="" /></div>
+										<div class="image"><img src="{% static "glance/images/screenshot01.jpg" %}" alt="" /></div><div class="image"><img src="{% static "glance/images/screenshot02.jpg" %}" alt="" /></div><div class="image"><img src="{% static "glance/images/screenshot03.jpg" %}" alt="" /></div><div class="image"><img src="{% static "glance/images/screenshot04.jpg" %}" alt="" /></div><div class="image"><img src="{% static "glance/images/screenshot05.jpg" %}" alt="" /></div>
 									</div>
 								</div>
 							</div>
@@ -388,7 +388,7 @@
 							and it's ready to go.</p>
 						</div>
 						<div class="6u">
-							<span class="image full"><img src="/static/glance/images/feature01.png" alt="" /></span>
+							<span class="image full"><img src="{% static "glance/images/feature01.png" %}" alt="" /></span>
 						</div>
 					</div>
 				</div>
@@ -398,7 +398,7 @@
 				<div class="container">
 					<div class="row double">
 						<div class="6u">
-							<span class="image full"><img src="/static/glance/images/feature02.png" alt="" /></span>
+							<span class="image full"><img src="{% static "glance/images/feature02.png" %}" alt="" /></span>
 						</div>
 						<div class="6u skel-cell-important">
 							<header>
@@ -422,7 +422,7 @@
 							shoot directly to your album.</p>
 						</div>
 						<div class="6u">
-							<span class="image full"><img src="/static/glance/images/feature03.png" alt="" /></span>
+							<span class="image full"><img src="{% static "glance/images/feature03.png" %}" alt="" /></span>
 						</div>
 					</div>
 				</div>
@@ -439,7 +439,7 @@
 							invite your friends and family using your phone's contact list.</p>
 						</div>
 						<div class="6u">
-							<span class="image full"><img src="/static/glance/images/feature04.png" alt="" /></span>
+							<span class="image full"><img src="{% static "glance/images/feature04.png" %}" alt="" /></span>
 						</div>
 					</div>
 				</div>
@@ -449,7 +449,7 @@
 				<div class="container">
 					<div class="row double">
 						<div class="5u">
-							<span class="image full"><img src="/static/glance/images/feature05.png" alt="" /></span>
+							<span class="image full"><img src="{% static "glance/images/feature05.png" %}" alt="" /></span>
 						</div>
 						<div class="7u skel-cell-important">
 							<header>
@@ -474,7 +474,7 @@
 							making your shared albums accessible just about everywhere.</p>
 						</div>
 						<div class="5u">
-							<span class="image full"><img src="/static/glance/images/feature06.png" alt="" /></span>
+							<span class="image full"><img src="{% static "glance/images/feature06.png" %}" alt="" /></span>
 						</div>
 					</div>
 				</div>
