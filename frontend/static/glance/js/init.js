@@ -1,5 +1,21 @@
+// This is used for the "prefix" variable below. Needed for figuring out where
+// to find css files relative to this source js file.
+//
+// See this for reference:
+//     http://stackoverflow.com/questions/984510/what-is-my-script-src-url/984656#984656
+var scriptSource = (function() {
+    var scripts = document.getElementsByTagName('script'),
+        script = scripts[scripts.length - 1];
+
+    if (script.getAttribute.length !== undefined) {
+        return script.getAttribute('src')
+    }
+
+    return script.getAttribute('src', 2)
+}());
+
 skel.init({
-    prefix: '/static/glance/css/style',
+    prefix: scriptSource.substr(0, scriptSource.lastIndexOf('/') - 'js'.length) + 'css/style',
     resetCSS: true,
     boxModel: 'border',
     useOrientation: true,
