@@ -15,6 +15,8 @@ from phone_auth.serializers import AuthorizePhoneNumberSerializer, ConfirmSMSCod
 from phone_auth.models import AuthToken, PhoneNumber, PhoneNumberLinkCode
 from affiliates.models import Event
 
+from photos_api.serializers import MemberIdentifier
+
 class AuthorizePhoneNumber(APIView):
     serializer_class = AuthorizePhoneNumberSerializer
 
@@ -49,6 +51,21 @@ class ConfirmSMSCode(APIView):
                 return Response({ 'detail': '"confirmation_key" has expired. Please request a new one.' }, status=status.HTTP_410_GONE)
             else:
                 raise NotImplementedError('Unknown failure')
+
+        custom_payload = request.GET.get('custom_payload')
+        if custom_payload:
+            if ':' in custom_payload:
+                payload_type, payload_id = custom_payload.split(":", 1)
+                if payload_type == 'event':
+                    try:
+                        event = Event.objects.get(pk=int(payload_id))
+                    except (ValueError, TypeError, Event.DoesNotExist):
+                        # payload was bad, perhaps log this somewhere?
+                        pass
+                    else:
+                        eventAlbum = event.album
+                        inviter = event.created_by
+                        eventAlbum.add_members(inviter, [MemberIdentifier(user_id=result.user.id)])
 
         return Response({
             'user_id': result.user.id,
@@ -104,21 +121,6 @@ def app_init(request):
     response = HttpResponse(status=302)
 
     phone_number_str = request.session.get('phone_number')
-    event_str = request.session.get('event')
-
-    if event_str and not phone_number_str:
-        # There was no 'phone_number' session data, but an 'event' and 'album' was set.
-        # This means this user came in through an affiliate link.
-        try:
-            event = Event.objects.get(pk=event_str)
-        except Event.DoesNotExist:
-            del request.session['event']
-        else:
-            if app == 'android':
-                response['Location'] = app_url_scheme + '://shotvibe/start_from_event/?country_code=' + country_code + '&event_id=' + str(event.pk) + '&album_id=' + str(event.album.pk)
-            elif app == 'iphone':
-                response['Location'] = app_url_scheme + '://shotvibe/start_from_event/?country_code=' + country_code + '&event_id=' + str(event.pk) + '&album_id=' + str(event.album.pk)
-            return response
 
     if phone_number_str is None:
         # There was no 'phone_number' session data, so this means that the app
@@ -126,6 +128,16 @@ def app_init(request):
         # invite link. The user will have to register with his phone number
         # inside the app. We still give the app the user's country_code, to
         # make it easier for him to enter his phone number.
+
+        custom_payload = request.session.get('custom_payload')
+        if custom_payload:
+            if app == 'android':
+                response['Location'] = app_url_scheme + '://shotvibe/start_unregistered/?country_code=' + country_code + '&custom_payload=' + custom_payload
+            elif app == 'iphone':
+                response['Location'] = app_url_scheme + '://shotvibe/start_unregistered/?country_code=' + country_code + '&custom_payload=' + custom_payload
+
+            return response
+
         if app == 'android':
             response['Location'] = app_url_scheme + '://shotvibe/start_unregistered/?country_code=' + country_code
         elif app == 'iphone':

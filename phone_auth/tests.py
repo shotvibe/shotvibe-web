@@ -385,5 +385,47 @@ class InviteTests(TestCase):
         self.assertEqual(url.scheme, 'shotvibe')
         query = urlparse.parse_qs(query_str, strict_parsing=True)
         self.assertEqual(len(query['country_code'][0]), 2)
-        self.assertEqual(int(query['event_id'][0]), event.id)
-        self.assertEqual(int(query['album_id'][0]), event.album.id)
+        custom_payload = query['custom_payload'][0]
+        self.assertEqual(custom_payload, "event:{0}".format(event.id))
+
+
+class InviteAuthorizationTests(TestCase):
+    urls = 'phone_auth.urls'
+    def setUp(self):
+        self.tom = User.objects.create_user(nickname='tom')
+        the_date = datetime.datetime(2010, 1, 1, tzinfo=utc)
+
+    def test_authorization_with_event_custom_payload(self):
+        later_on = datetime.datetime(2010, 1, 2, tzinfo=utc)
+        org = Organization(code="a")
+        org.save()
+        event = org.create_event(
+            Event(name="event", time=later_on),
+            self.tom
+        )
+
+        custom_payload = "event:{0}".format(event.id)
+
+        #test that phone clients that using this will be added to event
+        number = {
+            'phone_number': '212-718-4000',
+            'default_country': 'US',
+        }
+        auth_response = self.client.post('/authorize_phone_number/', content_type='application/json', data=json.dumps(number))
+        confirmation_key = json.loads(auth_response.content)['confirmation_key']
+
+        pre_count = AlbumMember.objects.filter(album=event.album).count()
+        confirm = {
+            'confirmation_code': '6666', # Default code currently used for testing
+            'device_description': 'iPhone 3GS'
+        }
+        r = self.client.post(
+            '/confirm_sms_code/{0}/?custom_payload={1}'.format(
+                confirmation_key,
+                custom_payload,
+            ),
+            content_type='application/json', data=json.dumps(confirm),
+        )
+        self.assertEqual(r.status_code, 200)
+        post_count = AlbumMember.objects.filter(album=event.album).count()
+        self.assertEqual(pre_count + 1, post_count)
