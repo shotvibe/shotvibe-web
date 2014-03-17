@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="960px" height="60px" viewBox="0 0 960 60" zoomAndPan="disable" preserveAspectRatio="none">
+    <style type="text/css"><![CDATA[
+		path
+		{
+			stroke: #d0d0d0;
+			stroke-width: 0.5px;
+		}
+    ]]></style>
+	<defs>
+		<filter id="f3" x="0" y="0" width="100%" height="100%">
+			<feOffset result="offOut" in="SourceAlpha" dx="0" dy="15" />
+			<feGaussianBlur result="blurOut" in="offOut" stdDeviation="10" />
+			<feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
+		</filter>
+	</defs>
+	<path d="M0,30 Q320,-15 640,30 T1280,-60 1280,60 0,60" fill="#fff" filter="url(#f3)" />
+</svg>

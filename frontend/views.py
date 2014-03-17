@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib import auth
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
@@ -10,7 +9,7 @@ from django.db import transaction
 import requests
 
 from phone_auth.models import AuthToken
-from photos.models import Album, Photo, AlbumMember
+from photos.models import Album, Photo
 from photos import image_uploads
 from photos import photo_operations
 from photos_api.serializers import MemberIdentifier
@@ -21,7 +20,12 @@ def index(request):
     if request.user.is_authenticated():
         return home(request)
     else:
-        return render_to_response('frontend/index.html', {}, context_instance=RequestContext(request))
+        data = {
+                'apple_app_store_url': 'https://itunes.apple.com/ro/app/shotvibe/id721122774?mt=8',
+                'google_play_url': 'https://play.google.com/store/apps/details?id=com.shotvibe.shotvibe&hl=en'
+                }
+        return render_to_response('glance/index.html', data, context_instance=RequestContext(request))
+
 
 def home(request):
     if request.method == 'POST' and 'create_album' in request.POST:
@@ -39,6 +43,7 @@ def home(request):
             'albums': albums
             }
     return render_to_response('frontend/home.html', data, context_instance=RequestContext(request))
+
 
 @transaction.non_atomic_requests
 def album(request, pk):
@@ -91,6 +96,7 @@ def album(request, pk):
             }
     return render_to_response('frontend/album.html', data, context_instance=RequestContext(request))
 
+
 def photo(request, album_pk, photo_id):
     album = get_object_or_404(Album, pk=album_pk)
     photo = get_object_or_404(Photo, pk=photo_id)
@@ -104,6 +110,7 @@ def photo(request, album_pk, photo_id):
             'members': album.members.all()
             }
     return render_to_response('frontend/photo.html', data, context_instance=RequestContext(request))
+
 
 def album_members(request, album_pk):
     album = get_object_or_404(Album, pk=album_pk)
