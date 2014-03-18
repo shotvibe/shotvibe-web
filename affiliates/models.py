@@ -9,7 +9,6 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 
 from photos.models import Album
-from photos_api.serializers import MemberIdentifier
 
 
 class Organization(models.Model):
@@ -167,6 +166,7 @@ class EventInvite(models.Model):
         unique_together = ('event', 'phone_number')
 
     def to_memberidentifier(self):
+        from photos_api.serializers import MemberIdentifier
         return MemberIdentifier(
             phone_number=self.phone_number,
             contact_nickname=self.nickname,
