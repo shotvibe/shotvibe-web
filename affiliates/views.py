@@ -2,17 +2,22 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.http import HttpResponseRedirect, HttpResponse
 from django.conf import settings
 from functools import wraps
+
+import requests
 
 from affiliates.models import Organization, OrganizationUser, Event, EventLink
 from affiliates.forms import EventForm, EventLinkForm, \
     EventInviteImportForm, EventInviteSendForm
 from frontend.mobile_views import get_device
 
+from phone_auth.models import AuthToken
 from photos.models import Album, Photo, PendingPhoto, AlbumMember
 from photos import image_uploads
+from photos import photo_operations
 from photos_api.serializers import MemberIdentifier
 from photos_api.signals import photos_added_to_album
 
@@ -191,6 +196,7 @@ def event_reports(request, event):
 
 @login_required
 @event_mod_required
+@transaction.non_atomic_requests
 def event_photos(request, event):
     album = event.album
 
@@ -199,26 +205,34 @@ def event_photos(request, event):
 
     if request.POST:
         if 'add_photos' in request.POST:
-            pending_photos = []
+            pending_photo_ids = []
             for f in request.FILES.getlist('photo_files'):
 
-                pending_photo = PendingPhoto.objects.create(author=request.user)
-                location, directory = pending_photo.bucket.split(':')
-                if location != 'local':
-                    raise ValueError('Unknown photo bucket location: ' + location)
+                pending_photo = Photo.objects.upload_request(author=request.user)
 
-                image_uploads.handle_file_upload(directory, pending_photo.photo_id, f.chunks())
-                pending_photos.append(pending_photo)
+                if settings.USING_LOCAL_PHOTOS:
+                    image_uploads.process_file_upload(pending_photo, f.chunks())
+                else:
+                    # Forward request to photo upload server
+                    userAuthToken = AuthToken.objects.create_auth_token(request.user, 'Internal Photo Upload Auth Token', timezone.now())
+
+                    r = requests.put(settings.PHOTO_UPLOAD_SERVER_URL + '/photos/upload/' + pending_photo.photo_id + '/original/',
+                            headers = { 'Authorization': 'Token ' + userAuthToken.key },
+                            data = f.chunks())
+                    r.raise_for_status()
+
+                pending_photo_ids.append(pending_photo.photo_id)
+
                 num_photos_added += 1
 
             # Upload pending photos
             now = timezone.now()
-            photos = [pf.get_or_process_uploaded_image_and_create_photo(album, now) for pf in pending_photos]
+            photo_operations.add_pending_photos_to_album(pending_photo_ids, album.id, now)
 
             # TODO: If this function will be refactored to use Class Based Views
             # change sender from `request` to `self` (View instance)
             photos_added_to_album.send(sender=request,
-                                       photos=photos,
+                                       photos=pending_photo_ids,
                                        by_user=request.user,
                                        to_album=album)
 
