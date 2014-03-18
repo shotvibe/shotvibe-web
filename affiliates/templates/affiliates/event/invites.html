@@ -106,6 +106,33 @@
 			<td>No links</td>
 		</tr>
 	{% endfor %}
+	{% if invites_form_fields.queryset %}
+		<tr>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td>
+				<div id="id_select_all"></div>
+				<script type="text/javascript">
+					(function() {
+					 var btn = document.createElement('Button');
+					 btn.type = 'button';
+					 btn.appendChild(document.createTextNode('Select All'));
+					 btn.className = 'btn btn-default';
+					 btn.onclick = function() {
+					  var cs = document.getElementsByName('invites');
+					  for (var i = 0; i < cs.length; ++i) {
+					   cs[i].checked = true;
+					  }
+					 };
+					 var cont = document.getElementById('id_select_all');
+					 cont.appendChild(btn);
+					})();
+				</script>
+			</td>
+		</tr>
+	{% endif %}
 		</tbody>
 	</table>
 	<button class="btn btn-primary">Invite</button>
