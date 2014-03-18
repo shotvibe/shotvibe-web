@@ -43,7 +43,10 @@ class EventLinkForm(Form):
 
 
 class EventInviteImportForm(Form):
-    data = CharField(required=True, widget=Textarea)
+    default_country = CharField(required=False, min_length=2, max_length=2,
+        label="2-Letter Country Code for phone numbers")
+    data = CharField(required=True, widget=Textarea,
+        label="Paste CSV")
 
     def clean_data(self):
         data = self.cleaned_data['data']

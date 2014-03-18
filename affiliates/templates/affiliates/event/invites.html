@@ -21,7 +21,10 @@
 				<form method="POST" action="">
 					{% csrf_token %}
 					<h3>Import CSV</h3>
+					{{ import_form.default_country.label_tag }}
+					{{ import_form.default_country }}
 					<div>
+						{{ import_form.data.label_tag }}
 						{% render_field import_form.data class+="import_phone_data" %}
 					</div>
 					<button type="submit" class="btn btn-primary"><i class="icon-plus-sign icon-white"></i> Import</button>

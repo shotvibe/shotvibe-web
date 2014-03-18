@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.gis.geoip import GeoIP, GeoIPException
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.core.exceptions import PermissionDenied
@@ -144,14 +145,29 @@ def event_links(request, event):
     })
 
 
+def get_request_country_code(request):
+    try:
+        g = GeoIP()
+        country_code = g.country_code(request.META.get('REMOTE_ADDR'))
+        del g
+        return country_code
+    except GeoIPException:
+        return None
+
+
 @login_required
 @event_mod_required
 def event_invites(request, event):
+    country_code = get_request_country_code(request)
     data = None
     err = None
     err_msg = None
     import_form = None
     invites_form = None
+
+    def new_blank_import_form():
+        return EventInviteImportForm(initial={'default_country': country_code})
+
     if request.method == 'POST':
         action = request.POST.get("_action")
         if action == "invite":
@@ -165,13 +181,13 @@ def event_invites(request, event):
             import_form = EventInviteImportForm(request.POST)
             if import_form.is_valid():
                 items = import_form._items
-                data, err, err_msg = event.create_eventinvites(items)
+                data, err, err_msg = event.create_eventinvites(items, import_form.cleaned_data['default_country'])
                 if not err:
-                    import_form = EventInviteImportForm()
+                    import_form = new_blank_import_form()
             else:
                 err, err_msg = True, "Invalid Request"
     if not import_form:
-        import_form = EventInviteImportForm()
+        import_form = new_blank_import_form()
     if not invites_form:
         invites_form = EventInviteSendForm(queryset=event.eventinvites())
     return render(request, 'affiliates/event/invites.html', {

@@ -92,18 +92,15 @@ class Event(models.Model):
     def public_links(self):
         return EventLink.objects.filter(event=self, invite__isnull=True)
 
-    def create_eventinvites(self, items):
+    def create_eventinvites(self, items, default_country):
         invites = []
         errs = []
         if not items:
             return None, True, "No items given"
         for item in items:
-            if not item[1].startswith('+'):
-                phone_number = '+' + item[1]
-            else:
-                phone_number = item[1]
+            phone_number = item[1]
             try:
-                phone_number = phonenumbers.parse(phone_number, None)
+                phone_number = phonenumbers.parse(phone_number, default_country)
                 if not phonenumbers.is_possible_number(phone_number):
                     raise NumberParseException(None, None)
             except NumberParseException:

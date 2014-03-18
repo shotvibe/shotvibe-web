@@ -295,7 +295,8 @@ somebody else +18881234444""",
             'data': '\xd7\xa2\xd7\x95\xd7\x9e\xd7\xa8 \xd7\xa7\xd7\x9c\xd7\x99\xd7\x99\xd7\x9f \t522222955\n' +
                     '\xd7\x90\xd7\x99\xd7\x99\xd7\xa4\xd7\x95\xd7\x9f 5\t586277493\n' +
                     '\xd7\xa0\xd7\xa7\xd7\xa1\xd7\x95\xd7\xa1 4 \t586277494\n' +
-                    '\xd7\x90\xd7\x99\xd7\x99\xd7\xa4\xd7\x95\xd7\x9f 4 \t587306619\n'
+                    '\xd7\x90\xd7\x99\xd7\x99\xd7\xa4\xd7\x95\xd7\x9f 4 \t587306619\n',
+            'default_country': 'IL'
         }
 
         r = self.client.post(invites_url, data)
@@ -316,7 +317,7 @@ somebody else +18881234444""",
             ('test_user1', '+12127180000'),
             ('test_user2', '+12127180001'),
             ('test_user3', '+12127180002'),
-        ])
+        ], 'US')
 
         self.assertEqual(len(event.eventinvites()), 3)
         with patch("phone_auth.models.send_sms") as mock:
@@ -333,7 +334,7 @@ somebody else +18881234444""",
         event_a.create_eventinvites([
             ('test_user1', '+12127180000'),
             ('test_user2', '+12127180001'),
-        ])
+        ], 'US')
         self.assertEqual(len(event_a.eventinvites()), 2)
         with patch("phone_auth.models.send_sms") as mock:
             event_a.send_invites(event_a.eventinvites())
@@ -346,7 +347,7 @@ somebody else +18881234444""",
         event_b.create_eventinvites([
             ('test_user3', '+12127180000'),
             ('test_user4', '+12127180001'),
-        ])
+        ], 'US')
 
         self.assertEqual(len(event_b.eventinvites()), 2)
         with patch("phone_auth.models.send_sms") as mock:
