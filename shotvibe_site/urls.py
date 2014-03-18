@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.conf.urls import patterns, include, url
-from django.conf.urls.static import static
 from django.contrib import admin
 
 import frontend.urls
@@ -29,9 +28,61 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
 )
 
-# During development, serve the photos from the photo buckets
-standard_photo_bucket_suffix = '{0}/{1}.jpg'
-if settings.LOCAL_PHOTO_BUCKET_URL_FORMAT_STR.endswith(standard_photo_bucket_suffix):
-    urlpatterns += static(
-            prefix = settings.LOCAL_PHOTO_BUCKET_URL_FORMAT_STR[:-len(standard_photo_bucket_suffix)],
-            document_root = settings.LOCAL_PHOTO_BUCKETS_BASE_PATH)
+if settings.DEBUG:
+    import photos_api.urls
+
+    urlpatterns += (
+            url(r'^api/', include(photos_api.urls)),
+            )
+
+# During development, serve the photos from the local photo storage directory
+if settings.USING_LOCAL_PHOTOS:
+    def parse_filename(photo_filename):
+        # Filenames are in one of the formats:
+        #
+        # photoid (photoid="photoid", suffix="")
+        # photoid.jpg (photoid="photoid", suffix=".jpg")
+        # photoid_tail.jpg (photoid="photoid", suffix="_tail.jpg")
+
+        underscore_index = photo_filename.find("_")
+        period_index = photo_filename.find(".")
+
+        if underscore_index < 0 and period_index < 0:
+            photo_id = photo_filename
+            suffix = ''
+        else:
+            if underscore_index < 0:
+                suffix_start_index = period_index
+            elif period_index < 0:
+                suffix_start_index = underscore_index
+            else:
+                if underscore_index < period_index:
+                    suffix_start_index = underscore_index
+                else:
+                    suffix_start_index = period_index
+
+            photo_id = photo_filename[:suffix_start_index]
+            suffix = photo_filename[suffix_start_index:]
+
+        return (photo_id, suffix)
+
+
+    def serve_photo(request, subdomain, photo_filename):
+        from django.shortcuts import get_object_or_404
+        from django.http import HttpResponseNotFound
+        from django.views.static import serve
+
+        from photos.models import Photo
+
+        photo_id, suffix = parse_filename(photo_filename)
+
+        photo = get_object_or_404(Photo, pk=photo_id)
+
+        if photo.subdomain != subdomain:
+            return HttpResponseNotFound()
+
+        return serve(request, photo.storage_id + suffix, settings.LOCAL_PHOTOS_DIRECTORY)
+
+    urlpatterns += (
+            url(r'^photos/(?P<subdomain>[\w-]+)/(?P<photo_filename>[\w.-]+)$', serve_photo),
+            )

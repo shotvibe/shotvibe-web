@@ -1,6 +1,9 @@
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from photos.models import Album
 from rest_framework.permissions import BasePermission
+
+from rest_framework.authentication import get_authorization_header
 
 
 class IsSameUserOrStaff(BasePermission):
@@ -53,3 +56,27 @@ class UserDetailsPagePermission(BasePermission):
 
         return super(UserDetailsPagePermission, self).\
             has_object_permission(request, view, obj)
+
+
+class IsAllowedPrivateAPI(BasePermission):
+    """
+    Permission that requires that the client authenticate with a key allowing
+    access to the private API. This is used by external servers.
+
+    Clients should authenticate by passing the token key in the "Authorization"
+    HTTP header, prepended with the string "Key ". For example:
+
+    Authorization: Key 401f7ac837da42b97f613d789819ff93537bee6a
+    """
+    def has_permission(self, request, view):
+        auth = get_authorization_header(request).split()
+
+        if not auth or auth[0].lower() != b'key':
+            return None
+
+        if len(auth) == 1:
+            return False
+        elif len(auth) > 2:
+            return False
+
+        return auth[1] == settings.PRIVATE_API_KEY

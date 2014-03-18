@@ -10,6 +10,7 @@ from django.test.utils import override_settings
 
 from photos.models import Album, Photo, PendingPhoto, AlbumMember
 from photos import image_uploads
+from photos import photo_operations
 
 def read_in_chunks(file_object, chunk_size=1024):
     """
@@ -23,7 +24,8 @@ def read_in_chunks(file_object, chunk_size=1024):
             break
         yield data
 
-@override_settings(LOCAL_PHOTO_BUCKETS_BASE_PATH='.tmp_photo_buckets')
+@override_settings(USING_LOCAL_PHOTOS=True)
+@override_settings(LOCAL_PHOTOS_DIRECTORY='.tmp_photos')
 class ModelTest(TestCase):
     fixtures = ['tests/test_users']
 
@@ -32,7 +34,7 @@ class ModelTest(TestCase):
         self.barney = auth.get_user_model().objects.get(pk=3)
 
     def tearDown(self):
-        shutil.rmtree(settings.LOCAL_PHOTO_BUCKETS_BASE_PATH, ignore_errors=True)
+        shutil.rmtree(settings.LOCAL_PHOTOS_DIRECTORY, ignore_errors=True)
 
     def test_issue_22(self):
         user_albums_qs = Album.objects.get_user_albums(self.amanda.pk)
@@ -51,23 +53,16 @@ class ModelTest(TestCase):
         self.assertEqual(list(Album.objects.get_user_albums(self.amanda.id)), [album])
         self.assertEqual(list(Album.objects.get_user_albums(self.barney.id)), [])
 
-        pending_photo = PendingPhoto.objects.create(author=self.amanda)
-
-        location, directory = pending_photo.bucket.split(':')
-        if location != 'local':
-            raise ValueError('Unknown photo bucket location: ' + location)
+        pending_photo = Photo.objects.upload_request(author=self.amanda)
 
         with open('photos/test_photos/death-valley-sand-dunes.jpg') as f:
-            image_uploads.handle_file_upload(directory, pending_photo.photo_id, read_in_chunks(f))
+            image_uploads.process_file_upload(pending_photo, read_in_chunks(f))
 
-        new_photo = pending_photo.get_or_process_uploaded_image_and_create_photo(album, the_date)
+        photo_operations.add_pending_photos_to_album([pending_photo.photo_id], album.id, the_date)
 
         self.assertFalse(PendingPhoto.objects.filter(photo_id=pending_photo.photo_id).exists())
 
-        # This is the size of the test photo:
-        self.assertEqual((new_photo.width, new_photo.height), (1024, 768))
-
-        self.assertEqual(list(album.get_photos()), [new_photo])
+        self.assertEqual(list(album.get_photos()), [Photo.objects.get(pk=pending_photo.photo_id)])
 
     def test_album_last_updated_photo_upload(self):
         create_date = datetime.datetime(2010, 1, 1, tzinfo=utc)
@@ -77,17 +72,15 @@ class ModelTest(TestCase):
 
         update_date = datetime.datetime(2010, 1, 2, tzinfo=utc)
 
-        pending_photo = PendingPhoto.objects.create(author=self.amanda)
-
-        location, directory = pending_photo.bucket.split(':')
-        if location != 'local':
-            raise ValueError('Unknown photo bucket location: ' + location)
+        pending_photo = Photo.objects.upload_request(author=self.amanda)
 
         with open('photos/test_photos/death-valley-sand-dunes.jpg') as f:
-            image_uploads.handle_file_upload(directory, pending_photo.photo_id, read_in_chunks(f))
+            image_uploads.process_file_upload(pending_photo, read_in_chunks(f))
 
-        pending_photo.get_or_process_uploaded_image_and_create_photo(the_album, update_date)
+        photo_operations.add_pending_photos_to_album([pending_photo.photo_id], the_album.id, update_date)
 
+        # Refresh the_album to get the latest data from the DB
+        the_album = Album.objects.get(pk=the_album.id)
         self.assertEqual(the_album.last_updated, update_date)
 
 class ImageUploads(TestCase):

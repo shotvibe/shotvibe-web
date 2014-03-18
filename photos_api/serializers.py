@@ -189,19 +189,17 @@ class AlbumUpdateSerializer(serializers.Serializer):
 
 
 class AlbumAdd(object):
-    def __init__(self, album_name=None, members=None, photos=None):
+    def __init__(self, album_name=None, members=None):
         self.album_name = album_name
         self.members = members
-        self.photos = photos
 
 
 class AlbumAddSerializer(serializers.Serializer):
     album_name = serializers.CharField()
     members = ListField(MemberIdentifierSerializer, required=False)
-    photos = PhotoListField(required=False)
 
     def restore_object(self, attrs, instance=None):
-        return AlbumAdd(album_name=attrs['album_name'], members=attrs['members'], photos=attrs['photos'])
+        return AlbumAdd(album_name=attrs['album_name'], members=attrs['members'])
 
 
 class AlbumViewSerializer(serializers.Serializer):
@@ -223,3 +221,11 @@ class QueryPhonesRequestSerializer(serializers.Serializer):
     def validate_default_country(self, attrs, source):
         attrs['default_country'] = attrs['default_country'].upper()
         return attrs
+
+class PhotoUploadInitSerializer(serializers.Serializer):
+    user_auth_token = serializers.CharField()
+
+class PhotoServerRegisterSerializer(serializers.Serializer):
+    update_url = serializers.CharField()
+    subdomain = serializers.CharField()
+    auth_key = serializers.CharField()

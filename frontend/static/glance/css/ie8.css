@@ -1,0 +1,69 @@
+/* Basic */
+
+	/* Form */
+
+		input,
+		select,
+		textarea {
+			border: solid 1px #bbb !important;
+		}
+
+	/* Button */
+
+		.button {
+			-ms-behavior: url('css/PIE.htc');
+		}
+
+/* Header */
+
+	#header {
+	}
+	
+		#logo {
+			background-size: contain;
+			-ms-behavior: url('css/backgroundsize.min.htc');
+		}
+
+	#alt-header {
+		border-bottom: solid 1px #d0d0d0;
+	}
+	
+		#alt-header .logo {
+			background-size: contain;
+			-ms-behavior: url('css/backgroundsize.min.htc');
+		}
+
+/* Banner */
+
+	#banner {
+		padding: 5em 0 5em 0;
+	}
+
+/* Download */
+
+	#download {
+	}
+		
+/* Features */
+
+	.feature {
+		border-bottom: solid 1px #d0d0d0;
+	}
+	
+		.feature header {
+			background: none !important;
+		}
+
+/* Footer */
+
+	#footer {
+	}
+	
+		#footer .container:before {
+			display: none;
+		}
+
+		#footer .logo {
+			background-size: contain;
+			-ms-behavior: url('css/backgroundsize.min.htc');
+		}

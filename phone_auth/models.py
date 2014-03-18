@@ -147,6 +147,9 @@ class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
         """Returns URL of the user's avatar image"""
         return avatar_url_from_avatar_file_data(self.avatar_file)
 
+    def get_primary_phone_number(self):
+        return PhoneNumber.objects.filter(user=self).order_by('date_created').first()
+
     def pick_anonymous_avatar(self, phone_number_str, save=False):
         """Picks up avatar used for anonymous contact data for the given
         phone_number_str.
@@ -369,15 +372,21 @@ class PhoneNumberLinkCodeManager(models.Manager):
                 inviting_user = inviter,
                 date_created = date_invited)
 
-        self.send_sms(phone_number, link_code_object, message_formatter)
+        inviter_phone = inviter.get_primary_phone_number()
+        if inviter_phone:
+            sender_phone = inviter_phone.phone_number
+        else:
+            sender_phone = None
+
+        self.send_sms(phone_number, link_code_object, message_formatter, sender_phone)
 
         return link_code_object
 
-    def send_sms(self, phone_number, link_code_object, message_formatter=None):
+    def send_sms(self, phone_number, link_code_object, message_formatter=None, sender_phone=None):
         if message_formatter is None:
             message_formatter = PhoneNumberLinkCodeManager.default_sms_invite_formatter
 
-        send_sms(phone_number.phone_number, message_formatter(link_code_object))
+        send_sms(phone_number.phone_number, message_formatter(link_code_object), sender_phone)
 
 
 class PhoneNumberLinkCode(models.Model):

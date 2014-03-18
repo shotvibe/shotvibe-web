@@ -17,8 +17,20 @@ parent_settings.DATABASES['default']['NAME'] = 'test_databases/default.sqlite'
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '!d*b0kzmxdg-!d=o^!8j#cr6^e666e$#wm0!m(uk3d&ix2)2sf'
 
-LOCAL_PHOTO_BUCKETS_BASE_PATH = 'photo_buckets'
-LOCAL_PHOTO_BUCKET_URL_FORMAT_STR = '/photos/{0}/{1}.jpg'
+# This should only be used for development and testing:
+USING_LOCAL_PHOTOS = True
+LOCAL_PHOTOS_DIRECTORY = 'photo_storage'
+
+# This should be set when USING_LOCAL_PHOTOS = False
+PHOTO_SERVER_URL_FORMAT_STR = 'https://{0}.shotvibe.com/{1}'
+
+# This should be set when USING_LOCAL_PHOTOS = False
+#
+# It is used to return an upload url to API clients in "photos_upload_request"
+#
+# It is currently also used for forwarding photo upload requests (coming into
+# the old photo upload url, and in the frontend)
+PHOTO_UPLOAD_SERVER_URL = 'https://upload.shotvibe.com'
 
 UNIVERSAL_PUSH_PROVIDER_URL = 'http://127.0.0.1:8800'
 
@@ -49,6 +61,12 @@ DEFAULT_AVATAR_FILES = [
     ('s3:shotvibe-avatars-01:default-avatar-{0:04d}.jpg', 1, 78),
     # ('foo:bar2:avatar_{0}', 41, 78)
 ]
+
+# This is they key that clients must use to authenticate with the private API
+# endpoints.
+#
+# Make sure to change it to something secret!
+PRIVATE_API_KEY = 'ANBQn8iCYxU2evwwg2mrCVIxXaCVZJEo9iZJ16cadd8csMvGwY5UCF2yMfoQIxUE'
 
 # AWS Credentials
 AWS_ACCESS_KEY = "************"
