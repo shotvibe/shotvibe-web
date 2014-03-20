@@ -1,0 +1,69 @@
+{% extends "frontend/base.html" %}
+
+{% load static %}
+{% load bootstrap_toolkit %}
+{% load widget_tweaks %}
+
+{% block extra_js %}
+<script src="{% static "vendor/jquery-1.11.0.min.js" %}"></script>
+<script src="{% static "bootstrap/js/bootstrap.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+
+<h3>
+	<a href="{% url "affiliates.views.organization" organization.code %}">{{ organization.code }}</a>
+	-
+	<a href="{% url "affiliates.views.event_edit" organization.code event.id %}">{{ event.name }}</a>
+	-
+	Links
+</h3>
+
+{% include "affiliates/event/partials/menu.html" with active="links" %}
+
+<div>
+	<fieldset>
+		<h3>Create New Link</h3>
+		{% if form.errors %}
+			{{ form.errors }}
+		{% endif %}
+		<form method="POST" action="" class="form-inline">
+			{% csrf_token %}
+			<div class="input-prepend">
+				<span class="add-on">/go/</span>
+				{% render_field form.slug placeholder="leave blank for auto" %}
+			</div>
+			<button type="submit" class="btn btn-primary"><i class="icon-plus-sign icon-white"></i> Create New Link</button>
+		</form>
+	</fieldset>
+</div>
+
+<hr>
+
+<table class="table table-hover table-striped">
+	<thead>
+		<tr>
+			<th>Link</th>
+			<th>Views</th>
+			<th>Downloads</th>
+		</tr>
+	</thead>
+	<tbody>
+{% for link in event.public_links %}
+	<tr>
+		<td>
+			<i class="icon-globe"></i>
+    	<a href="{{ link.get_absolute_url }}">{{ link }}</a>
+		</td>
+		<td>{{ link.visited_count }}</td>
+		<td>{{ link.downloaded_count }}</td>
+	</tr>
+{% empty %}
+	<tr>
+		<td>No links</td>
+	</tr>
+{% endfor %}
+	</tbody>
+</table>
+
+{% endblock %}

@@ -41,6 +41,7 @@ JENKINS_TASKS = (
 )
 
 PROJECT_APPS = (
+    'affiliates',
     'frontend',
     'photos',
     'phone_auth',

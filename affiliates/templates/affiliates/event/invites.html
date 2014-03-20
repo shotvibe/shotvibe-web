@@ -1,0 +1,141 @@
+{% extends "affiliates/base.html" %}
+
+{% load widget_tweaks %}
+
+{% block subcontent %}
+
+<h3>
+	<a href="{% url "affiliates.views.organization" organization.code %}">{{ organization.code }}</a>
+	-
+	<a href="{% url "affiliates.views.event_edit" organization.code event.id %}">{{ event.name }}</a>
+	-
+	Links
+</h3>
+
+{% include "affiliates/event/partials/menu.html" with active="invites" %}
+
+<div>
+	<fieldset>
+		<div class="row">
+			<div class="span6">
+				<form method="POST" action="">
+					{% csrf_token %}
+					<h3>Import CSV</h3>
+					{{ import_form.default_country.label_tag }}
+					{{ import_form.default_country }}
+					<div>
+						{{ import_form.data.label_tag }}
+						{% render_field import_form.data class+="import_phone_data" %}
+					</div>
+					<button type="submit" class="btn btn-primary"><i class="icon-plus-sign icon-white"></i> Import</button>
+				</form>
+			</div>
+			<div class="span6">
+				{% if err %}
+					<h3>Error:</h3>
+					<p>{{ err_msg }}</p>
+					<ul>
+					{% for item in data %}
+						<li>{{ item }}</li>
+					{% endfor %}
+					</ul>
+				{% else %}
+					{% if data %}
+						<h3>Created:</h3>
+						<ul>
+						{% for item in data %}
+							<li>{{ item }}</li>
+						{% endfor %}
+						</ul>
+					{% endif %}
+				{% endif %}
+			</div>
+		</div>
+	</fieldset>
+</div>
+
+<hr>
+
+<form method="POST" action="">
+	<input type="hidden" name="_action", value="invite">
+	{% csrf_token %}
+	<table class="table table-hover table-striped">
+		<thead>
+			<tr>
+				<th>Invite</th>
+				<th>Number</th>
+				<th>Viewed</th>
+				<th>Downloaded</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+	{% for invite in invites_form_fields.queryset %}
+		<tr>
+			<td>{{ invite.nickname }}</td>
+			<td>{{ invite.phone_number }}</td>
+			{% if invite.eventlink %}
+			<td>
+				{% if invite.eventlink.visited_count %}
+					<i class="icon-ok"></i>
+				{% else %}
+					<i class="icon-minus"></i>
+				{% endif %}
+			</td>
+			<td>
+				{% if invite.eventlink.downloaded_count %}
+					<i class="icon-ok"></i>
+				{% else %}
+					<i class="icon-minus"></i>
+				{% endif %}
+			</td>
+			<td>
+				<i class="icon-user"></i>
+				<a href="{{ invite.eventlink.get_absolute_url }}">{{ invite.eventlink }}</a>
+			</td>
+			{% else %}
+			<td></td>
+			<td></td>
+			<td>
+				<input value="{{invite.pk}}" type="checkbox" name="invites">
+			</td>
+			{% endif %}
+		</tr>
+	{% empty %}
+		<tr>
+			<td>No links</td>
+		</tr>
+	{% endfor %}
+	{% if invites_form_fields.queryset %}
+		<tr>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td>
+				<div id="id_select_all"></div>
+				<script type="text/javascript">
+					(function() {
+					 var btn = document.createElement('Button');
+					 btn.type = 'button';
+					 btn.appendChild(document.createTextNode('Select All'));
+					 btn.className = 'btn btn-default';
+					 btn.onclick = function() {
+					  var cs = document.getElementsByName('invites');
+					  for (var i = 0; i < cs.length; ++i) {
+					   cs[i].checked = true;
+					  }
+					 };
+					 var cont = document.getElementById('id_select_all');
+					 cont.appendChild(btn);
+					})();
+				</script>
+			</td>
+		</tr>
+	{% endif %}
+		</tbody>
+	</table>
+	<button class="btn btn-primary">Invite</button>
+</form>
+
+{% endblock %}

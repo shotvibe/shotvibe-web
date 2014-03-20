@@ -58,7 +58,7 @@ class Album(models.Model):
         Album.objects.filter(pk=self.id).update(revision_number=models.F('revision_number')+1)
         self.save(update_fields=['last_updated'])
 
-    def add_members(self, inviter, member_identifiers, date_added=None):
+    def add_members(self, inviter, member_identifiers, date_added=None, message_formatter=None, force_send=False):
 
         result = []
 
@@ -91,14 +91,24 @@ class Album(models.Model):
                     if phone_number.should_send_invite():
                         PhoneNumberLinkCode.objects.\
                             invite_existing_phone_number(inviter, phone_number,
-                                                         date_added)
+                                                         date_added,
+                                                         message_formatter)
+                    elif force_send:
+                        # we insist on sending an SMS, but user already
+                        # has a phonenumberlinkcode object
+                        link_code_object = PhoneNumberLinkCode.objects.\
+                            get(phone_number=phone_number)
+
+                        PhoneNumberLinkCode.objects.\
+                            send_sms(phone_number, link_code_object, message_formatter)
                     new_users.append(phone_number.user)
                 except PhoneNumber.DoesNotExist:
                     link_code_object = PhoneNumberLinkCode.objects.\
                         invite_new_phone_number(inviter,
                                                 formatted_number,
                                                 member_identifier.contact_nickname,
-                                                date_added)
+                                                date_added,
+                                                message_formatter)
                     new_users.append(link_code_object.phone_number.user)
 
                 # Later check for the result of the Twilio SMS send, which

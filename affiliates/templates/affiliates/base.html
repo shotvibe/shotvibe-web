@@ -1,0 +1,17 @@
+{% extends "frontend/base.html" %}
+
+{% load static %}
+{% block extra_css %}
+<link href="{% static "affiliates/css/style.css" %}" rel="stylesheet">
+{% endblock extra_css %}
+{% block extra_js %}
+<script src="{% static "vendor/jquery-1.11.0.min.js" %}"></script>
+<script src="{% static "bootstrap/js/bootstrap.js" %}"></script>
+{% endblock extra_js %}
+
+{% block content %}
+	<div id="affiliates">
+		{% block subcontent %}
+		{% endblock %}
+	</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "frontend/base.html" %}
+
+{% load bootstrap_toolkit %}
+
+{% block content %}
+
+{% for organization in organizations %}
+    {{ organization }}
+{% endfor %}
+
+{% endblock %}

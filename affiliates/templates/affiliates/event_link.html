@@ -1,0 +1,67 @@
+{% load static %}
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>{{ inviting_user.get_full_name }} Has Shared Photos</title>
+	<link href="{% static "bootstrap/css/bootstrap.css" %}" rel="stylesheet">
+	<link href="{% static "affiliates/css/invite.css" %}" rel="stylesheet">
+</head>
+<body>
+	<article>
+		<header id="header">
+			<h1>Hello! You're invited to<br>share photos</h1>
+			<img src="{% static "affiliates/img/glance-logo.png" %}" alt="glance" />
+		</header>
+		<section id="content">
+			<h2>{{ eventLink.event.name }}<br>
+				{{ eventLink.event.location }}<br>
+				{{ eventLink.event.time|date:"N.j.Y, H:i" }}
+			</h2>
+		</section>
+		<section id="screenshots" class="{{ device }}">
+			<ul class="screen">
+				{% for photo in photos %}
+					<li><img src="{{ photo.get_photo_url_no_ext }}_thumb75.jpg" width="192" height="192" alt=""></li>
+				{% empty %}
+				{% endfor %}
+			</ul>
+		</section>
+		<section id="cta">
+			<a href="{% url "affiliates.views.event_download_link" eventLink.slug %}" class="availabe-in-{{ device }}">
+			 	{% if device == "android" %}
+					<img src="{% static "affiliates/img/app-store.png" %}">
+				{% else %}
+					<img src="{% static "affiliates/img/app-store.png" %}">
+				{% endif %}
+			</a>
+		 	<h3>The fastest way to create and share<br>albums with groups of friends.</h3>
+		</section>
+		<section id="about">
+		 	<img src="{% static "affiliates/img/phones.png" %}" />
+			<h4>
+				Now for
+				{% if device == "android" %}
+					Android + iPhone.
+				{% else %}
+					iPhone + Android.
+				{% endif %}
+			</h4>
+		</section>
+		<section id="cta">
+			<a href="{% url "affiliates.views.event_download_link" eventLink.slug %}" class="availabe-in-{{ device }}">
+			 	{% if device == "android" %}
+					<img src="{% static "affiliates/img/app-store.png" %}">
+				{% else %}
+					<img src="{% static "affiliates/img/app-store.png" %}">
+				{% endif %}
+			</a>
+		</section>
+		<footer id="footer">
+		 	<h5>
+			(&copy;) {% now "Y" %} Glance, Inc. All rights reserved.<br />
+			<a href="//useglance.com">useglance.com</a>
+			</h5>
+		</footer>
+	</article>
+</body>
