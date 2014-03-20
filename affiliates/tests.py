@@ -125,7 +125,6 @@ class EventLinkTests(TestCase):
         for i, val in enumerate(vals):
             slug = EventLink.encode_hash(val)
             eventLink = self.event.create_link(slug=slug)
-            self.assertEquals(eventLink.pk, i+1)
 
         n = 10
         ids = range(n)
