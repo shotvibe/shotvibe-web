@@ -7,7 +7,9 @@ from phonenumbers.phonenumberutil import NumberParseException
 from django.db import models, transaction, IntegrityError
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.utils import timezone
 
+from phone_auth.models import PhoneNumber, PhoneNumberLinkCode
 from photos.models import Album
 
 
@@ -50,6 +52,20 @@ class OrganizationUser(models.Model):
         unique_together = ('organization', 'user')
 
 
+class EventManager(models.Manager):
+    def handle_event_registration_payload(self, user, payload_id):
+        from photos_api.serializers import MemberIdentifier
+        try:
+            event = Event.objects.get(pk=int(payload_id))
+        except (ValueError, TypeError, Event.DoesNotExist):
+            # payload was bad, perhaps log this somewhere?
+            pass
+        else:
+            eventAlbum = event.album
+            inviter = event.created_by
+            eventAlbum.add_members(inviter, [MemberIdentifier(user_id=user.id)], timezone.now(), Album.default_sms_message_formatter)
+
+
 class Event(models.Model):
     organization = models.ForeignKey(Organization)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL)
@@ -63,6 +79,8 @@ class Event(models.Model):
     #logo =
     #banner
     html_content = models.TextField()
+
+    objects = EventManager()
 
     def create_link(self, slug=None):
         if slug:
@@ -88,9 +106,6 @@ class Event(models.Model):
 
     def links(self):
         return EventLink.objects.filter(event=self)
-
-    def public_links(self):
-        return EventLink.objects.filter(event=self, invite__isnull=True)
 
     def create_eventinvites(self, items, default_country):
         invites = []
@@ -133,19 +148,17 @@ class Event(models.Model):
 
     def send_invites(self, eventinvites):
         sms_template = string.Template(self.sms_message)
+
+        now = timezone.now()
+
         for eventinvite in eventinvites:
-            invitelink = eventinvite.create_invitelink()
             memberidentifier = eventinvite.to_memberidentifier()
 
             def sms_formatter(link_code_object):
-                formatted_sms = sms_template.safe_substitute(
+                return sms_template.safe_substitute(
                     name=eventinvite.nickname,
                 )
-                return u"{0} https://www.shotvibe.com{1}".format(
-                    formatted_sms,
-                    invitelink.get_absolute_url(),
-                )
-            self.album.add_members(self.created_by, [memberidentifier], message_formatter=sms_formatter, force_send=True)
+            self.album.add_members(self.created_by, [memberidentifier], now, sms_formatter)
 
     def eventinvites(self):
         return self.eventinvite_set.all()
@@ -162,22 +175,32 @@ class EventInvite(models.Model):
     class Meta:
         unique_together = ('event', 'phone_number')
 
+    def get_phone_number(self):
+        return PhoneNumber.objects.filter(phone_number=self.phone_number).first()
+
+    def get_phone_number_link_code(self):
+        return PhoneNumberLinkCode.objects.filter(phone_number__phone_number=self.phone_number).first()
+
+    def is_added_to_event(self):
+        phone_number = self.get_phone_number()
+        if phone_number:
+            return self.event.album.is_user_member(phone_number.user.id)
+        else:
+            return False
+
+    def is_registered_user(self):
+        phone_number = self.get_phone_number()
+        if phone_number:
+            return phone_number.verified
+        else:
+            return False
+
     def to_memberidentifier(self):
         from photos_api.serializers import MemberIdentifier
         return MemberIdentifier(
             phone_number=self.phone_number,
             contact_nickname=self.nickname,
         )
-
-    def create_invitelink(self):
-        try:
-            return self.eventlink
-        except EventLink.DoesNotExist:
-            pass
-        eventlink = self.event.create_link()
-        eventlink.invite = self
-        eventlink.save()
-        return eventlink
 
     @staticmethod
     def import_data(data):
@@ -200,7 +223,6 @@ VALID_LINK_CHARS = tuple(string.ascii_letters + string.digits)
 class EventLink(models.Model):
     slug = models.CharField(max_length=255, unique=True, null=True, blank=True)
     event = models.ForeignKey(Event, null=True)
-    invite = models.OneToOneField(EventInvite, null=True)
     time_sent = models.DateTimeField(null=True, blank=True)
     visited_count = models.IntegerField(default=0)
     downloaded_count = models.IntegerField(default=0)
@@ -215,14 +237,6 @@ class EventLink(models.Model):
 
     def get_absolute_url(self):
         return reverse('affiliates.views.event_link', args=[self.slug])
-
-    @property
-    def is_personal(self):
-        return self.invite is not None
-
-    @property
-    def is_public(self):
-        return not self.is_personal
 
     def __unicode__(self):
         return self.get_absolute_url()

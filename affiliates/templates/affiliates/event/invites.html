@@ -72,34 +72,40 @@
 		<tbody>
 	{% for invite in invites_form_fields.queryset %}
 		<tr>
-			<td>{{ invite.nickname }}</td>
-			<td>{{ invite.phone_number }}</td>
-			{% if invite.eventlink %}
 			<td>
-				{% if invite.eventlink.visited_count %}
+				{# Invite #}
+				{{ invite.nickname }}
+			</td>
+			<td>
+				{# Number #}
+				{{ invite.phone_number }}
+			</td>
+			<td>
+				{# Viewed #}
+				{% if invite.get_phone_number_link_code %}
+					{% if invite.get_phone_number_link_code.was_visited %}
+						<i class="icon-ok"></i>
+					{% else %}
+						<i class="icon-minus"></i>
+					{% endif %}
+				{% endif %}
+			</td>
+			<td>
+				{# Downloaded #}
+				{% if invite.is_registered_user %}
 					<i class="icon-ok"></i>
 				{% else %}
 					<i class="icon-minus"></i>
 				{% endif %}
 			</td>
 			<td>
-				{% if invite.eventlink.downloaded_count %}
-					<i class="icon-ok"></i>
+				{# Checkbox #}
+				{% if invite.is_added_to_event %}
+					<i class="icon-user"></i>
 				{% else %}
-					<i class="icon-minus"></i>
+					<input value="{{ invite.pk }}" type="checkbox" name="invites">
 				{% endif %}
 			</td>
-			<td>
-				<i class="icon-user"></i>
-				<a href="{{ invite.eventlink.get_absolute_url }}">{{ invite.eventlink }}</a>
-			</td>
-			{% else %}
-			<td></td>
-			<td></td>
-			<td>
-				<input value="{{invite.pk}}" type="checkbox" name="invites">
-			</td>
-			{% endif %}
 		</tr>
 	{% empty %}
 		<tr>

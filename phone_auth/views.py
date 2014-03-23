@@ -20,8 +20,6 @@ from phone_auth.sms_send import send_sms
 
 from affiliates.models import Event
 
-from photos_api.serializers import MemberIdentifier
-
 class AuthorizePhoneNumber(APIView):
     serializer_class = AuthorizePhoneNumberSerializer
 
@@ -63,15 +61,7 @@ class ConfirmSMSCode(APIView):
             if ':' in custom_payload:
                 payload_type, payload_id = custom_payload.split(":", 1)
                 if payload_type == 'event':
-                    try:
-                        event = Event.objects.get(pk=int(payload_id))
-                    except (ValueError, TypeError, Event.DoesNotExist):
-                        # payload was bad, perhaps log this somewhere?
-                        pass
-                    else:
-                        eventAlbum = event.album
-                        inviter = event.created_by
-                        eventAlbum.add_members(inviter, [MemberIdentifier(user_id=result.user.id)])
+                    Event.objects.handle_event_registration_payload(result.user, payload_id)
 
         return Response({
             'user_id': result.user.id,

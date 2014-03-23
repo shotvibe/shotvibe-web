@@ -124,9 +124,9 @@ class AlbumDetail(generics.RetrieveAPIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        if serializer.object.add_photos:
-            now = timezone.now()
+        now = timezone.now()
 
+        if serializer.object.add_photos:
             photo_ids = serializer.object.add_photos
 
             try:
@@ -141,7 +141,7 @@ class AlbumDetail(generics.RetrieveAPIView):
                                        by_user=request.user,
                                        to_album=self.album)
 
-        self.album.add_members(request.user, member_identifiers=serializer.object.add_members)
+        self.album.add_members(request.user, serializer.object.add_members, now, Album.default_sms_message_formatter)
 
         responseSerializer = (self.get_serializer_class())(self.get_object(), context={'request': request})
         return Response(responseSerializer.data)
@@ -155,10 +155,14 @@ class AlbumMembersView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.DATA, files=request.FILES)
 
+        now = timezone.now()
+
         if serializer.is_valid():
             album = Album.objects.get(pk=kwargs.get('pk'))
             result = album.add_members(request.user,
-                                       serializer.object['members'])
+                                       serializer.object['members'],
+                                       now,
+                                       Album.default_sms_message_formatter)
 
             return Response(result, status=status.HTTP_200_OK)
         else:
@@ -373,8 +377,10 @@ class Albums(generics.ListAPIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+        now = timezone.now()
+
         album = Album.objects.create_album(self.request.user, serializer.object.album_name)
-        album.add_members(request.user, member_identifiers=serializer.object.members)
+        album.add_members(request.user, serializer.object.members, now, Album.default_sms_message_formatter)
 
         responseSerializer = AlbumSerializer(album, context={'request': request})
         return Response(responseSerializer.data)
