@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import auth
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
