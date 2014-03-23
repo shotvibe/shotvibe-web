@@ -106,9 +106,6 @@ class Event(models.Model):
     def links(self):
         return EventLink.objects.filter(event=self)
 
-    def public_links(self):
-        return EventLink.objects.filter(event=self, invite__isnull=True)
-
     def create_eventinvites(self, items, default_country):
         invites = []
         errs = []
@@ -154,7 +151,6 @@ class Event(models.Model):
         now = timezone.now()
 
         for eventinvite in eventinvites:
-            invitelink = eventinvite.create_invitelink()
             memberidentifier = eventinvite.to_memberidentifier()
 
             def sms_formatter(link_code_object):
@@ -185,16 +181,6 @@ class EventInvite(models.Model):
             contact_nickname=self.nickname,
         )
 
-    def create_invitelink(self):
-        try:
-            return self.eventlink
-        except EventLink.DoesNotExist:
-            pass
-        eventlink = self.event.create_link()
-        eventlink.invite = self
-        eventlink.save()
-        return eventlink
-
     @staticmethod
     def import_data(data):
         lines = data.splitlines()
@@ -216,7 +202,6 @@ VALID_LINK_CHARS = tuple(string.ascii_letters + string.digits)
 class EventLink(models.Model):
     slug = models.CharField(max_length=255, unique=True, null=True, blank=True)
     event = models.ForeignKey(Event, null=True)
-    invite = models.OneToOneField(EventInvite, null=True)
     time_sent = models.DateTimeField(null=True, blank=True)
     visited_count = models.IntegerField(default=0)
     downloaded_count = models.IntegerField(default=0)
@@ -231,14 +216,6 @@ class EventLink(models.Model):
 
     def get_absolute_url(self):
         return reverse('affiliates.views.event_link', args=[self.slug])
-
-    @property
-    def is_personal(self):
-        return self.invite is not None
-
-    @property
-    def is_public(self):
-        return not self.is_personal
 
     def __unicode__(self):
         return self.get_absolute_url()
