@@ -9,6 +9,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 
+from phone_auth.models import PhoneNumber, PhoneNumberLinkCode
 from photos.models import Album
 
 
@@ -173,6 +174,26 @@ class EventInvite(models.Model):
 
     class Meta:
         unique_together = ('event', 'phone_number')
+
+    def get_phone_number(self):
+        return PhoneNumber.objects.filter(phone_number=self.phone_number).first()
+
+    def get_phone_number_link_code(self):
+        return PhoneNumberLinkCode.objects.filter(phone_number__phone_number=self.phone_number).first()
+
+    def is_added_to_event(self):
+        phone_number = self.get_phone_number()
+        if phone_number:
+            return self.event.album.is_user_member(phone_number.user.id)
+        else:
+            return False
+
+    def is_registered_user(self):
+        phone_number = self.get_phone_number()
+        if phone_number:
+            return phone_number.verified
+        else:
+            return False
 
     def to_memberidentifier(self):
         from photos_api.serializers import MemberIdentifier
