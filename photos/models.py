@@ -58,13 +58,12 @@ class Album(models.Model):
         Album.objects.filter(pk=self.id).update(revision_number=models.F('revision_number')+1)
         self.save(update_fields=['last_updated'])
 
-    def add_members(self, inviter, member_identifiers, date_added=None, message_formatter=None, force_send=False):
+    @staticmethod
+    def default_sms_message_formatter(link_code):
+        return link_code.inviting_user.nickname + ' has shared photos with you!'
 
+    def add_members(self, inviter, member_identifiers, date_added, sms_message_formatter):
         result = []
-
-        # Date added is current datetime by default
-        if not date_added:
-            date_added = timezone.now()
 
         new_users = []
 
@@ -85,31 +84,13 @@ class Album(models.Model):
                 # Format final number.
                 formatted_number = phonenumbers.format_number(number, phonenumbers.PhoneNumberFormat.E164)
 
-                try:
-                    phone_number = PhoneNumber.objects.get(
-                        phone_number=formatted_number)
-                    if phone_number.should_send_invite():
-                        PhoneNumberLinkCode.objects.\
-                            invite_existing_phone_number(inviter, phone_number,
-                                                         date_added,
-                                                         message_formatter)
-                    elif force_send:
-                        # we insist on sending an SMS, but user already
-                        # has a phonenumberlinkcode object
-                        link_code_object = PhoneNumberLinkCode.objects.\
-                            get(phone_number=phone_number)
-
-                        PhoneNumberLinkCode.objects.\
-                            send_sms(phone_number, link_code_object, message_formatter)
-                    new_users.append(phone_number.user)
-                except PhoneNumber.DoesNotExist:
-                    link_code_object = PhoneNumberLinkCode.objects.\
-                        invite_new_phone_number(inviter,
-                                                formatted_number,
-                                                member_identifier.contact_nickname,
-                                                date_added,
-                                                message_formatter)
-                    new_users.append(link_code_object.phone_number.user)
+                user = PhoneNumberLinkCode.objects.invite_phone_number(
+                        inviter,
+                        formatted_number,
+                        member_identifier.contact_nickname,
+                        date_added,
+                        sms_message_formatter)
+                new_users.append(user)
 
                 # Later check for the result of the Twilio SMS send, which
                 # will tell us if sending the SMS failed due to being an invalid
@@ -132,6 +113,7 @@ class Album(models.Model):
             }
             AlbumMember.objects.get_or_create(user=new_user, album=self, defaults=defaults)
 
+        # TODO Modify this to allow a custom push notification
         members_added_to_album.send(sender=self, member_users=new_users,
                                     by_user=inviter, to_album=self)
 

@@ -7,6 +7,7 @@ from phonenumbers.phonenumberutil import NumberParseException
 from django.db import models, transaction, IntegrityError
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.utils import timezone
 
 from photos.models import Album
 
@@ -50,6 +51,20 @@ class OrganizationUser(models.Model):
         unique_together = ('organization', 'user')
 
 
+class EventManager(models.Manager):
+    def handle_event_registration_payload(self, user, payload_id):
+        from photos_api.serializers import MemberIdentifier
+        try:
+            event = Event.objects.get(pk=int(payload_id))
+        except (ValueError, TypeError, Event.DoesNotExist):
+            # payload was bad, perhaps log this somewhere?
+            pass
+        else:
+            eventAlbum = event.album
+            inviter = event.created_by
+            eventAlbum.add_members(inviter, [MemberIdentifier(user_id=user.id)], timezone.now(), Album.default_sms_message_formatter)
+
+
 class Event(models.Model):
     organization = models.ForeignKey(Organization)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL)
@@ -63,6 +78,8 @@ class Event(models.Model):
     #logo =
     #banner
     html_content = models.TextField()
+
+    objects = EventManager()
 
     def create_link(self, slug=None):
         if slug:
@@ -133,19 +150,18 @@ class Event(models.Model):
 
     def send_invites(self, eventinvites):
         sms_template = string.Template(self.sms_message)
+
+        now = timezone.now()
+
         for eventinvite in eventinvites:
             invitelink = eventinvite.create_invitelink()
             memberidentifier = eventinvite.to_memberidentifier()
 
             def sms_formatter(link_code_object):
-                formatted_sms = sms_template.safe_substitute(
+                return sms_template.safe_substitute(
                     name=eventinvite.nickname,
                 )
-                return u"{0} https://www.shotvibe.com{1}".format(
-                    formatted_sms,
-                    invitelink.get_absolute_url(),
-                )
-            self.album.add_members(self.created_by, [memberidentifier], message_formatter=sms_formatter, force_send=True)
+            self.album.add_members(self.created_by, [memberidentifier], now, sms_formatter)
 
     def eventinvites(self):
         return self.eventinvite_set.all()

@@ -17,7 +17,7 @@ from django.utils import timezone
 
 from phone_auth.models import AuthToken
 from phone_auth.models import PhoneNumber, PhoneContact, AnonymousPhoneNumber, PhoneNumberLinkCode
-from photos.models import Photo, PendingPhoto, AlbumMember
+from photos.models import Photo, PendingPhoto, Album, AlbumMember
 from photos_api import is_phone_number_mobile
 
 from photos_api.serializers import AlbumUpdateSerializer, MemberIdentifier, MemberIdentifierSerializer, AlbumAddSerializer
@@ -684,8 +684,12 @@ class MembersTests(BaseTestCase):
                 date_created = timezone.now(),
                 verified = False)
 
-        link_code = PhoneNumberLinkCode.objects.invite_existing_phone_number(
-            inviter, phone_number)
+        PhoneNumberLinkCode.objects.invite_phone_number(
+                inviter,
+                phone_number.phone_number,
+                phone_number.user.nickname,
+                timezone.now(),
+                Album.default_sms_message_formatter)
 
         # Add barney to the album
         add_members = {'add_members': [
@@ -702,7 +706,7 @@ class MembersTests(BaseTestCase):
 
         # View invite
         with self.settings(ROOT_URLCONF='shotvibe_site.urls'):
-            response = self.client.get(link_code.get_invite_page())
+            response = self.client.get(PhoneNumberLinkCode.objects.get(phone_number=phone_number).get_invite_page())
             self.assertEqual(response.status_code, httplib.OK)
 
         # Verify status
@@ -822,7 +826,6 @@ class MembersTests(BaseTestCase):
 
         self.assertEqual(user_phone.phone_number, '+12127184000')
         self.assertEqual(user_phone.verified, False)
-        self.assertEqual(user_phone.should_send_invite(), False)
 
         # Check that nicknames was assigned to the new users.
         nicknames_before = [u['nickname'] for u in members_before]
@@ -840,8 +843,6 @@ class MembersTests(BaseTestCase):
                 user=barney,
                 date_created=timezone.now(),
                 verified=True)
-
-        self.assertEqual(barney_phone.should_send_invite(), False)
 
         album_before_response = self.client.get('/albums/9/')
         members_before = json.loads(album_before_response.content)['members']
@@ -868,8 +869,6 @@ class MembersTests(BaseTestCase):
 
         self.assertEqual(set(members_ids_before + [3]), set(members_ids_after))
 
-        self.assertEqual(barney_phone.should_send_invite(), False)
-
         nicknames_before = [u['nickname'] for u in members_before]
         nicknames_after = [u['nickname'] for u in members_after]
 
@@ -887,7 +886,6 @@ class MembersTests(BaseTestCase):
         self.assertEqual(r.status_code, 200)
 
         self.assertEqual(PhoneNumber.objects.get(phone_number='+12127184000').verified, False)
-        self.assertEqual(PhoneNumber.objects.get(phone_number='+12127184000').should_send_invite(), True)
 
         album_before_response = self.client.get('/albums/9/')
         members_before = json.loads(album_before_response.content)['members']
@@ -905,7 +903,6 @@ class MembersTests(BaseTestCase):
         self.assertEqual(add_response.status_code, 200)
 
         self.assertEqual(PhoneNumber.objects.get(phone_number='+12127184000').verified, False)
-        self.assertEqual(PhoneNumber.objects.get(phone_number='+12127184000').should_send_invite(), False)
 
         album_after_response = self.client.get('/albums/9/', HTTP_IF_NONE_MATCH=etag)
         self.assertEqual(album_after_response.status_code, 200)
@@ -924,7 +921,6 @@ class MembersTests(BaseTestCase):
 
         self.assertEqual(user_phone.phone_number, '+12127184000')
         self.assertEqual(user_phone.verified, False)
-        self.assertEqual(user_phone.should_send_invite(), False)
 
     def test_leave_album(self):
         # Currently logged in user is amanda, she will be removed from the album

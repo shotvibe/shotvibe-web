@@ -315,12 +315,6 @@ class PhoneNumber(models.Model):
 
     objects = PhoneNumberManager()
 
-    def should_send_invite(self):
-        if self.verified:
-            return False
-
-        return not self.phonenumberlinkcode_set.exists()
-
     def __unicode__(self):
         return self.phone_number
 
@@ -336,41 +330,36 @@ class PhoneNumberConfirmSMSCode(models.Model):
         return self.confirmation_key + ': ' + unicode(self.phone_number.phone_number)
 
 class PhoneNumberLinkCodeManager(models.Manager):
-    # phone_number must not exist in PhoneNumber model
+    # TODO Should throw an exception if sending the SMS fails (because of invalid phone number)
+    def invite_phone_number(self, inviter, phone_number_str, nickname, date_invited, sms_message_formatter):
+        """
+        phone_number_str: Must be formatted as international E164
 
-    @staticmethod
-    def default_sms_invite_formatter(link_code_object):
-        invite_url_prefix = 'https://www.shotvibe.com'
-        return link_code_object.inviting_user.nickname + ' has shared photos with you!\n' + link_code_object.get_invite_page(invite_url_prefix)
+        Returns the user
+        """
+        try:
+            phone_number = PhoneNumber.objects.get(phone_number=phone_number_str)
 
-    def invite_new_phone_number(self, inviter, phone_number_str, nickname, date_invited=None, message_formatter=None):
+            if phone_number.verified:
+                return phone_number.user
+        except PhoneNumber.DoesNotExist:
+            new_user = User.objects.create_user(nickname=nickname)
+            phone_number = PhoneNumber.objects.create(
+                    phone_number = phone_number_str,
+                    user = new_user,
+                    date_created = date_invited,
+                    verified = False)
+            new_user.pick_anonymous_avatar(phone_number_str)
+            new_user.save()
 
-        if date_invited is None:
-            date_invited = timezone.now()
+            user_avatar_changed.send(sender=self, user=new_user)
 
-        new_user = User.objects.create_user(nickname=nickname)
-        phone_number = PhoneNumber.objects.create(
-                phone_number = phone_number_str,
-                user = new_user,
-                date_created = date_invited,
-                verified = False)
-        new_user.pick_anonymous_avatar(phone_number_str)
-        new_user.save()
-
-        user_avatar_changed.send(sender=self, user=new_user)
-
-        return self.invite_existing_phone_number(inviter, phone_number, date_invited, message_formatter)
-
-    def invite_existing_phone_number(self, inviter, phone_number, date_invited=None, message_formatter=None):
-
-        if date_invited is None:
-            date_invited = timezone.now()
-
-        link_code_object = PhoneNumberLinkCode.objects.create(
-                invite_code = PhoneNumberLinkCode.generate_invite_code(),
-                phone_number = phone_number,
-                inviting_user = inviter,
-                date_created = date_invited)
+        link_code_object, created = PhoneNumberLinkCode.objects.get_or_create(phone_number=phone_number, defaults={
+            'invite_code': PhoneNumberLinkCode.generate_invite_code(),
+            'inviting_user': inviter,
+            'date_created': date_invited,
+            'was_visited': False
+            })
 
         inviter_phone = inviter.get_primary_phone_number()
         if inviter_phone:
@@ -378,15 +367,12 @@ class PhoneNumberLinkCodeManager(models.Manager):
         else:
             sender_phone = None
 
-        self.send_sms(phone_number, link_code_object, message_formatter, sender_phone)
+        message = sms_message_formatter(link_code_object)
 
-        return link_code_object
+        invite_url_prefix = 'https://www.shotvibe.com'
+        send_sms(phone_number.phone_number, message + '\n' + link_code_object.get_invite_page(invite_url_prefix), sender_phone)
 
-    def send_sms(self, phone_number, link_code_object, message_formatter=None, sender_phone=None):
-        if message_formatter is None:
-            message_formatter = PhoneNumberLinkCodeManager.default_sms_invite_formatter
-
-        send_sms(phone_number.phone_number, message_formatter(link_code_object), sender_phone)
+        return link_code_object.phone_number.user
 
 
 class PhoneNumberLinkCode(models.Model):
