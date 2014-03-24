@@ -137,7 +137,7 @@ class UserAdmin(auth.admin.UserAdmin):
         if phone_number:
             return phone_number.verified
         else:
-            return False
+            return None
     first_phone_number_verified.short_description = 'Verified'
     first_phone_number_verified.boolean = True
 
