@@ -151,11 +151,13 @@ class UserAdmin(auth.admin.UserAdmin):
 #admin.site.unregister(auth.models.Group)
 
 class PhoneNumberLinkCodeAdmin(admin.ModelAdmin):
-    list_display = ('phone_number', 'inviting_user', 'date_created', 'invite_code')
+    list_display = ('phone_number', 'inviting_user', 'date_created', 'invite_code', 'was_visited')
     list_display_links = list_display
 
-    fields = ('phone_number', 'inviting_user', 'date_created', 'invite_link',)
-    readonly_fields = ('phone_number', 'inviting_user', 'date_created', 'invite_link',)
+    fields = ('phone_number', 'inviting_user', 'date_created', 'invite_link', 'was_visited')
+    readonly_fields = ('phone_number', 'inviting_user', 'date_created', 'invite_link', 'was_visited')
+    search_fields = ('phone_number__phone_number',)
+    list_filter = ('was_visited',)
 
     def invite_link(self, instance):
         return format_html(u'<a href="{0}">{1}</a>', instance.get_invite_page(), instance.invite_code)
