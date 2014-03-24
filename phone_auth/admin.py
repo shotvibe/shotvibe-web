@@ -13,7 +13,7 @@ class PhoneNumberConfirmSMSCodeInline(admin.TabularInline):
     model = PhoneNumberConfirmSMSCode
 
 class PhoneNumberAdmin(admin.ModelAdmin):
-    list_display = ('phone_number', 'user', 'date_created', 'verified')
+    list_display = ('phone_number', 'user', 'date_created', 'verified', 'invite_link_visited')
     list_display_links = list_display
     search_fields = ('phone_number', 'user__nickname')
     list_filter = ('verified',)
@@ -21,6 +21,14 @@ class PhoneNumberAdmin(admin.ModelAdmin):
     readonly_fields = ('user', 'date_created')
 
     inlines = [PhoneNumberConfirmSMSCodeInline]
+
+    def invite_link_visited(self, instance):
+        try:
+            link_code = PhoneNumberLinkCode.objects.get(phone_number=instance)
+            return link_code.was_visited
+        except PhoneNumberLinkCode.DoesNotExist:
+            return None
+    invite_link_visited.boolean = True
 
 class PhoneNumberConfirmSMSCodeAdmin(admin.ModelAdmin):
     list_display = ('phone_number', 'confirmation_key', 'confirmation_code', 'date_created')
@@ -110,7 +118,7 @@ class UserAdmin(auth.admin.UserAdmin):
     )
     form = UserChangeForm
     add_form = UserCreationForm
-    list_display = ('id', 'avatar', 'nickname', 'primary_email', 'first_phone_number', 'first_phone_number_verified', 'is_staff')
+    list_display = ('id', 'avatar', 'nickname', 'primary_email', 'first_phone_number', 'first_phone_number_verified', 'invite_link_visited', 'is_staff')
     list_display_links = list_display
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
     search_fields = ('id', 'nickname', 'phonenumber__phone_number', 'primary_email__email',)
@@ -129,9 +137,17 @@ class UserAdmin(auth.admin.UserAdmin):
         if phone_number:
             return phone_number.verified
         else:
-            return False
+            return None
     first_phone_number_verified.short_description = 'Verified'
     first_phone_number_verified.boolean = True
+
+    def invite_link_visited(self, instance):
+        try:
+            link_code = PhoneNumberLinkCode.objects.get(phone_number=self.first_phone_number(instance))
+            return link_code.was_visited
+        except PhoneNumberLinkCode.DoesNotExist:
+            return None
+    invite_link_visited.boolean = True
 
     def avatar(self, instance):
         return format_html(u'<img src="{0}" width="24" height="24">', instance.get_avatar_url(), instance.get_avatar_url())
@@ -143,11 +159,13 @@ class UserAdmin(auth.admin.UserAdmin):
 #admin.site.unregister(auth.models.Group)
 
 class PhoneNumberLinkCodeAdmin(admin.ModelAdmin):
-    list_display = ('phone_number', 'inviting_user', 'date_created', 'invite_code')
+    list_display = ('phone_number', 'inviting_user', 'date_created', 'invite_code', 'was_visited')
     list_display_links = list_display
 
-    fields = ('phone_number', 'inviting_user', 'date_created', 'invite_link',)
-    readonly_fields = ('phone_number', 'inviting_user', 'date_created', 'invite_link',)
+    fields = ('phone_number', 'inviting_user', 'date_created', 'invite_link', 'was_visited')
+    readonly_fields = ('phone_number', 'inviting_user', 'date_created', 'invite_link', 'was_visited')
+    search_fields = ('phone_number__phone_number',)
+    list_filter = ('was_visited',)
 
     def invite_link(self, instance):
         return format_html(u'<a href="{0}">{1}</a>', instance.get_invite_page(), instance.invite_code)

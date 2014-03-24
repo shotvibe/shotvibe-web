@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.db import models
 from django.utils.html import format_html
 
+from phone_auth.models import PhoneNumberLinkCode
 from photos.models import Album, AlbumMember, Photo, PendingPhoto
 from photos.models import PhotoServer
 
@@ -36,8 +37,8 @@ class PhotoAdminInline(admin.TabularInline):
 class AlbumMemberInline(admin.TabularInline):
     model = AlbumMember
 
-    fields = ('user', 'added_by_user', 'datetime_added')
-    readonly_fields = ('user', 'added_by_user', 'datetime_added')
+    fields = ('avatar', 'user', 'first_phone_number', 'first_phone_number_verified', 'invite_link_visited', 'datetime_added', 'added_by_user')
+    readonly_fields = ('avatar', 'user', 'first_phone_number', 'first_phone_number_verified', 'invite_link_visited', 'datetime_added', 'added_by_user')
 
     ordering = ('datetime_added',)
 
@@ -45,6 +46,30 @@ class AlbumMemberInline(admin.TabularInline):
 
     extra = 0
     max_num = 0
+
+    def first_phone_number(self, instance):
+        return instance.user.phonenumber_set.all()[:1].get()
+
+    def first_phone_number_verified(self, instance):
+        phone_number = instance.user.phonenumber_set.first()
+        if phone_number:
+            return phone_number.verified
+        else:
+            return None
+    first_phone_number_verified.short_description = 'Verified'
+    first_phone_number_verified.boolean = True
+
+    def avatar(self, instance):
+        return format_html(u'<img src="{0}" width="24" height="24">', instance.user.get_avatar_url())
+
+    def invite_link_visited(self, instance):
+        try:
+            link_code = PhoneNumberLinkCode.objects.get(phone_number=self.first_phone_number(instance))
+            return link_code.was_visited
+        except PhoneNumberLinkCode.DoesNotExist:
+            return None
+    invite_link_visited.boolean = True
+
 
 class AlbumAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'date_created', 'creator')
