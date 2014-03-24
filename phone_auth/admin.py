@@ -13,7 +13,7 @@ class PhoneNumberConfirmSMSCodeInline(admin.TabularInline):
     model = PhoneNumberConfirmSMSCode
 
 class PhoneNumberAdmin(admin.ModelAdmin):
-    list_display = ('phone_number', 'user', 'date_created', 'verified')
+    list_display = ('phone_number', 'user', 'date_created', 'verified', 'invite_link_visited')
     list_display_links = list_display
     search_fields = ('phone_number', 'user__nickname')
     list_filter = ('verified',)
@@ -21,6 +21,14 @@ class PhoneNumberAdmin(admin.ModelAdmin):
     readonly_fields = ('user', 'date_created')
 
     inlines = [PhoneNumberConfirmSMSCodeInline]
+
+    def invite_link_visited(self, instance):
+        try:
+            link_code = PhoneNumberLinkCode.objects.get(phone_number=instance)
+            return link_code.was_visited
+        except PhoneNumberLinkCode.DoesNotExist:
+            return None
+    invite_link_visited.boolean = True
 
 class PhoneNumberConfirmSMSCodeAdmin(admin.ModelAdmin):
     list_display = ('phone_number', 'confirmation_key', 'confirmation_code', 'date_created')
