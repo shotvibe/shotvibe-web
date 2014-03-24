@@ -100,6 +100,7 @@ class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
     nickname = models.CharField(max_length=128)
     primary_email = models.ForeignKey('UserEmail', db_index=False, null=True, blank=True, related_name='+', on_delete=models.SET_NULL)
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
+    # TODO This doesn't seem to be used, probably should delete it
     is_registered = models.BooleanField(default=False)
 
     is_staff = models.BooleanField(_('staff status'), default=False,
