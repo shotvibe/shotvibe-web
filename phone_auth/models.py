@@ -125,6 +125,18 @@ class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
     def __unicode__(self):
         return u'{0} ({1})'.format(self.id, self.nickname)
 
+    def save(self, *args, **kwargs):
+        # When creating a new user from the Django admin, there will be no id
+        # set, so we handle it here
+        if not self.id:
+            new_user = User.objects.create_user()
+            # Copy the id from the newly created user to the current user
+            # object. This will cause the current User object to "save over"
+            # the new_user object
+            self.id = new_user.id
+
+        super(User, self).save(*args, **kwargs)
+
     def get_invite_status(self):
         query = self.phonenumber_set.filter(verified=True)
         if query.count() > 0:
