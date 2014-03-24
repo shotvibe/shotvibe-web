@@ -15,6 +15,8 @@ class PhoneNumberConfirmSMSCodeInline(admin.TabularInline):
 class PhoneNumberAdmin(admin.ModelAdmin):
     list_display = ('phone_number', 'user', 'date_created', 'verified')
     list_display_links = list_display
+    search_fields = ('phone_number', 'user__nickname')
+    list_filter = ('verified',)
 
     readonly_fields = ('user', 'date_created')
 
