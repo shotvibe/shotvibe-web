@@ -118,7 +118,7 @@ class UserAdmin(auth.admin.UserAdmin):
     )
     form = UserChangeForm
     add_form = UserCreationForm
-    list_display = ('id', 'avatar', 'nickname', 'primary_email', 'first_phone_number', 'first_phone_number_verified', 'is_staff')
+    list_display = ('id', 'avatar', 'nickname', 'primary_email', 'first_phone_number', 'first_phone_number_verified', 'invite_link_visited', 'is_staff')
     list_display_links = list_display
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
     search_fields = ('id', 'nickname', 'phonenumber__phone_number', 'primary_email__email',)
@@ -140,6 +140,14 @@ class UserAdmin(auth.admin.UserAdmin):
             return False
     first_phone_number_verified.short_description = 'Verified'
     first_phone_number_verified.boolean = True
+
+    def invite_link_visited(self, instance):
+        try:
+            link_code = PhoneNumberLinkCode.objects.get(phone_number=self.first_phone_number(instance))
+            return link_code.was_visited
+        except PhoneNumberLinkCode.DoesNotExist:
+            return None
+    invite_link_visited.boolean = True
 
     def avatar(self, instance):
         return format_html(u'<img src="{0}" width="24" height="24">', instance.get_avatar_url(), instance.get_avatar_url())
