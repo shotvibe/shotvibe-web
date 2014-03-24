@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.db import models
 from django.utils.html import format_html
 
-from photos.models import Album, Photo, PendingPhoto
+from photos.models import Album, AlbumMember, Photo, PendingPhoto
 from photos.models import PhotoServer
 
 class PhotoAdminInline(admin.TabularInline):
@@ -33,13 +33,26 @@ class PhotoAdminInline(admin.TabularInline):
     def photo_thumbnail(self, instance):
         return format_html(u'<img src="{0}" />', instance.get_photo_url_no_ext() + '_thumb75.jpg')
 
+class AlbumMemberInline(admin.TabularInline):
+    model = AlbumMember
+
+    fields = ('user', 'added_by_user', 'datetime_added')
+    readonly_fields = ('user', 'added_by_user', 'datetime_added')
+
+    ordering = ('datetime_added',)
+
+    can_delete = False
+
+    extra = 0
+    max_num = 0
+
 class AlbumAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'date_created', 'creator')
     list_display_links = list_display
 
     readonly_fields = ('creator', 'revision_number', 'last_updated', 'date_created')
 
-    inlines = [PhotoAdminInline]
+    inlines = [AlbumMemberInline, PhotoAdminInline]
 
 class PhotoAdmin(admin.ModelAdmin):
     list_display = ('photo_id', 'album', 'date_created', 'author',)

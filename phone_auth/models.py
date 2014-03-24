@@ -100,6 +100,7 @@ class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
     nickname = models.CharField(max_length=128)
     primary_email = models.ForeignKey('UserEmail', db_index=False, null=True, blank=True, related_name='+', on_delete=models.SET_NULL)
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
+    # TODO This doesn't seem to be used, probably should delete it
     is_registered = models.BooleanField(default=False)
 
     is_staff = models.BooleanField(_('staff status'), default=False,
@@ -124,6 +125,18 @@ class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
 
     def __unicode__(self):
         return u'{0} ({1})'.format(self.id, self.nickname)
+
+    def save(self, *args, **kwargs):
+        # When creating a new user from the Django admin, there will be no id
+        # set, so we handle it here
+        if not self.id:
+            new_user = User.objects.create_user()
+            # Copy the id from the newly created user to the current user
+            # object. This will cause the current User object to "save over"
+            # the new_user object
+            self.id = new_user.id
+
+        super(User, self).save(*args, **kwargs)
 
     def get_invite_status(self):
         query = self.phonenumber_set.filter(verified=True)
