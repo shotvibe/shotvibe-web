@@ -111,7 +111,7 @@ class UserAdmin(auth.admin.UserAdmin):
     list_display = ('id', 'avatar', 'nickname', 'is_registered', 'primary_email', 'first_phone_number', 'is_staff')
     list_display_links = list_display
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'is_registered', 'groups')
-    search_fields = ('nickname', 'primary_email',)
+    search_fields = ('id', 'nickname', 'phonenumber__phone_number', 'primary_email__email',)
     ordering = ('id',)
     filter_horizontal = ('groups', 'user_permissions',)
 
