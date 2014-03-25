@@ -2,84 +2,91 @@
 <!DOCTYPE HTML>
 <html>
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>{{ inviting_user.get_full_name }} Has Shared Photos</title>
-    <link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600" rel="stylesheet" />
-    <link rel="stylesheet" href="{% static "mobile/css/style.css" %}" />
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>
+      {% if inviting_user %}
+      {{ inviting_user.get_full_name }} Has Shared Photos
+      {% elif event %}
+      {{ event.name }}
+      {% else %}
+      Glance
+      {% endif %}
+    </title>
+    <meta name="description" content="" />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="{% static "invite/css/style.css" %}" />
   </head>
   <body>
     <article>
-    <header id="header">
-    <p>Hello! <strong>{{ inviting_user.get_full_name }}</strong> wants to
-    share photos with you on</p>
-    <h1>ShotVibe</h1>
-    </header>
-    <section id="photos">
-    <div class="reel">
-      {% with album.get_invite_page_photos as invite_page_photos %}
-      {% for photo in invite_page_photos %}
-      {% if not forloop.last or invite_page_photos|length < 4 %}
-      <a href="#" class="image">
-        <img src="{{ photo.get_photo_url_no_ext }}_940x570.jpg" alt="">
-      </a>
-      {% endif %}
-      {% if forloop.last %}
-      <div class="image last">
-        <div class="overlay">
-          <p>Browse all <strong>174</strong> photos<br />
-          in this album</p>
-          <a href="{{ app_url }}" class="button {{ device }}">Get the App</a>
+
+      <!-- Header -->
+      <header>
+        <p>Hello! You're invited to<br />share photos on &hellip;</p>
+        <h1 id="logo">Glance</h1>
+        <p class="event">
+        {% if inviting_user %}
+          <small>{{ inviting_user.get_full_name }} has shared the album:<br />
+            {{ album.name }}</small>
+        {% elif event %}
+          <strong>{{ event.name }}</strong><br />
+          <small>{{ event.location }}<br />
+            {{ event.time|date:"N.j.Y, H:i" }}</small>
+          </p>
+        {% endif %}
+      </header>
+
+      <!-- Photos -->
+      <section id="photos">
+        <div class="reel">
+          {% with album.get_invite_page_photos as invite_page_photos %}
+          {% for photo in invite_page_photos %}
+          <span class="image"><span><img src="{{ photo.get_photo_url_no_ext}}_940x570.jpg" alt="" /></span></span>
+          {% endfor %}
+          {% endwith %}
         </div>
-        <img src="{{ photo.get_photo_url_no_ext }}_940x570.jpg" alt="">
+      </section>
+
+      <!-- Action -->
+      <div class="action">
+        {% if device == "android" %}
+        <a href="{{ app_url }}" class="button android">Available on Google Play</a>
+        {% elif device == "iphone" %}
+        <a href="{{ app_url }}" class="button ios">Available on the App Store</a>
+        {% endif %}
       </div>
-      {% endif %}
-      {% endfor %}
-      {% endwith %}
-    </div>
-    </section>
-    <section id="about">
-    <p>
-    <strong>ShotVibe</strong> is the simplest way to share photos with your friends and family. Now for
-    {% if device == "android" %}
-    Android + iPhone.
-    {% elif device == "iphone" %}
-    iPhone + Android.
-    {% endif %}
-    </p>
-    </section>
-    <section id="screenshots" class="{{ device }}">
-    <div class="screen">
-      <div class="reel">
-        {# {% with "mobile/images/tmp-"|add:device|add:".jpg" as screenshot %} #}
-        <div class="image">
-          <img src="{% static "mobile/images/tmp-"|add:device|add:".jpg" %}" alt="" />
-        </div>
-        <div class="image">
-          <img src="{% static "mobile/images/tmp-"|add:device|add:".jpg" %}" alt="" />
-        </div>
-        <div class="image">
-          <img src="{% static "mobile/images/tmp-"|add:device|add:".jpg" %}" alt="" />
-        </div>
-        <div class="image">
-          <img src="{% static "mobile/images/tmp-"|add:device|add:".jpg" %}" alt="" />
+      <p>The fastest way to create and share<br />
+      albums with groups of friends.</p>
+
+      <!-- Phone -->
+      <div id="phone">
+        <div class="screen">
+          <div class="reel">
+            <div class="image"><img src="{% static "invite/images/screenshot01.jpg" %}" alt="" /></div><div class="image"><img src="{% static "invite/images/screenshot02.jpg" %}" alt="" /></div><div class="image"><img src="{% static "invite/images/screenshot03.jpg" %}" alt="" /></div><div class="image"><img src="{% static "invite/images/screenshot04.jpg" %}" alt="" /></div><div class="image"><img src="{% static "invite/images/screenshot05.jpg" %}" alt="" /></div>
+          </div>
         </div>
       </div>
-    </div>
-    </section>
-    <section id="cta">
-    <a href="{{ app_url }}" class="button {{ device }}">Get the App</a>
-    <p>Also available for
-    {% if device == "android" %}
-    <strong>iPhone</strong>
-    {% elif device == "iphone" %}
-    <strong>Android</strong>
-    {% endif %}
-    </p>
-    </section>
-    <footer id="footer">
-    &copy; 2013 ShotVibe, Inc. All rights reserved.<br />
-    <a href="//www.shotvibe.com">shotvibe.com</a>
-    </footer>
+
+      <!-- Action -->
+      {% if device == "android" %}
+      <p>Now for Android + iPhone</p>
+      {% elif device == "iphone" %}
+      <p>Now for iPhone + Android</p>
+      {% endif %}
+      <div class="action">
+        {% if device == "android" %}
+        <a href="{{ app_url }}" class="button android">Available on Google Play</a>
+        {% elif device == "iphone" %}
+        <a href="{{ app_url }}" class="button ios">Available on the App Store</a>
+        {% endif %}
+      </div>
+
+      <!-- Footer -->
+      <footer>
+        <p>&copy; Glance, Inc. All rights reserved.</p>
+        <a href="//www.useglance.com">useglance.com</a>
+      </footer>
+
     </article>
   </body>
 </html>

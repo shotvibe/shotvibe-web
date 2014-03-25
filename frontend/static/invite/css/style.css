@@ -1,0 +1,219 @@
+@charset 'UTF-8';
+@import url(//fonts.googleapis.com/css?family=Lato:400);
+
+/* Resets (http://meyerweb.com/eric/tools/css/reset/ | v2.0 | 20110126 | License: none (public domain)) */
+
+	html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{margin:0;padding:0;border:0;font-size:100%;font:inherit;vertical-align:baseline;}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block;}body{line-height:1;}ol,ul{list-style:none;}blockquote,q{quotes:none;}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none;}table{border-collapse:collapse;border-spacing:0;}body{-webkit-text-size-adjust:none}
+
+/* Box Model */
+
+	*, *:before, *:after {
+		-moz-box-sizing: border-box;
+		-webkit-box-sizing: border-box;
+		-o-box-sizing: border-box;
+		-ms-box-sizing: border-box;
+		box-sizing: border-box;
+	}
+
+/* Basic */
+
+	body, input, select, textarea {
+		color: #666;
+		font-family: 'Lato', sans-serif;
+		font-size: 13pt;
+		line-height: 1.35em;
+		text-align: justify;
+		letter-spacing: -0.5px;
+	}
+
+	strong {
+		color: #222;
+	}
+	
+	a {
+		color: inherit;
+	}
+	
+	p {
+		margin: 0 0 1.5em 0;
+	}
+	
+/* Button */
+
+	.action {
+		margin: 0 0 1.5em 0;
+	}
+	
+		.action p {
+			display: block;
+			margin: 1em 0 0 0;
+			font-size: 0.8em;
+		}
+
+	.button {
+		display: block;
+		position: relative;
+		text-indent: -200%;
+		text-align: left;
+		color: #000;
+		overflow-x: hidden;
+		margin: 0 auto 0.5em auto;
+		background-size: contain;
+		background-repeat: no-repeat;
+		background-position: center center;
+	}
+	
+		.button.ios {
+			width: 70%;
+			height: 3.5em;
+			background-image: url('images/button-ios.svg');
+		}
+
+		.button.android {
+			width: 70%;
+			height: 3.5em;
+			background-image: url('images/button-android.svg');
+		}
+
+/* Article */
+
+	article {
+		text-align: center;
+	}
+
+/* Header */
+	
+	header {
+		margin: 1em 2em 1.5em 2em;
+	}
+	
+		header p {
+			font-size: 1em;
+			margin: 0 0 1em 0;
+		}
+		
+		header .event {
+			font-size: 1.25em;
+			margin: 0.5em 0 0 0;
+			line-height: 1.25em;
+		}
+		
+			header .event small {
+				font-size: 0.9em;
+			}
+		
+		header h1 {
+			display: block;
+			width: 80%;
+			height: 3em;
+			position: relative;
+			text-align: left;
+			background-image: url('images/logo.png');
+			background-repeat: no-repeat;
+			background-size: contain;
+			background-position: center center;
+			margin: 0 auto;
+			text-indent: -200%;
+			overflow: hidden;
+		}
+
+/* Footer */
+
+	footer {
+		font-size: 0.8em;
+		margin: 0 0 3em 0;
+	}
+
+		footer p {
+			margin: 0 0 0.5em 0;
+		}
+
+/* Photos */
+
+	#photos {
+		width: 100%;
+		height: 190px;
+		overflow-x: scroll;
+		overflow-y: visible;
+		margin: 0 0 1.5em 0;
+		padding: 8px 0 0 0;
+		white-space: nowrap;
+		box-shadow: 0 0 3px 1px rgba(0,0,0,0.2);
+		-webkit-overflow-scrolling: touch;
+	}
+
+		#photos .reel {
+			display: block;
+		}
+		
+		#photos .reel .image {
+			position: relative;
+			display: inline-block;
+		}
+		
+			#photos .reel .image span {
+				position: relative;
+				display: block;
+				height: 175px;
+				overflow: hidden;
+				border-right: solid 8px #fff;
+			}
+
+			#photos .reel .image:first-child span {
+				border-left: solid 8px #fff;
+			}
+		
+			#photos .reel .image img {
+				display: block;
+				height: 192px;
+			}
+
+/* Phone */
+
+	#phone {
+		position: relative;
+		z-index: 1;
+		width: 320px;
+		height: 250px;
+		background-image: url('images/phone.png');
+		background-repeat: no-repeat;
+		background-size: contain;
+		margin: 1em auto 1.5em auto;
+	}
+	
+		#phone .screen {
+			width: 143px;
+			height: 203px;
+			overflow: hidden;
+			position: absolute;
+			left: 112px;
+			top: 46px;
+		}
+
+			#phone .screen .reel {
+				position: absolute;
+				left: 0;
+				top: 0;
+				white-space: nowrap;
+
+				-moz-animation: banner-phone 16000ms infinite;
+				-webkit-animation: banner-phone 16000ms infinite;
+				-o-animation: banner-phone 16000ms infinite;
+				-ms-animation: banner-phone 16000ms infinite;
+				animation: banner-phone 16000ms infinite;
+			}
+		
+				#phone .screen .reel .image {
+					display: inline-block;
+					width: 143px;
+				}
+
+					#phone .screen .reel .image img {
+						width: 100%;
+					}
+
+				@-moz-keyframes banner-phone { 0% { left: 0px; } 15% { left: 0px; } 20% { left: -143px; } 35% { left: -143px; } 40% { left: -286px; } 55% { left: -286px; } 60% { left: -429px; } 75% { left: -429px; } 80% { left: -572px; } 95% { left: -572px; } 100% { left: 0px; } }
+				@-webkit-keyframes banner-phone { 0% { left: 0px; } 15% { left: 0px; } 20% { left: -143px; } 35% { left: -143px; } 40% { left: -286px; } 55% { left: -286px; } 60% { left: -429px; } 75% { left: -429px; } 80% { left: -572px; } 95% { left: -572px; } 100% { left: 0px; } }
+				@-o-keyframes banner-phone { 0% { left: 0px; } 15% { left: 0px; } 20% { left: -143px; } 35% { left: -143px; } 40% { left: -286px; } 55% { left: -286px; } 60% { left: -429px; } 75% { left: -429px; } 80% { left: -572px; } 95% { left: -572px; } 100% { left: 0px; } }
+				@-ms-keyframes banner-phone { 0% { left: 0px; } 15% { left: 0px; } 20% { left: -143px; } 35% { left: -143px; } 40% { left: -286px; } 55% { left: -286px; } 60% { left: -429px; } 75% { left: -429px; } 80% { left: -572px; } 95% { left: -572px; } 100% { left: 0px; } }
+				@keyframes banner-phone { 0% { left: 0px; } 15% { left: 0px; } 20% { left: -143px; } 35% { left: -143px; } 40% { left: -286px; } 55% { left: -286px; } 60% { left: -429px; } 75% { left: -429px; } 80% { left: -572px; } 95% { left: -572px; } 100% { left: 0px; } }
