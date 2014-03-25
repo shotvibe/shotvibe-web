@@ -298,9 +298,9 @@ def event_link(request, slug):
 
     request.session['custom_payload'] = "event:{0}".format(eventLink.event.pk)
 
-    return render(request, 'affiliates/event_link.html', {
-        'eventLink': eventLink,
+    return render(request, 'frontend/mobile/invite_page.html', {
+        'event': eventLink.event,
+        'album': album,
         'app_url': app_url,
         'device': device,
-        'photos': album.get_invite_page_photos(),
     })

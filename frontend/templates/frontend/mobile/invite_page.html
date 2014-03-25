@@ -4,7 +4,15 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>{{ inviting_user.get_full_name }} Has Shared Photos</title>
+    <title>
+      {% if inviting_user %}
+      {{ inviting_user.get_full_name }} Has Shared Photos
+      {% elif event %}
+      {{ event.name }}
+      {% else %}
+      Glance
+      {% endif %}
+    </title>
     <meta name="description" content="" />
     <meta name="keywords" content="" />
     <link rel="stylesheet" href="{% static "invite/css/style.css" %}" />
@@ -17,10 +25,15 @@
         <p>Hello! You're invited to<br />share photos on &hellip;</p>
         <h1 id="logo">Glance</h1>
         <p class="event">
-        <strong>EVENT NAME</strong><br />
-        <small>EVENT LOCATION<br />
-          EVENT TIME</small>
-        </p>
+        {% if inviting_user %}
+          <small>{{ inviting_user.get_full_name }} has shared the album:<br />
+            {{ album.name }}</small>
+        {% elif event %}
+          <strong>{{ event.name }}</strong><br />
+          <small>{{ event.location }}<br />
+            {{ event.time|date:"N.j.Y, H:i" }}</small>
+          </p>
+        {% endif %}
       </header>
 
       <!-- Photos -->
