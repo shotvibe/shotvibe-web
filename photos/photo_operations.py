@@ -194,10 +194,16 @@ class AddPendingPhotosToAlbumAction(ExThread):
         self.verify_all_uploaded(self.photo_ids)
 
         if not settings.USING_LOCAL_PHOTOS:
+            retry_count = 2
             while not self.all_processing_done(self.photo_ids):
                 # TODO This should be more robust and also "kick" the photo
                 # upload server to make sure that no jobs got lost and to
                 # re-prioritize jobs
+
+                retry_count -= 1
+                if retry_count == 0:
+                    # TODO This should instead return an appropriate HTTP status code
+                    raise RuntimeError('Photo Processing Timeout: ' + str(self.photo_ids))
 
                 RETRY_TIME = 1
 

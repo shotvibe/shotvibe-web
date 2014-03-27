@@ -1,3 +1,5 @@
+import time
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.gis.geoip import GeoIP, GeoIPException
 from django.shortcuts import render, redirect, get_object_or_404
@@ -242,8 +244,26 @@ def event_photos(request, event):
                 num_photos_added += 1
 
             # Upload pending photos
-            now = timezone.now()
-            photo_operations.add_pending_photos_to_album(pending_photo_ids, album.id, now)
+            done = False
+            total_retry_time = 0
+            while not done:
+                now = timezone.now()
+                try:
+                    photo_operations.add_pending_photos_to_album(pending_photo_ids, album.id, now)
+                    done = True
+                except RuntimeError:
+                    # TODO This is a really bad workaround to deal with the
+                    # situation where the photos aren't "done" yet (in which
+                    # case "add_pending_photos_to_album" currently raises a
+                    # "RuntimeError")
+                    RETRY_TIME = 5
+                    MAX_RETRY_TIME = 600 # 10 minutes
+
+                    if total_retry_time >= MAX_RETRY_TIME:
+                        raise
+
+                    time.sleep(RETRY_TIME)
+                    total_retry_time += RETRY_TIME
 
             # TODO: If this function will be refactored to use Class Based Views
             # change sender from `request` to `self` (View instance)
