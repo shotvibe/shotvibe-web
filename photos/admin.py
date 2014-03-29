@@ -37,8 +37,8 @@ class PhotoAdminInline(admin.TabularInline):
 class AlbumMemberInline(admin.TabularInline):
     model = AlbumMember
 
-    fields = ('avatar', 'user', 'first_phone_number', 'first_phone_number_verified', 'invite_link_visited', 'datetime_added', 'added_by_user')
-    readonly_fields = ('avatar', 'user', 'first_phone_number', 'first_phone_number_verified', 'invite_link_visited', 'datetime_added', 'added_by_user')
+    fields = ('avatar', 'user_link', 'first_phone_number', 'first_phone_number_verified', 'invite_link_visited', 'datetime_added', 'added_by_user_link', 'last_access')
+    readonly_fields = fields
 
     ordering = ('datetime_added',)
 
@@ -46,6 +46,22 @@ class AlbumMemberInline(admin.TabularInline):
 
     extra = 0
     max_num = 0
+
+    def user_link(self, obj):
+        return format_html(u'<a href="{0}">{1}</a>',
+                u'../../../{0}/{1}/{2}/'.format(obj.user._meta.app_label, obj.user._meta.module_name, obj.user.id),
+                obj.user)
+    user_link.short_description = 'User'
+    user_link.admin_order_field = 'user'
+    user_link.allow_tags = True
+
+    def added_by_user_link(self, obj):
+        return format_html(u'<a href="{0}">{1}</a>',
+                u'../../../{0}/{1}/{2}/'.format(obj.added_by_user._meta.app_label, obj.added_by_user._meta.module_name, obj.added_by_user.id),
+                obj.added_by_user)
+    added_by_user_link.short_description = 'Added by user'
+    added_by_user_link.admin_order_field = 'added_by_user'
+    added_by_user_link.allow_tags = True
 
     def first_phone_number(self, instance):
         return instance.user.phonenumber_set.all()[:1].get()
