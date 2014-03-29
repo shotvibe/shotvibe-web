@@ -14,14 +14,22 @@ class PhoneNumberConfirmSMSCodeInline(admin.TabularInline):
     model = PhoneNumberConfirmSMSCode
 
 class PhoneNumberAdmin(admin.ModelAdmin):
-    list_display = ('phone_number', 'user', 'date_created', 'verified', 'invite_link_visited')
-    list_display_links = list_display
+    list_display = ('phone_number', 'user_link', 'date_created', 'verified', 'invite_link_visited')
+    list_display_links = ('phone_number', 'date_created')
     search_fields = ('phone_number', 'user__nickname')
     list_filter = ('verified',)
 
     readonly_fields = ('user', 'date_created')
 
     inlines = [PhoneNumberConfirmSMSCodeInline]
+
+    def user_link(self, obj):
+        return format_html(u'<a href="{0}">{1}</a>',
+                u'../../{0}/{1}/{2}/'.format(obj.user._meta.app_label, obj.user._meta.module_name, obj.user.id),
+                obj.user)
+    user_link.short_description = 'User'
+    user_link.admin_order_field = 'user'
+    user_link.allow_tags = True
 
     def invite_link_visited(self, instance):
         try:
