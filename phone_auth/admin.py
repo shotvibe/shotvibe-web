@@ -90,6 +90,8 @@ class PhoneNumberInline(admin.TabularInline):
 class AlbumMemberInline(admin.TabularInline):
     model = AlbumMember
     fk_name = 'user'
+    verbose_name = 'Album'
+    verbose_name_plural = 'Albums'
 
     fields = ('album', 'added_by_user', 'datetime_added', 'last_access')
     readonly_fields = ('album', 'added_by_user', 'datetime_added', 'last_access')
