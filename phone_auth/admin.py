@@ -104,17 +104,17 @@ class AlbumMemberInline(admin.TabularInline):
     max_num = 0
 
     def album_link(self, obj):
-        return format_html('<a href="{0}">{1}</a>',
-                '../../../{0}/{1}/{2}/'.format(obj.album._meta.app_label, obj.album._meta.module_name, obj.album.id),
+        return format_html(u'<a href="{0}">{1}</a>',
+                u'../../../{0}/{1}/{2}/'.format(obj.album._meta.app_label, obj.album._meta.module_name, obj.album.id),
                 obj.album.name)
     album_link.short_description = 'Album'
     album_link.admin_order_field = 'album'
     album_link.allow_tags = True
 
     def added_by_user_link(self, obj):
-        return format_html('<a href="{0}">{1}</a>',
-                '../../../{0}/{1}/{2}/'.format(obj.added_by_user._meta.app_label, obj.added_by_user._meta.module_name, obj.added_by_user.id),
-                str(obj.added_by_user))
+        return format_html(u'<a href="{0}">{1}</a>',
+                u'../../../{0}/{1}/{2}/'.format(obj.added_by_user._meta.app_label, obj.added_by_user._meta.module_name, obj.added_by_user.id),
+                obj.added_by_user)
     added_by_user_link.short_description = 'Added by user'
     added_by_user_link.admin_order_field = 'added_by_user'
     added_by_user_link.allow_tags = True
