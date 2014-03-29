@@ -4,6 +4,7 @@ from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.utils.html import format_html
 
 from phone_auth.models import User, UserEmail, AuthToken, PhoneNumber, PhoneNumberConfirmSMSCode, PhoneNumberLinkCode, AnonymousPhoneNumber, PhoneContact
+from photos.models import AlbumMember
 
 class AuthTokenAdmin(admin.ModelAdmin):
     list_display = ('user', 'description', 'date_created', 'key')
@@ -86,6 +87,38 @@ class UserEmailInline(admin.TabularInline):
 class PhoneNumberInline(admin.TabularInline):
     model = PhoneNumber
 
+class AlbumMemberInline(admin.TabularInline):
+    model = AlbumMember
+    fk_name = 'user'
+    verbose_name = 'Album'
+    verbose_name_plural = 'Albums'
+
+    fields = ('album_link', 'added_by_user_link', 'datetime_added', 'last_access')
+    readonly_fields = fields
+
+    ordering = ('datetime_added',)
+
+    can_delete = False
+
+    extra = 0
+    max_num = 0
+
+    def album_link(self, obj):
+        return format_html('<a href="{0}">{1}</a>',
+                '../../../{0}/{1}/{2}/'.format(obj.album._meta.app_label, obj.album._meta.module_name, obj.album.id),
+                obj.album.name)
+    album_link.short_description = 'Album'
+    album_link.admin_order_field = 'album'
+    album_link.allow_tags = True
+
+    def added_by_user_link(self, obj):
+        return format_html('<a href="{0}">{1}</a>',
+                '../../../{0}/{1}/{2}/'.format(obj.added_by_user._meta.app_label, obj.added_by_user._meta.module_name, obj.added_by_user.id),
+                str(obj.added_by_user))
+    added_by_user_link.short_description = 'Added by user'
+    added_by_user_link.admin_order_field = 'added_by_user'
+    added_by_user_link.allow_tags = True
+
 class PhoneContactInline(admin.TabularInline):
     model = PhoneContact
     fk_name = 'created_by_user'
@@ -127,7 +160,7 @@ class UserAdmin(auth.admin.UserAdmin):
 
     readonly_fields = ('avatar_full', 'primary_email',)
 
-    inlines = [UserEmailInline, PhoneNumberInline, PhoneContactInline]
+    inlines = [UserEmailInline, PhoneNumberInline, AlbumMemberInline, PhoneContactInline]
 
     def first_phone_number(self, instance):
         return instance.phonenumber_set.all()[:1].get()
