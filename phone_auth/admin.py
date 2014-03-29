@@ -4,6 +4,7 @@ from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.utils.html import format_html
 
 from phone_auth.models import User, UserEmail, AuthToken, PhoneNumber, PhoneNumberConfirmSMSCode, PhoneNumberLinkCode, AnonymousPhoneNumber, PhoneContact
+from photos.models import AlbumMember
 
 class AuthTokenAdmin(admin.ModelAdmin):
     list_display = ('user', 'description', 'date_created', 'key')
@@ -86,6 +87,20 @@ class UserEmailInline(admin.TabularInline):
 class PhoneNumberInline(admin.TabularInline):
     model = PhoneNumber
 
+class AlbumMemberInline(admin.TabularInline):
+    model = AlbumMember
+    fk_name = 'user'
+
+    fields = ('album', 'added_by_user', 'datetime_added', 'last_access')
+    readonly_fields = ('album', 'added_by_user', 'datetime_added', 'last_access')
+
+    ordering = ('datetime_added',)
+
+    can_delete = False
+
+    extra = 0
+    max_num = 0
+
 class PhoneContactInline(admin.TabularInline):
     model = PhoneContact
     fk_name = 'created_by_user'
@@ -127,7 +142,7 @@ class UserAdmin(auth.admin.UserAdmin):
 
     readonly_fields = ('avatar_full', 'primary_email',)
 
-    inlines = [UserEmailInline, PhoneNumberInline, PhoneContactInline]
+    inlines = [UserEmailInline, PhoneNumberInline, AlbumMemberInline, PhoneContactInline]
 
     def first_phone_number(self, instance):
         return instance.phonenumber_set.all()[:1].get()
