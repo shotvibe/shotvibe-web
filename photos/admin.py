@@ -37,8 +37,8 @@ class PhotoAdminInline(admin.TabularInline):
 class AlbumMemberInline(admin.TabularInline):
     model = AlbumMember
 
-    fields = ('avatar', 'user', 'first_phone_number', 'first_phone_number_verified', 'invite_link_visited', 'datetime_added', 'added_by_user')
-    readonly_fields = ('avatar', 'user', 'first_phone_number', 'first_phone_number_verified', 'invite_link_visited', 'datetime_added', 'added_by_user')
+    fields = ('avatar', 'user', 'first_phone_number', 'first_phone_number_verified', 'invite_link_visited', 'datetime_added', 'added_by_user', 'last_access')
+    readonly_fields = fields
 
     ordering = ('datetime_added',)
 
