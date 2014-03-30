@@ -4,8 +4,11 @@
 
 {% block content %}
 
+<h2>Organizations</h2>
+<ul>
 {% for organization in organizations %}
-    {{ organization }}
+    <li><a href="{% url 'affiliates.views.organization' organization_code=organization.code %}">{{ organization }}</a></li>
 {% endfor %}
+</ul>
 
 {% endblock %}
