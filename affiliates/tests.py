@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db import IntegrityError, transaction
 import django.utils.timezone
 
-from affiliates.views import index, organization, create_event, event_edit, \
+from affiliates.views import organization, create_event, event_edit, \
     event_links, event_invites, event_link, event_download_link
 
 
@@ -34,20 +34,19 @@ class ModelTests(TestCase):
         org_c.add_user(chloe)
 
         endpoint_items = [
-            reverse(index),
             reverse(organization, args=(org_a,)),
             reverse(organization, args=(org_b,)),
             reverse(organization, args=(org_ab,)),
             reverse(organization, args=(org_c,)),
         ]
         access_matrix = {
-            ('2', 'amanda'): [True, True, False, True, False],
-            ('3', 'barney'): [True, False, True, True, False],
-            ('4', 'chloe'): [False, False, False, False, True],
-            ('5', 'daniel'): [False, False, False, False, False],
+            ('2', 'amanda'): [True, False, True, False],
+            ('3', 'barney'): [False, True, True, False],
+            ('4', 'chloe'): [False, False, False, True],
+            ('5', 'daniel'): [False, False, False, False],
         }
         OKAY_RESPONSE = 200
-        DENY_RESPONSE = 302
+        DENY_RESPONSE = 404
 
         for credentials, access_list in access_matrix.iteritems():
             self.client.login(username=credentials[0], password=credentials[1])
