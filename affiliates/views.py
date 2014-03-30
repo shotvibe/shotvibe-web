@@ -6,7 +6,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, HttpResponseForbidden
+from django.http import Http404
 from django.conf import settings
 from functools import wraps
 
@@ -34,7 +35,8 @@ def organization_required(view_f):
         orgs = [ou.organization for ou in user.organizationuser_set.all()]
         if orgs:
             return view_f(request, orgs)
-        return redirect('frontend.views.home')
+        else:
+            return HttpResponseForbidden("403 Forbidden.\nYou don't belong to any organizations. Try logging in as a different user.", content_type='text/plain')
     return wrapped_view
 
 
@@ -46,7 +48,7 @@ def organization_membership_required(view_f):
                 organization__code=organization_code
             )
         except OrganizationUser.DoesNotExist:
-            return HttpResponseRedirect(reverse('affiliates.views.index'))
+            raise Http404
         else:
             return view_f(request, organizationUser.organization)
     return wrapped_view
