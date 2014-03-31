@@ -22,17 +22,21 @@
 
       <!-- Header -->
       <header>
-        <p>Hello! You're invited to<br />share photos on &hellip;</p>
-        <h1 id="logo">Glance</h1>
-        <p class="event">
-        {% if inviting_user %}
-          <small>{{ inviting_user.get_full_name }} has shared the album:<br />
-            {{ album.name }}</small>
-        {% elif event %}
-          <strong>{{ event.name }}</strong><br />
-          <small>{{ event.location }}<br />
-            {{ event.time|date:"N.j.Y, H:i" }}</small>
-          </p>
+        {% if event.html_content|striptags %}
+          {{ event.html_content|safe }}
+        {% else %}
+          <p>Hello! You're invited to<br />share photos on &hellip;</p>
+          <h1 id="logo">Glance</h1>
+          <p class="event">
+          {% if inviting_user %}
+            <small>{{ inviting_user.get_full_name }} has shared the album:<br />
+              {{ album.name }}</small>
+          {% elif event %}
+            <strong>{{ event.name }}</strong><br />
+            <small>{{ event.location }}<br />
+              {{ event.time|date:"N.j.Y, H:i" }}</small>
+            </p>
+          {% endif %}
         {% endif %}
       </header>
 
