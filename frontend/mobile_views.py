@@ -9,6 +9,8 @@ from subdomains.utils import reverse
 from phone_auth.models import PhoneNumberLinkCode
 from photos.models import Album
 
+from affiliates.models import Event
+
 
 def invite_page(request, invite_code):
     try:
@@ -35,11 +37,26 @@ def invite_page(request, invite_code):
     link_code_object.was_visited = True
     link_code_object.save(update_fields=['was_visited'])
 
-    data = {
-            'inviting_user' : link_code_object.inviting_user,
-            'album' : album,
-            'app_url' : app_url,
-            'device' : device }
+    # Check if this album is part of an event
+    try:
+        event = Event.objects.get(album=album)
+        # The album is part of an event. Show the invite page in the style of
+        # an event invite:
+        data = {
+                'event': event,
+                'album': album,
+                'app_url': app_url,
+                'device': device }
+    except Event.DoesNotExist:
+        # The album is not part of an event. Show the invite page in the style of
+        # a personal invite:
+        data = {
+                'inviting_user' : link_code_object.inviting_user,
+                'album' : album,
+                'app_url' : app_url,
+                'device' : device }
+
+
     return render_to_response('frontend/mobile/invite_page.html', data, context_instance=RequestContext(request))
 
 
