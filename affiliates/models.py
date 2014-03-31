@@ -78,7 +78,7 @@ class Event(models.Model):
     location = models.CharField(max_length=255)
     #logo =
     #banner
-    html_content = models.TextField()
+    html_content = models.TextField(blank=True)
 
     objects = EventManager()
 
