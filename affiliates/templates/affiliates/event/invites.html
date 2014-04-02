@@ -102,9 +102,8 @@
 				{# Checkbox #}
 				{% if invite.is_added_to_event %}
 					<i class="icon-user"></i>
-				{% else %}
-					<input value="{{ invite.pk }}" type="checkbox" name="invites">
 				{% endif %}
+				<input value="{{ invite.pk }}" type="checkbox" name="invites">
 			</td>
 		</tr>
 	{% empty %}
