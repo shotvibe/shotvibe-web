@@ -79,6 +79,7 @@ class Event(models.Model):
     #logo =
     #banner
     html_content = models.TextField(blank=True)
+    app_button_custom_text = models.CharField(max_length=255, blank=True)
 
     objects = EventManager()
 

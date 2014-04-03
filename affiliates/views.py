@@ -325,4 +325,5 @@ def event_link(request, slug):
         'album': album,
         'app_url': app_url,
         'device': device,
+        'app_button_text': eventLink.event.app_button_custom_text
     })
