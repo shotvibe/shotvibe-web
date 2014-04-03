@@ -130,13 +130,13 @@ def send_sms_smartsms(phone, message, sender_phone=None):
 
     def log_error(message):
         # TODO Better logging ...
-        print message
+        print message.encode('utf8')
 
     try:
         r = requests.post(smartsms_url, data=payload)
         r.raise_for_status()
     except requests.exceptions.RequestException as e:
-        log_error(str(e))
+        log_error(unicode(e))
         return
 
     # SmartSMS has an ugly API:
