@@ -74,21 +74,28 @@
 		0px 1px 0px rgba(255,255,255,1);
 }
         </style>
-        {% if device.version >= min_os_supported %}
-          <a href="{{ app_url }}" class="app_button">
-            {% if app_button_text %}
-            {{ app_button_text }}
-            {% else %}
-            Get the App
-            {% endif %}
-          </a>
+        {% if device.os == "Android" or device.os == "iOS" %}
+          {% if device.version >= min_os_supported %}
+            <a href="{{ app_url }}" class="app_button">
+              {% if app_button_text %}
+              {{ app_button_text }}
+              {% else %}
+              Get the App
+              {% endif %}
+            </a>
+          {% else %}
+            <p>
+            <strong>Sorry!</strong>
+            The app requires {{ device.os }} {{ min_os_supported }}
+            </p>
+            <p>
+            <em>(You have {{ device.os }} {{ device.version }})</em>
+            </p>
+          {% endif %}
         {% else %}
           <p>
           <strong>Sorry!</strong>
-          The app requires {{ device.os }} {{ min_os_supported }}
-          </p>
-          <p>
-          <em>(You have {{ device.os }} {{ device.version }})</em>
+          Your device is not supported. The app is available for Android and iPhone
           </p>
         {% endif %}
       </div>
