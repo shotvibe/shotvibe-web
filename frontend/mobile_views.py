@@ -10,6 +10,7 @@ from phone_auth.models import PhoneNumberLinkCode
 from photos.models import Album
 
 from affiliates.models import Event
+from frontend.user_device import get_device
 
 
 def invite_page(request, invite_code):
@@ -23,13 +24,13 @@ def invite_page(request, invite_code):
     # For showing the album, just grab the first album that the user belongs to
     album = Album.objects.get_user_albums(link_code_object.phone_number.user.id)[0]
 
-    device = get_device(request.META.get('HTTP_USER_AGENT', '').lower())
+    device = get_device(request.META.get('HTTP_USER_AGENT', ''))
 
     request.session['phone_number'] = link_code_object.phone_number.phone_number
 
-    if device == 'android':
+    if device.os == 'android':
         app_url = settings.GOOGLE_PLAY_URL
-    elif device == 'iphone':
+    elif device.os == 'iphone':
         app_url = settings.APPLE_APP_STORE_URL
     else:
         app_url = None
@@ -60,22 +61,12 @@ def invite_page(request, invite_code):
     return render_to_response('frontend/mobile/invite_page.html', data, context_instance=RequestContext(request))
 
 
-def get_device(ua):
-    if ua.find('iphone') > 0:
-        return 'iphone'
-
-    if ua.find('android') > 0:
-        return 'android'
-
-    return 'other'
-
-
 def get_app(request):
-    device = get_device(request.META.get('HTTP_USER_AGENT', '').lower())
+    device = get_device(request.META.get('HTTP_USER_AGENT', ''))
 
-    if device == 'android':
+    if device.os == 'android':
         app_url = settings.GOOGLE_PLAY_URL
-    elif device == 'iphone':
+    elif device.os == 'iphone':
         app_url = settings.APPLE_APP_STORE_URL
     else:
         # neither android or iphone, redirect user to the home page

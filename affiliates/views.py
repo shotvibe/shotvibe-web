@@ -16,7 +16,7 @@ import requests
 from affiliates.models import Organization, OrganizationUser, Event, EventLink
 from affiliates.forms import EventForm, EventLinkForm, \
     EventInviteImportForm, EventInviteSendForm
-from frontend.mobile_views import get_device
+from frontend.user_device import get_device
 
 from phone_auth.models import AuthToken
 from photos.models import Album, Photo, PendingPhoto, AlbumMember
@@ -287,11 +287,11 @@ def event_photos(request, event):
 
 
 def event_download_link(request, slug):
-    device = get_device(request.META.get('HTTP_USER_AGENT', '').lower())
+    device = get_device(request.META.get('HTTP_USER_AGENT', ''))
 
-    if device == 'android':
+    if device.os == 'android':
         app_url = settings.GOOGLE_PLAY_URL
-    elif device == 'iphone':
+    elif device.os == 'iphone':
         app_url = settings.APPLE_APP_STORE_URL
     else:
         app_url = None
@@ -305,11 +305,11 @@ def event_download_link(request, slug):
 
 
 def event_link(request, slug):
-    device = get_device(request.META.get('HTTP_USER_AGENT', '').lower())
+    device = get_device(request.META.get('HTTP_USER_AGENT', ''))
 
-    if device == 'android':
+    if device.os == 'android':
         app_url = settings.GOOGLE_PLAY_URL
-    elif device == 'iphone':
+    elif device.os == 'iphone':
         app_url = settings.APPLE_APP_STORE_URL
     else:
         app_url = None
