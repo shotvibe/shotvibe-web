@@ -132,6 +132,7 @@ INSTALLED_APPS = (
     'bootstrap_toolkit',
     'datetimewidget',
     'widget_tweaks',
+    'analytics',
     'frontend',
     'photos',
     'phone_auth',
