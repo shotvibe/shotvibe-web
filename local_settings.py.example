@@ -38,6 +38,9 @@ UNIVERSAL_PUSH_PROVIDER_URL = 'http://127.0.0.1:8800'
 GOOGLE_PLAY_URL = 'market://details?id=com.urbandictionary.android'
 APPLE_APP_STORE_URL = 'itms-apps://itunes.apple.com/us/app/urban-dictionary/id584986228'
 
+ANDROID_APP_MIN_VERSION_SUPPORTED = '2.3'
+IOS_APP_MIN_VERSION_SUPPORTED = '6.0'
+
 # Buckets where we upload new avatars
 AVATAR_BUCKETS = (
     's3:shotvibe-avatars-01:{filename}',

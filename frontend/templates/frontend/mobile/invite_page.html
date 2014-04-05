@@ -74,13 +74,30 @@
 		0px 1px 0px rgba(255,255,255,1);
 }
         </style>
-        <a href="{{ app_url }}" class="app_button">
-          {% if app_button_text %}
-          {{ app_button_text }}
+        {% if device.os == "Android" or device.os == "iOS" %}
+          {% if device.version >= min_os_supported %}
+            <a href="{{ app_url }}" class="app_button">
+              {% if app_button_text %}
+              {{ app_button_text }}
+              {% else %}
+              Get the App
+              {% endif %}
+            </a>
           {% else %}
-          Get the App
+            <p>
+            <strong>Sorry!</strong>
+            The app requires {{ device.os }} {{ min_os_supported }}
+            </p>
+            <p>
+            <em>(You have {{ device.os }} {{ device.version }})</em>
+            </p>
           {% endif %}
-        </a>
+        {% else %}
+          <p>
+          <strong>Sorry!</strong>
+          Your device is not supported. The app is available for Android and iPhone
+          </p>
+        {% endif %}
       </div>
 
       <!-- Photos -->
@@ -96,9 +113,9 @@
 
       <!-- Action -->
       <div class="action">
-        {% if device == "android" %}
+        {% if device.os == "Android" %}
         <a href="{{ app_url }}" class="button android">Available on Google Play</a>
-        {% elif device == "iphone" %}
+        {% elif device.os == "iOS" %}
         <a href="{{ app_url }}" class="button ios">Available on the App Store</a>
         {% endif %}
       </div>
@@ -115,15 +132,15 @@
       </div>
 
       <!-- Action -->
-      {% if device == "android" %}
+      {% if device.os == "Android" %}
       <p>Now for Android + iPhone</p>
-      {% elif device == "iphone" %}
+      {% elif device.os == "iOS" %}
       <p>Now for iPhone + Android</p>
       {% endif %}
       <div class="action">
-        {% if device == "android" %}
+        {% if device.os == "Android" %}
         <a href="{{ app_url }}" class="button android">Available on Google Play</a>
-        {% elif device == "iphone" %}
+        {% elif device.os == "iOS" %}
         <a href="{{ app_url }}" class="button ios">Available on the App Store</a>
         {% endif %}
       </div>
