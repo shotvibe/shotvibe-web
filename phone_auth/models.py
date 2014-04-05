@@ -14,6 +14,8 @@ from django.utils import crypto
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
+from analytics.event_tracking import track_event
+
 from phone_auth.sms_send import is_test_number, send_sms
 
 USER_AVATAR_DATA_REGEX = re.compile(r's3:.+?:user-avatar-\d+?-\d+?\.jpg')
@@ -344,7 +346,7 @@ class PhoneNumberConfirmSMSCode(models.Model):
 
 class PhoneNumberLinkCodeManager(models.Manager):
     # TODO Should throw an exception if sending the SMS fails (because of invalid phone number)
-    def invite_phone_number(self, inviter, phone_number_str, nickname, date_invited, sms_message_formatter):
+    def invite_phone_number(self, inviter, phone_number_str, nickname, date_invited, sms_message_formatter, sms_analytics_event_name, sms_analytics_event_properties):
         """
         phone_number_str: Must be formatted as international E164
 
@@ -384,6 +386,8 @@ class PhoneNumberLinkCodeManager(models.Manager):
 
         invite_url_prefix = 'https://www.shotvibe.com'
         send_sms(phone_number.phone_number, message + '\n' + link_code_object.get_invite_page(invite_url_prefix), sender_phone)
+
+        track_event(link_code_object.phone_number.user, sms_analytics_event_name, sms_analytics_event_properties)
 
         return link_code_object.phone_number.user
 

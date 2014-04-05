@@ -159,7 +159,10 @@ class Event(models.Model):
                 return sms_template.safe_substitute(
                     name=eventinvite.nickname,
                 )
-            self.album.add_members(self.created_by, [memberidentifier], now, sms_formatter)
+
+            sms_analytics_event_name = 'Event SMS Invite Sent'
+            sms_analytics_event_properties = { 'event': str(self.id) }
+            self.album.add_members(self.created_by, [memberidentifier], now, sms_formatter, sms_analytics_event_name, sms_analytics_event_properties)
 
     def eventinvites(self):
         return self.eventinvite_set.all()
