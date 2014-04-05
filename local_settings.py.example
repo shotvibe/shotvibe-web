@@ -75,4 +75,7 @@ PRIVATE_API_KEY = 'ANBQn8iCYxU2evwwg2mrCVIxXaCVZJEo9iZJ16cadd8csMvGwY5UCF2yMfoQI
 AWS_ACCESS_KEY = "************"
 AWS_SECRET_ACCESS_KEY = "*******************"
 
+# "Token" for mixpanel analytics <https://mixpanel.com>
+MIXPANEL_TOKEN = 'df2d61f8eb3d77bce9b8a515e877ee9d'
+
 DISABLE_AUTOLOGIN_FOR_COUNTRY_LOOKUP_VERSION = '1'

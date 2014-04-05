@@ -1,4 +1,5 @@
 {% load static %}
+{% load analytics %}
 <!DOCTYPE HTML>
 <html>
 	<head>
@@ -20,8 +21,12 @@
 			<link rel="stylesheet" href="{% static "glance/css/ie8.css" %}" />
 		<![endif]-->
 		<link rel="icon" type="image/png" href="{% static "glance/images/icon48px.png" %}">
+		{% analytics_mixpanel_init %}
 	</head>
 	<body>
+		<script type="text/javascript">
+			mixpanel.track('Visit Home Page');
+		</script>
 		
 		<div id="wrapper" class="loading">
 		
