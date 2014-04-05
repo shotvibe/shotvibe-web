@@ -96,9 +96,9 @@
 
       <!-- Action -->
       <div class="action">
-        {% if device.os == "android" %}
+        {% if device.os == "Android" %}
         <a href="{{ app_url }}" class="button android">Available on Google Play</a>
-        {% elif device.os == "iphone" %}
+        {% elif device.os == "iOS" %}
         <a href="{{ app_url }}" class="button ios">Available on the App Store</a>
         {% endif %}
       </div>
@@ -115,15 +115,15 @@
       </div>
 
       <!-- Action -->
-      {% if device.os == "android" %}
+      {% if device.os == "Android" %}
       <p>Now for Android + iPhone</p>
-      {% elif device.os == "iphone" %}
+      {% elif device.os == "iOS" %}
       <p>Now for iPhone + Android</p>
       {% endif %}
       <div class="action">
-        {% if device.os == "android" %}
+        {% if device.os == "Android" %}
         <a href="{{ app_url }}" class="button android">Available on Google Play</a>
-        {% elif device.os == "iphone" %}
+        {% elif device.os == "iOS" %}
         <a href="{{ app_url }}" class="button ios">Available on the App Store</a>
         {% endif %}
       </div>

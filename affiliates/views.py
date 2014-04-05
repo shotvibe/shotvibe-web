@@ -289,9 +289,9 @@ def event_photos(request, event):
 def event_download_link(request, slug):
     device = get_device(request.META.get('HTTP_USER_AGENT', ''))
 
-    if device.os == 'android':
+    if device.os == 'Android':
         app_url = settings.GOOGLE_PLAY_URL
-    elif device.os == 'iphone':
+    elif device.os == 'iOS':
         app_url = settings.APPLE_APP_STORE_URL
     else:
         app_url = None
@@ -307,9 +307,9 @@ def event_download_link(request, slug):
 def event_link(request, slug):
     device = get_device(request.META.get('HTTP_USER_AGENT', ''))
 
-    if device.os == 'android':
+    if device.os == 'Android':
         app_url = settings.GOOGLE_PLAY_URL
-    elif device.os == 'iphone':
+    elif device.os == 'iOS':
         app_url = settings.APPLE_APP_STORE_URL
     else:
         app_url = None

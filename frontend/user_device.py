@@ -59,10 +59,10 @@ def get_device(user_agent_str):
     ua = user_agent_str.lower()
 
     if ua.find('iphone') > 0:
-        return UserDevice('iphone', get_ios_version(user_agent_str))
+        return UserDevice('iOS', get_ios_version(user_agent_str))
 
     if ua.find('android') > 0:
-        return UserDevice('android', get_android_version(user_agent_str))
+        return UserDevice('Android', get_android_version(user_agent_str))
 
     return UserDevice('other', None)
 

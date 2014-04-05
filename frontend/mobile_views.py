@@ -28,9 +28,9 @@ def invite_page(request, invite_code):
 
     request.session['phone_number'] = link_code_object.phone_number.phone_number
 
-    if device.os == 'android':
+    if device.os == 'Android':
         app_url = settings.GOOGLE_PLAY_URL
-    elif device.os == 'iphone':
+    elif device.os == 'iOS':
         app_url = settings.APPLE_APP_STORE_URL
     else:
         app_url = None
@@ -64,9 +64,9 @@ def invite_page(request, invite_code):
 def get_app(request):
     device = get_device(request.META.get('HTTP_USER_AGENT', ''))
 
-    if device.os == 'android':
+    if device.os == 'Android':
         app_url = settings.GOOGLE_PLAY_URL
-    elif device.os == 'iphone':
+    elif device.os == 'iOS':
         app_url = settings.APPLE_APP_STORE_URL
     else:
         # neither android or iphone, redirect user to the home page
