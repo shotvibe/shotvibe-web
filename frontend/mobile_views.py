@@ -51,7 +51,8 @@ def invite_page(request, invite_code):
                 'album': album,
                 'app_url': app_url,
                 'device': device,
-                'min_os_supported': min_os_supported
+                'min_os_supported': min_os_supported,
+                'app_button_text': event.app_button_custom_text
                 }
     except Event.DoesNotExist:
         # The album is not part of an event. Show the invite page in the style of
