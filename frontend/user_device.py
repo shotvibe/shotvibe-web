@@ -39,6 +39,16 @@ class Version(object):
         return 'Version(' + repr(self.version_major) + ', ' + repr(self.version_minor) + ', ' + repr(self.version_revision) + ')'
 
 
+def parse_version(version_str):
+    m = re.match(r'(\d+).(\d+).(\d+)', version_str)
+    if m:
+        return Version(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+    m = re.match(r'(\d+).(\d+)', version_str)
+    if m:
+        return Version(int(m.group(1)), int(m.group(2)))
+    return None
+
+
 class UserDevice(object):
     def __init__(self, os, version):
         self.os = os

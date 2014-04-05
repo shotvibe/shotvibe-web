@@ -7,7 +7,7 @@ Replace this with more appropriate tests for your application.
 
 from django.test import TestCase
 
-from frontend.user_device import Version, get_device, get_ios_version, get_android_version
+from frontend.user_device import Version, parse_version, get_device, get_ios_version, get_android_version
 
 class SimpleTest(TestCase):
     def test_basic_addition(self):
@@ -30,6 +30,11 @@ class UserDeviceTest(TestCase):
         self.assertGreater(Version(1, 0, 1), Version(1, 0, 0))
         self.assertGreater(Version(2, 0, 0), Version(1, 9, 9))
         self.assertGreater(Version(2, 0), Version(1, 1, 1))
+
+    def test_parse_version(self):
+        self.assertEqual(parse_version('6.1'), Version(6, 1))
+        self.assertEqual(parse_version('10.9'), Version(10, 9))
+        self.assertEqual(parse_version('2.3.3'), Version(2, 3, 3))
 
     def test_ios_version(self):
         self.assertEqual(get_ios_version("Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_1 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8B117 Safari/6531.22.7"), Version(4, 1))
