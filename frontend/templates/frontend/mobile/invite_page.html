@@ -1,4 +1,5 @@
 {% load static %}
+{% load analytics %}
 <!DOCTYPE HTML>
 <html>
   <head>
@@ -16,8 +17,17 @@
     <meta name="description" content="" />
     <meta name="keywords" content="" />
     <link rel="stylesheet" href="{% static "invite/css/style.css" %}" />
+    {% analytics_mixpanel_init %}
+    {% if user_id %}
+    <script type="text/javascript">
+      mixpanel.identify('{{ user_id }}');
+    </script>
+    {% endif %}
   </head>
   <body>
+    <script type="text/javascript">
+      mixpanel.track('Invite Page Viewed');
+    </script>
     <article>
 
       <!-- Header -->
@@ -76,13 +86,16 @@
         </style>
         {% if device.os == "Android" or device.os == "iOS" %}
           {% if device.version >= min_os_supported %}
-            <a href="{{ app_url }}" class="app_button">
+            <a href="{{ app_url }}" id="id_app_button_main" class="app_button">
               {% if app_button_text %}
               {{ app_button_text }}
               {% else %}
               Get the App
               {% endif %}
             </a>
+            <script type="text/javascript">
+              mixpanel.track('Invite Page Viewed (Supported Device)');
+            </script>
           {% else %}
             <p>
             <strong>Sorry!</strong>
@@ -91,12 +104,18 @@
             <p>
             <em>(You have {{ device.os }} {{ device.version }})</em>
             </p>
+            <script type="text/javascript">
+              mixpanel.track('Invite Page Viewed (Unsupported Device)');
+            </script>
           {% endif %}
         {% else %}
           <p>
           <strong>Sorry!</strong>
           Your device is not supported. The app is available for Android and iPhone
           </p>
+          <script type="text/javascript">
+            mixpanel.track('Invite Page Viewed (Unsupported Device)');
+          </script>
         {% endif %}
       </div>
 
@@ -114,9 +133,9 @@
       <!-- Action -->
       <div class="action">
         {% if device.os == "Android" %}
-        <a href="{{ app_url }}" class="button android">Available on Google Play</a>
+        <a href="{{ app_url }}" id="id_app_button_center" class="button android">Available on Google Play</a>
         {% elif device.os == "iOS" %}
-        <a href="{{ app_url }}" class="button ios">Available on the App Store</a>
+        <a href="{{ app_url }}" id="id_app_button_center" class="button ios">Available on the App Store</a>
         {% endif %}
       </div>
       <p>The fastest way to create and share<br />
@@ -139,9 +158,9 @@
       {% endif %}
       <div class="action">
         {% if device.os == "Android" %}
-        <a href="{{ app_url }}" class="button android">Available on Google Play</a>
+        <a href="{{ app_url }}" id="id_app_button_footer" class="button android">Available on Google Play</a>
         {% elif device.os == "iOS" %}
-        <a href="{{ app_url }}" class="button ios">Available on the App Store</a>
+        <a href="{{ app_url }}" id="id_app_button_footer" class="button ios">Available on the App Store</a>
         {% endif %}
       </div>
 
@@ -152,5 +171,10 @@
       </footer>
 
     </article>
+    <script type="text/javascript">
+      mixpanel.track_links('#id_app_button_main', 'Invite Page Clicked App Button', {'button_id': 'id_app_button_main'});
+      mixpanel.track_links('#id_app_button_center', 'Invite Page Clicked App Button', {'button_id': 'id_app_button_center'});
+      mixpanel.track_links('#id_app_button_footer', 'Invite Page Clicked App Button', {'button_id': 'id_app_button_footer'});
+    </script>
   </body>
 </html>

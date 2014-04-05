@@ -47,6 +47,7 @@ def invite_page(request, invite_code):
         # The album is part of an event. Show the invite page in the style of
         # an event invite:
         data = {
+                'user_id': link_code_object.phone_number.user.id,
                 'event': event,
                 'album': album,
                 'app_url': app_url,
@@ -58,6 +59,7 @@ def invite_page(request, invite_code):
         # The album is not part of an event. Show the invite page in the style of
         # a personal invite:
         data = {
+                'user_id': link_code_object.phone_number.user.id,
                 'inviting_user' : link_code_object.inviting_user,
                 'album' : album,
                 'app_url' : app_url,
