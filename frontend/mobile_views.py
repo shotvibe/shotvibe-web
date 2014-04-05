@@ -10,7 +10,7 @@ from phone_auth.models import PhoneNumberLinkCode
 from photos.models import Album
 
 from affiliates.models import Event
-from frontend.user_device import get_device
+from frontend.user_device import get_device, parse_version
 
 
 def invite_page(request, invite_code):
@@ -30,10 +30,13 @@ def invite_page(request, invite_code):
 
     if device.os == 'Android':
         app_url = settings.GOOGLE_PLAY_URL
+        min_os_supported = parse_version(settings.ANDROID_APP_MIN_VERSION_SUPPORTED)
     elif device.os == 'iOS':
         app_url = settings.APPLE_APP_STORE_URL
+        min_os_supported = parse_version(settings.IOS_APP_MIN_VERSION_SUPPORTED)
     else:
         app_url = None
+        min_os_supported = None
 
     link_code_object.was_visited = True
     link_code_object.save(update_fields=['was_visited'])
@@ -47,7 +50,9 @@ def invite_page(request, invite_code):
                 'event': event,
                 'album': album,
                 'app_url': app_url,
-                'device': device }
+                'device': device,
+                'min_os_supported': min_os_supported
+                }
     except Event.DoesNotExist:
         # The album is not part of an event. Show the invite page in the style of
         # a personal invite:
@@ -55,7 +60,9 @@ def invite_page(request, invite_code):
                 'inviting_user' : link_code_object.inviting_user,
                 'album' : album,
                 'app_url' : app_url,
-                'device' : device }
+                'device' : device,
+                'min_os_supported': min_os_supported
+                }
 
 
     return render_to_response('frontend/mobile/invite_page.html', data, context_instance=RequestContext(request))

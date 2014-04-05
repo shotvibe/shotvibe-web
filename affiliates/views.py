@@ -16,7 +16,7 @@ import requests
 from affiliates.models import Organization, OrganizationUser, Event, EventLink
 from affiliates.forms import EventForm, EventLinkForm, \
     EventInviteImportForm, EventInviteSendForm
-from frontend.user_device import get_device
+from frontend.user_device import get_device, parse_version
 
 from phone_auth.models import AuthToken
 from photos.models import Album, Photo, PendingPhoto, AlbumMember
@@ -309,10 +309,13 @@ def event_link(request, slug):
 
     if device.os == 'Android':
         app_url = settings.GOOGLE_PLAY_URL
+        min_os_supported = parse_version(settings.ANDROID_APP_MIN_VERSION_SUPPORTED)
     elif device.os == 'iOS':
         app_url = settings.APPLE_APP_STORE_URL
+        min_os_supported = parse_version(settings.IOS_APP_MIN_VERSION_SUPPORTED)
     else:
         app_url = None
+        min_os_supported = None
 
     eventLink = get_object_or_404(EventLink, slug=slug)
     eventLink.incr_visited()
@@ -325,5 +328,6 @@ def event_link(request, slug):
         'album': album,
         'app_url': app_url,
         'device': device,
+        'min_os_supported': min_os_supported,
         'app_button_text': eventLink.event.app_button_custom_text
     })
