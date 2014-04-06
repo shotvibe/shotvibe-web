@@ -26,7 +26,17 @@
   </head>
   <body>
     <script type="text/javascript">
-      mixpanel.track('Invite Page Viewed');
+      var mixpanel_properties = {};
+      {% if device.os == "Android" %}
+      mixpanel_properties['os_version'] = 'Android {{ device.version }}';
+      mixpanel_properties['os_version_major'] = 'Android {{ device.version.version_major }}';
+      mixpanel_properties['os_version_major_minor'] = 'Android {{ device.version.version_major }}.{{ device.version.version_minor }}';
+      {% elif device.os == "iOS" %}
+      mixpanel_properties['os_version'] = 'iOS {{ device.version }}';
+      mixpanel_properties['os_version_major'] = 'iOS {{ device.version.version_major }}';
+      mixpanel_properties['os_version_major_minor'] = 'iOS {{ device.version.version_major }}.{{ device.version.version_minor }}';
+      {% endif %}
+      mixpanel.track('Invite Page Viewed', mixpanel_properties);
     </script>
     <article>
 
@@ -94,7 +104,7 @@
               {% endif %}
             </a>
             <script type="text/javascript">
-              mixpanel.track('Invite Page Viewed (Supported Device)');
+              mixpanel.track('Invite Page Viewed (Supported Device)', mixpanel_properties);
             </script>
           {% else %}
             <p>
@@ -105,7 +115,7 @@
             <em>(You have {{ device.os }} {{ device.version }})</em>
             </p>
             <script type="text/javascript">
-              mixpanel.track('Invite Page Viewed (Unsupported Device)');
+              mixpanel.track('Invite Page Viewed (Unsupported Device)', mixpanel_properties);
             </script>
           {% endif %}
         {% else %}
@@ -114,7 +124,7 @@
           Your device is not supported. The app is available for Android and iPhone
           </p>
           <script type="text/javascript">
-            mixpanel.track('Invite Page Viewed (Unsupported Device)');
+            mixpanel.track('Invite Page Viewed (Unsupported Device)', mixpanel_properties);
           </script>
         {% endif %}
       </div>
