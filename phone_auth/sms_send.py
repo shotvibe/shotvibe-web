@@ -108,7 +108,7 @@ def send_sms_smartsms(phone, message, sender_phone=None):
     # Strip the leading plus:
     phone_final = phone_e164[1:]
 
-    smartsms_url = 'http://smartsms.co.il/member/http_sms_api.php'
+    smartsms_url = 'http://www.smartsms.co.il/member/http_sms_xml_api.php?function=singles'
 
     if sender_phone:
         # Strip the leading plus:
@@ -120,46 +120,113 @@ def send_sms_smartsms(phone, message, sender_phone=None):
     username = settings.SMARTSMS_CREDENTIALS['username']
     password = settings.SMARTSMS_CREDENTIALS['password']
 
+    def create_request_doc():
+        import xml.etree.ElementTree as ET
+
+        # Example of a request document:
+        #
+        #   <Request>
+        #     <UserName>{MyApiUserName}</UserName>
+        #     <Password>{MyApiPassword}</Password>
+        #     <Time>{1437282993}</Time>
+        #     <Singles>
+        #       <Single>
+        #         <Message>{Message Text1}></Message>
+        #         <DestinationNumber>{0549999999}</DestinationNumber>
+        #         <SourceNumber>{0739999999}</SourceNumber>
+        #         <ClientReference>{1000}</ClientReference>
+        #       </Single>
+        #     </Singles>
+        #   </Request>
+
+        e_Request = ET.Element('Request')
+        e_UserName = ET.SubElement(e_Request, 'UserName')
+        e_UserName.text = username
+        e_Password = ET.SubElement(e_Request, 'Password')
+        e_Password.text = password
+        e_Time = ET.SubElement(e_Request, 'Time')
+        e_Time.text = '0'
+        e_Singles = ET.SubElement(e_Request, 'Singles')
+        e_Single = ET.SubElement(e_Singles, 'Single')
+        e_Message = ET.SubElement(e_Single, 'Message')
+        e_Message.text = message
+        e_SourceNumber = ET.SubElement(e_Single, 'SourceNumber')
+        e_SourceNumber.text = source_phone_number
+        e_DestinationNumber = ET.SubElement(e_Single, 'DestinationNumber')
+        e_DestinationNumber.text = phone_final
+        e_ClientReference = ET.SubElement(e_Single, 'ClientReference')
+        e_ClientReference.text = '0'
+        return ET.tostring(e_Request)
+
     payload = {
-            'UN': username,
-            'P': password,
-            'DA': phone_final,
-            'SA': source_phone_number,
-            'M': message
+            'xml': create_request_doc()
             }
 
     def log_error(message):
         # TODO Better logging ...
         print message.encode('utf8')
 
+    class SmartsmsResponse(object):
+        RESPONSE_SUCCESS, \
+                RESPONSE_XML_PARSE_ERROR, \
+                RESPONSE_ERROR_CODE, \
+                RESPONSE_INVALID_DESTINATION_NUMBER = range(4)
+
+    def parse_response_doc(response_content):
+        """
+        Returns a tuple. First element is one of the constants in
+        SmartsmsResponse. Second element is a string containing more detail
+        """
+        import xml.etree.ElementTree as ET
+
+        # Example of a response doc for a successful request:
+        #
+        #   <Response>
+        #     <SinglesResults>
+        #       <SingleResult>
+        #         <ServerId>5620979</ServerId>
+        #         <ClientReference>0</ClientReference>
+        #       </SingleResult>
+        #     </SinglesResults>
+        #   </Response>
+        #
+        # Example of a response doc for an unsuccessful request:
+        #
+        #   <?xml version="1.0" encoding="UTF-8" ?>
+        #   <Response>
+        #     <ErrorCode>BAD_CREDENTIALS</ErrorCode>
+        #   </Response>
+
+        try:
+            root = ET.fromstring(response_content)
+        except ET.ParseError as e:
+            return SmartsmsResponse.RESPONSE_XML_PARSE_ERROR, unicode(e)
+        if root.tag != 'Response':
+            return SmartsmsResponse.RESPONSE_XML_PARSE_ERROR, 'Root Xml element is not <Response>. It is: <' + root.tag + '>'
+        for child in root:
+            if child.tag == 'ErrorCode':
+                return SmartsmsResponse.RESPONSE_ERROR_CODE, child.text
+            elif child.tag == 'SinglesResults':
+                for result in child:
+                    if result.tag == 'SingleResult':
+                        return SmartsmsResponse.RESPONSE_SUCCESS, None
+        return SmartsmsResponse.RESPONSE_INVALID_DESTINATION_NUMBER, ''
+
     try:
         r = requests.post(smartsms_url, data=payload)
         r.raise_for_status()
     except requests.exceptions.RequestException as e:
         log_error(unicode(e))
+
+    response, detail = parse_response_doc(r.content)
+    if response == SmartsmsResponse.RESPONSE_SUCCESS:
         return
-
-    # SmartSMS has an ugly API:
-    # It returns an HTTP status code of 200 even on error. And it returns a pseudo-XML response that needs to HTML entity decoded
-    class ResponseHTMLParser(HTMLParser.HTMLParser):
-        def __init__(self):
-            HTMLParser.HTMLParser.__init__(self)
-            self.state = 'waiting_for_root'
-        def handle_starttag(self, tag, attrs):
-            if tag == 'br':
-                return
-
-            if self.state == 'waiting_for_root':
-                if tag == 'error':
-                    self.state = 'error'
-                elif tag == 'success':
-                    self.state = 'success'
-        def handle_endtag(self, tag):
-            pass
-        def handle_data(self, data):
-            pass
-    h = ResponseHTMLParser()
-    response_xml = h.unescape(r.text)
-    h.feed(response_xml)
-    if h.state != 'success':
-        log_error('Error Response: ' + response_xml)
+    elif response == SmartsmsResponse.RESPONSE_XML_PARSE_ERROR:
+        log_error(unicode(detail))
+        return
+    elif response == SmartsmsResponse.RESPONSE_ERROR_CODE:
+        log_error(unicode(detail))
+        return
+    elif response == SmartsmsResponse.RESPONSE_INVALID_DESTINATION_NUMBER:
+        log_error('The destination phone is unable to receive SMS messages: ' + phone_final)
+        return
