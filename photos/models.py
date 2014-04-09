@@ -62,7 +62,7 @@ class Album(models.Model):
     def default_sms_message_formatter(link_code):
         return link_code.inviting_user.nickname + ' has shared photos with you!'
 
-    def add_members(self, inviter, member_identifiers, date_added, sms_message_formatter):
+    def add_members(self, inviter, member_identifiers, date_added, sms_message_formatter, sms_analytics_event_name='New User SMS Invite Sent', sms_analytics_event_properties={}):
         result = []
 
         new_users = []
@@ -89,7 +89,9 @@ class Album(models.Model):
                         formatted_number,
                         member_identifier.contact_nickname,
                         date_added,
-                        sms_message_formatter)
+                        sms_message_formatter,
+                        sms_analytics_event_name,
+                        sms_analytics_event_properties)
                 new_users.append(user)
 
                 # Later check for the result of the Twilio SMS send, which

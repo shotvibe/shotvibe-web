@@ -689,7 +689,9 @@ class MembersTests(BaseTestCase):
                 phone_number.phone_number,
                 phone_number.user.nickname,
                 timezone.now(),
-                Album.default_sms_message_formatter)
+                Album.default_sms_message_formatter,
+                'Test',
+                {})
 
         # Add barney to the album
         add_members = {'add_members': [

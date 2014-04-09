@@ -7,6 +7,7 @@ django-bootstrap-toolkit==2.10.0
 django-subdomains==2.0.4
 djangorestframework==2.3.9
 phonenumbers==5.9b1
+mixpanel-py==3.1.2
 raven==3.5.2
 wsgiref==0.1.2
 requests==2.0.1
