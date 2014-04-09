@@ -42,7 +42,7 @@
 
       <!-- Header -->
       <header>
-        {% if event.html_content|striptags %}
+        {% if not inviting_user and event.html_content|striptags %}
           {{ event.html_content|safe }}
         {% else %}
           <p>Hello! You're invited to<br />share photos on &hellip;</p>
