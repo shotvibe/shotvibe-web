@@ -115,7 +115,7 @@ def send_sms_smartsms(phone, message, sender_phone=None):
         source_phone_number = sender_phone[1:]
     else:
         # This can be any phone number:
-        source_phone_number = '1555'
+        source_phone_number = 'GLANCE'
 
     username = settings.SMARTSMS_CREDENTIALS['username']
     password = settings.SMARTSMS_CREDENTIALS['password']
