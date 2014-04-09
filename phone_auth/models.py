@@ -403,7 +403,7 @@ class PhoneNumberLinkCode(models.Model):
 
     @staticmethod
     def generate_invite_code():
-        return crypto.get_random_string(26, string.ascii_letters + string.digits)
+        return crypto.get_random_string(16, string.ascii_letters + string.digits)
 
     def __unicode__(self):
         value = self.invite_code + ': ' + unicode(self.phone_number)
