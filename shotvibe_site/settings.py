@@ -138,6 +138,7 @@ INSTALLED_APPS = (
     'phone_auth',
     'photos_api',
     'affiliates',
+    'slideshow',
 )
 
 LOGIN_REDIRECT_URL = '/'
