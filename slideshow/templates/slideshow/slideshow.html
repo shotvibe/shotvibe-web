@@ -1,0 +1,16 @@
+{% load static %}
+<html>
+  <head>
+    <title>{{ album.name }}</title>
+    <link rel="stylesheet" href="{% static "slideshow/css/slideshow.css" %}">
+    <script src="{% static "slideshow/js/slideshow.js" %}"></script>
+  </head>
+  <body>
+  <div id="main_photo">
+    <img id="photo">
+  </div>
+  <script>
+    startSlideshow('{% url "slideshow.views.slideshow_latest_photo" album.id %}');
+  </script>
+  </body>
+</html>
