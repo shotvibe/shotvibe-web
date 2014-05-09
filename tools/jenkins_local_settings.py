@@ -47,6 +47,7 @@ PROJECT_APPS = (
     'photos',
     'phone_auth',
     'photos_api',
+    'slideshow',
 )
 
 # Buckets where we upload new avatars
