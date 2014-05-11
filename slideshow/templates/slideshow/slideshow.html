@@ -9,6 +9,9 @@
   <div id="main_photo">
     <img id="photo">
   </div>
+  <div id="frame">
+    <img src="{% static "slideshow/img/frame.png" %}">
+  </div>
   <script>
     startSlideshow('{% url "slideshow.views.slideshow_latest_photo" album.id %}');
   </script>
