@@ -134,6 +134,7 @@ INSTALLED_APPS = (
     'widget_tweaks',
     'analytics',
     'frontend',
+    'invites_manager',
     'photos',
     'phone_auth',
     'photos_api',
