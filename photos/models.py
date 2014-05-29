@@ -114,32 +114,29 @@ class Album(models.Model):
 
             send_invite_callable: A callable that accepts 3 parameters:
             inviter, phone_number, current_time
+
+            Returns the PhoneNumber object belonging to the user who was added
             """
             if not isinstance(parsed_phone_number, phonenumbers.phonenumber.PhoneNumber):
                 raise ValueError('phone must be a PhoneNumber object')
 
             phone_number_str = phonenumbers.format_number(parsed_phone_number, phonenumbers.PhoneNumberFormat.E164)
 
-            new_user = User.objects.create_user(nickname=contact_nickname)
-            phone_number, phone_created = PhoneNumber.objects.get_or_create(phone_number=phone_number_str, defaults={
-                    'user' : new_user,
-                    'date_created' : self.current_date,
-                    'verified' : False
-                    })
-            if not created:
-                new_user.delete()
+            phone_number, _ = PhoneNumber.objects.get_or_create_phone_number(phone_number_str, contact_nickname, self.current_date)
+
+            _, member_created = AlbumMember.objects.get_or_create(user=phone_number.user, album=self.album, defaults={
+                'added_by_user': inviter,
+                'datetime_added': self.current_date
+                })
 
             if phone_number.verified:
-                _, member_created = AlbumMember.objects.get_or_create(user=phone_number.user, album=self.album, defaults={
-                    'added_by_user': inviter,
-                    'datetime_added': self.current_date
-                    })
-
                 if member_created:
                     members_added_to_album.send(sender=None, member_users=[phone_number.user], by_user=inviter, to_album=self.album)
             else:
                 if send_invite_callable:
-                    send_invite_callable(inviter, phone_number, current_time)
+                    send_invite_callable(inviter, phone_number, self.current_date)
+
+            return phone_number
 
 
     def modify(self, current_date):
