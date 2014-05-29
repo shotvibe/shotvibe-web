@@ -305,6 +305,34 @@ class PhoneNumberManager(models.Manager):
         result.auth_token = auth_token.key
         return result
 
+    def get_or_create_phone_number(self, phone_number_str, default_nickname, current_time):
+        """
+        phone_number_str: Must be formatted as international E164
+
+        default_nickname: If the phone number isn't found (doesn't belong to
+        any existing users) then a new user will be created, with nickname set
+        to `default_nickname'
+
+        Returns a tuple of (phone_number, created) where `phone_number' is a
+        PhoneNumber object, and `created' is a boolean that indicates if a new
+        phone number (and associated new user) was created
+        """
+
+        tmp_user = User.objects.create_user(nickname=default_nickname)
+        delete_tmp_user = True
+        try:
+            phone_number, created = PhoneNumber.objects.get_or_create(phone_number=phone_number_str, defaults={
+                    'user' : tmp_user,
+                    'date_created' : current_time,
+                    'verified' : False
+                    })
+            if created:
+                delete_tmp_user = False
+            return phone_number, created
+        finally:
+            if delete_tmp_user:
+                tmp_user.delete()
+
 
 class AnonymousPhoneNumber(models.Model):
     phone_number = models.CharField(max_length=32, unique=True, db_index=True)
