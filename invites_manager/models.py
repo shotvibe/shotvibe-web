@@ -63,7 +63,7 @@ class ScheduledSMSInviteMessageManager(models.Manager):
 
 class ScheduledSMSInviteMessage(models.Model):
     invite_sent_time = models.DateTimeField()
-    scheduled_delivery_time = models.DateTimeField()
+    scheduled_delivery_time = models.DateTimeField(db_index=True)
     link_code = models.ForeignKey(PhoneNumberLinkCode)
     message_template = models.TextField()
     time_delay_hours = models.PositiveIntegerField()
