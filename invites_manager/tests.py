@@ -3,7 +3,7 @@ import datetime
 from django.utils.timezone import utc
 from django.test import TestCase
 
-from phone_auth.models import User, PhoneNumber, PhoneNumberLinkCode
+from phone_auth.models import User, PhoneNumber
 from photos.models import Album, AlbumMember
 
 from invites_manager.models import SMSInviteProcessor, SMSInviteMessage
@@ -49,20 +49,13 @@ class InviteTest(TestCase):
                 date_created = the_time,
                 verified = False)
 
-        link_code = PhoneNumberLinkCode.objects.create(
-                phone_number = phone_number,
-                invite_code = PhoneNumberLinkCode.generate_invite_code(),
-                inviting_user = self.amanda,
-                date_created = the_time,
-                was_visited = False)
-
         AlbumMember.objects.create(
                 user = new_user,
                 album = self.party_album,
                 added_by_user = self.amanda,
                 datetime_added = the_time)
 
-        SMSInviteMessage.objects.invite_new_user(self.sms_invite_processor, link_code, the_time)
+        link_code = self.sms_invite_processor.send_invite(self.amanda, phone_number, the_time)
 
         invite_url_prefix = 'https://useglance.com'
         link = link_code.get_invite_page(invite_url_prefix)
@@ -94,20 +87,13 @@ class InviteTest(TestCase):
                 date_created = the_time,
                 verified = False)
 
-        link_code = PhoneNumberLinkCode.objects.create(
-                phone_number = phone_number,
-                invite_code = PhoneNumberLinkCode.generate_invite_code(),
-                inviting_user = self.amanda,
-                date_created = the_time,
-                was_visited = False)
-
         AlbumMember.objects.create(
                 user = new_user,
                 album = self.party_album,
                 added_by_user = self.amanda,
                 datetime_added = the_time)
 
-        SMSInviteMessage.objects.invite_new_user(self.sms_invite_processor, link_code, the_time)
+        link_code = self.sms_invite_processor.send_invite(self.amanda, phone_number, the_time)
 
         invite_url_prefix = 'https://useglance.com'
         link = link_code.get_invite_page(invite_url_prefix)

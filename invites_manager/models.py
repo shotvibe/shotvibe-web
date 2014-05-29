@@ -19,28 +19,6 @@ class SMSInviteMessageManager(models.Manager):
                 raise RuntimeError('No default SMSInviteMessage exists in database')
             return True
 
-    def invite_new_user(self, sms_invite_processor, link_code, current_time):
-        destination_phone_number = link_code.phone_number.phone_number
-        destination_country_calling_code = phonenumbers.parse(destination_phone_number).country_code
-
-        if SMSInviteMessage.objects.country_calling_code_use_default(destination_country_calling_code):
-            immediate_message_obj = SMSInviteMessage.objects.get(country_calling_code=None, time_delay_hours=0)
-            delayed_message_objs = SMSInviteMessage.objects.filter(country_calling_code=None, time_delay_hours__gt=0)
-        else:
-            immediate_message_obj = SMSInviteMessage.objects.get(country_calling_code=destination_country_calling_code, time_delay_hours=0)
-            delayed_message_objs = SMSInviteMessage.objects.filter(country_calling_code=destination_country_calling_code, time_delay_hours__gt=0)
-
-        for delayed_message in delayed_message_objs:
-            ScheduledSMSInviteMessage.objects.create(
-                    invite_sent_time = current_time,
-                    scheduled_delivery_time = current_time + datetime.timedelta(hours=delayed_message.time_delay_hours),
-                    link_code = link_code,
-                    message_template = delayed_message.message_template,
-                    time_delay_hours = delayed_message.time_delay_hours,
-                    sms_sender_phone_override = None)
-
-        sms_invite_processor.send_immediate_invite(link_code, immediate_message_obj.message_template, None)
-
 
 class SMSInviteMessage(models.Model):
     country_calling_code = models.PositiveSmallIntegerField(null=True, blank=True, help_text=
@@ -78,6 +56,46 @@ class SMSInviteProcessor(object):
         sms_sender must be a callable with the same signature as phone_auth.sms_send.send_sms
         """
         self.sms_sender = sms_sender
+
+    def send_invite(self, inviter, phone_number, current_time):
+        link_code, created = PhoneNumberLinkCode.objects.get_or_create(phone_number=phone_number, defaults={
+            'invite_code': PhoneNumberLinkCode.generate_invite_code(),
+            'inviting_user': inviter,
+            'date_created': current_time,
+            'was_visited': False
+            })
+        if not created:
+            # If the target user was previously invited, update his link_code
+            # object so that the inviter reflects the user who most recently
+            # invited him
+            link_code.inviting_user = inviter
+            link_code.save(update_fields=['inviting_user'])
+
+            # Delete any scheduled invites that the target user may already
+            # have. New scheduled events will be set for the current invite
+            ScheduledSMSInviteMessage.objects.filter(link_code=link_code).delete()
+
+        destination_country_calling_code = phonenumbers.parse(phone_number.phone_number).country_code
+
+        if SMSInviteMessage.objects.country_calling_code_use_default(destination_country_calling_code):
+            immediate_message_obj = SMSInviteMessage.objects.get(country_calling_code=None, time_delay_hours=0)
+            delayed_message_objs = SMSInviteMessage.objects.filter(country_calling_code=None, time_delay_hours__gt=0)
+        else:
+            immediate_message_obj = SMSInviteMessage.objects.get(country_calling_code=destination_country_calling_code, time_delay_hours=0)
+            delayed_message_objs = SMSInviteMessage.objects.filter(country_calling_code=destination_country_calling_code, time_delay_hours__gt=0)
+
+        for delayed_message in delayed_message_objs:
+            ScheduledSMSInviteMessage.objects.create(
+                    invite_sent_time = current_time,
+                    scheduled_delivery_time = current_time + datetime.timedelta(hours=delayed_message.time_delay_hours),
+                    link_code = link_code,
+                    message_template = delayed_message.message_template,
+                    time_delay_hours = delayed_message.time_delay_hours,
+                    sms_sender_phone_override = None)
+
+        self.send_immediate_invite(link_code, immediate_message_obj.message_template, None)
+
+        return link_code
 
     def send_immediate_invite(self, link_code, message_template, sms_sender_phone_override):
         destination_phone = link_code.phone_number.phone_number
