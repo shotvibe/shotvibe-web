@@ -652,10 +652,11 @@ class PhotoUpload(BaseTestCase):
 
 class MembersTests(BaseTestCase):
     def setUp(self):
-        SMSInviteMessage.objects.create(
+        d = SMSInviteMessage.objects.get(
                 country_calling_code = SMSInviteMessage.COUNTRY_DEFAULT_VALUE,
-                message_template = 'Hi ${name}. ${inviter} shared an album: ${album}',
                 time_delay_hours = 0)
+        d.message_template = 'Hi ${name}. ${inviter} shared an album: ${album}'
+        d.save(update_fields=['message_template'])
 
         self.client.login(username='2', password='amanda')
 
@@ -969,10 +970,11 @@ class ScheduledSMSTest(BaseTestCase):
     urls = MockUrlConf
 
     def setUp(self):
-        SMSInviteMessage.objects.create(
+        d = SMSInviteMessage.objects.get(
                 country_calling_code = SMSInviteMessage.COUNTRY_DEFAULT_VALUE,
-                message_template = 'Hi ${name}. ${inviter} shared an album: ${album}',
                 time_delay_hours = 0)
+        d.message_template = 'Hi ${name}. ${inviter} shared an album: ${album}'
+        d.save(update_fields=['message_template'])
 
         SMSInviteMessage.objects.create(
                 country_calling_code = SMSInviteMessage.COUNTRY_DEFAULT_VALUE,

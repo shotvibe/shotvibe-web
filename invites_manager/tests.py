@@ -24,10 +24,11 @@ class InviteTest(TestCase):
         self.party_album = Album.objects.create_album(self.amanda, 'Party', datetime.datetime(2000, 01, 01, tzinfo=utc))
 
     def test_single_default_invite(self):
-        SMSInviteMessage.objects.create(
+        d = SMSInviteMessage.objects.get(
                 country_calling_code = SMSInviteMessage.COUNTRY_DEFAULT_VALUE,
-                message_template = 'Hi ${name}. ${inviter} shared an album: ${album}',
                 time_delay_hours = 0)
+        d.message_template = 'Hi ${name}. ${inviter} shared an album: ${album}'
+        d.save(update_fields=['message_template'])
 
         the_time = datetime.datetime(2000, 01, 02, tzinfo=utc)
 
@@ -52,10 +53,11 @@ class InviteTest(TestCase):
         self.assertEqual(send_sms.testing_outbox, [('+12127182003', u'Hi barney. amanda shared an album: Party\n' + link, '+12127182002')])
 
     def test_scheduled_default_invites(self):
-        SMSInviteMessage.objects.create(
+        d = SMSInviteMessage.objects.get(
                 country_calling_code = SMSInviteMessage.COUNTRY_DEFAULT_VALUE,
-                message_template = 'Hi ${name}. ${inviter} shared an album: ${album}',
                 time_delay_hours = 0)
+        d.message_template = 'Hi ${name}. ${inviter} shared an album: ${album}'
+        d.save(update_fields=['message_template'])
 
         SMSInviteMessage.objects.create(
                 country_calling_code = SMSInviteMessage.COUNTRY_DEFAULT_VALUE,
