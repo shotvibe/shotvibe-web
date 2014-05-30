@@ -143,6 +143,9 @@ class Album(models.Model):
         return Album.ModificationContext(self, current_date)
 
     def add_members(self, inviter, member_identifiers, date_added, sms_message_formatter, sms_analytics_event_name='New User SMS Invite Sent', sms_analytics_event_properties={}):
+        """
+        This method is deprecated and will eventually be removed
+        """
         result = []
 
         new_users = []
