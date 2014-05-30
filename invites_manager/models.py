@@ -41,3 +41,6 @@ class ScheduledSMSInviteMessage(models.Model):
     sms_sender_phone_override = models.CharField(max_length=32, null=True, blank=True)
 
     objects = ScheduledSMSInviteMessageManager()
+
+    def __unicode__(self):
+        return unicode(self.link_code.phone_number) + ' (' + unicode(self.time_delay_hours) + ' hours)'
