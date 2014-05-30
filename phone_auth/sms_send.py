@@ -35,6 +35,24 @@ def in_testing_mode():
     # http://stackoverflow.com/questions/6957016/detect-django-testing-mode
     return hasattr(mail, 'outbox')
 
+
+def mark_sms_test_case(testcase_class):
+    """
+    Should be used as a decorator on a class (that derives from Django's TestCase)
+
+    Makes sure that the SMS testing outbox is cleared before each test runs
+    """
+    orig_pre_setup = testcase_class._pre_setup
+
+    def _pre_setup(self):
+        # Clear the SMS testing outbox before each test runs
+        send_sms.testing_outbox = []
+        orig_pre_setup(self)
+
+    testcase_class._pre_setup = _pre_setup
+    return testcase_class
+
+
 def send_sms(destination_phone, message, sender_phone=None):
     """
     destination_phone must be formatted as international E164
@@ -45,8 +63,11 @@ def send_sms(destination_phone, message, sender_phone=None):
     """
     p = phonenumbers.parse(destination_phone)
 
-    # Don't actually send any SMS messages during unit tests
     if in_testing_mode():
+        # During unit tests, don't actually send any SMS messages. Instead,
+        # keep a record of sent SMS's in the testing outbox
+        if hasattr(send_sms, 'testing_outbox'):
+            send_sms.testing_outbox.append((destination_phone, message, sender_phone))
         return
 
     # Don't actually send any SMS messages for test numbers

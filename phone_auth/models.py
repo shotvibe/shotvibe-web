@@ -5,8 +5,8 @@ import re
 import os
 import string
 
+import django.contrib.auth.models
 from django.conf import settings
-from django.contrib import auth
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import models, IntegrityError
@@ -50,7 +50,7 @@ def random_default_avatar_file_data(*args, **kwargs):
     return format_string.format(random.randint(min_number, max_number))
 
 
-class UserManager(auth.models.BaseUserManager):
+class UserManager(django.contrib.auth.models.BaseUserManager):
     def create_user(self, nickname=None, password=None):
         if not nickname:
             nickname = self.make_default_nickname()
@@ -93,7 +93,7 @@ class UserManager(auth.models.BaseUserManager):
         user.save(using=self._db)
         return user
 
-class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
+class User(django.contrib.auth.models.AbstractBaseUser, django.contrib.auth.models.PermissionsMixin):
     STATUS_JOINED = 'joined'
     STATUS_SMS_SENT = 'sms_sent'
     STATUS_INVITATION_VIEWED = 'invitation_viewed'
@@ -304,6 +304,34 @@ class PhoneNumberManager(models.Manager):
         result.user = user
         result.auth_token = auth_token.key
         return result
+
+    def get_or_create_phone_number(self, phone_number_str, default_nickname, current_time):
+        """
+        phone_number_str: Must be formatted as international E164
+
+        default_nickname: If the phone number isn't found (doesn't belong to
+        any existing users) then a new user will be created, with nickname set
+        to `default_nickname'
+
+        Returns a tuple of (phone_number, created) where `phone_number' is a
+        PhoneNumber object, and `created' is a boolean that indicates if a new
+        phone number (and associated new user) was created
+        """
+
+        tmp_user = User.objects.create_user(nickname=default_nickname)
+        delete_tmp_user = True
+        try:
+            phone_number, created = PhoneNumber.objects.get_or_create(phone_number=phone_number_str, defaults={
+                    'user' : tmp_user,
+                    'date_created' : current_time,
+                    'verified' : False
+                    })
+            if created:
+                delete_tmp_user = False
+            return phone_number, created
+        finally:
+            if delete_tmp_user:
+                tmp_user.delete()
 
 
 class AnonymousPhoneNumber(models.Model):

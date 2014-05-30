@@ -8,9 +8,12 @@ from django.test import TestCase
 from django.utils.timezone import utc
 from django.test.utils import override_settings
 
+import phonenumbers
+
 from photos.models import Album, Photo, PendingPhoto, AlbumMember
 from photos import image_uploads
 from photos import photo_operations
+from phone_auth.models import User, PhoneNumber
 
 def read_in_chunks(file_object, chunk_size=1024):
     """
@@ -82,6 +85,77 @@ class ModelTest(TestCase):
         # Refresh the_album to get the latest data from the DB
         the_album = Album.objects.get(pk=the_album.id)
         self.assertEqual(the_album.last_updated, update_date)
+
+class AlbumTest(TestCase):
+    def setUp(self):
+        self.amanda = User.objects.create_user('amanda')
+
+        self.barney = User.objects.create_user('barney')
+        PhoneNumber.objects.create(
+                phone_number = '+12127182003',
+                user = self.barney,
+                date_created = datetime.datetime(1999, 01, 01, tzinfo=utc),
+                verified = True)
+
+        self.party_album = Album.objects.create_album(self.amanda, 'Party', datetime.datetime(2000, 01, 01, tzinfo=utc))
+
+    def test_add_invalid_user_id(self):
+        the_time = datetime.datetime(2000, 01, 02, tzinfo=utc)
+
+        with self.party_album.modify(the_time) as m:
+            invalid_user_id = -1 # user ids are guaranteed to be positive
+            result = m.add_user_id(self.amanda, invalid_user_id)
+            self.assertFalse(result)
+
+    def test_add_valid_user_id(self):
+        the_time = datetime.datetime(2000, 01, 02, tzinfo=utc)
+
+        before_revision_number = self.party_album.revision_number
+
+        with self.party_album.modify(the_time) as m:
+            result = m.add_user_id(self.amanda, self.barney.id)
+            self.assertTrue(result)
+
+        self.party_album = Album.objects.get(pk=self.party_album.pk)
+        after_revision_number = self.party_album.revision_number
+
+        self.assertGreater(after_revision_number, before_revision_number)
+
+        self.assertTrue(self.party_album.is_user_member(self.barney.id))
+
+    def test_add_existing_phone_number(self):
+        the_time = datetime.datetime(2000, 01, 02, tzinfo=utc)
+
+        before_revision_number = self.party_album.revision_number
+
+        with self.party_album.modify(the_time) as m:
+            barney_number = m.add_phone_number(self.amanda, phonenumbers.parse('+12127182003'), 'Barney Smith', None)
+            self.assertEquals(barney_number, PhoneNumber.objects.get(user=self.barney))
+
+        self.party_album = Album.objects.get(pk=self.party_album.pk)
+        after_revision_number = self.party_album.revision_number
+
+        self.assertGreater(after_revision_number, before_revision_number)
+
+        self.assertTrue(self.party_album.is_user_member(self.barney.id))
+
+    def test_add_new_phone_number(self):
+        the_time = datetime.datetime(2000, 01, 02, tzinfo=utc)
+
+        before_revision_number = self.party_album.revision_number
+
+        with self.party_album.modify(the_time) as m:
+            new_phone_number = m.add_phone_number(self.amanda, phonenumbers.parse('+12127182004'), 'Chloe Smith', None)
+
+        self.party_album = Album.objects.get(pk=self.party_album.pk)
+        after_revision_number = self.party_album.revision_number
+
+        self.assertGreater(after_revision_number, before_revision_number)
+
+        self.assertEquals(new_phone_number.phone_number, '+12127182004')
+        self.assertEquals(new_phone_number.user.nickname, 'Chloe Smith')
+        self.assertTrue(self.party_album.is_user_member(new_phone_number.user.id))
+
 
 class ImageUploads(TestCase):
     def test_box_fit_expanded(self):
