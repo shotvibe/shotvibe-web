@@ -5,8 +5,8 @@ import re
 import os
 import string
 
+import django.contrib.auth.models
 from django.conf import settings
-from django.contrib import auth
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import models, IntegrityError
@@ -50,7 +50,7 @@ def random_default_avatar_file_data(*args, **kwargs):
     return format_string.format(random.randint(min_number, max_number))
 
 
-class UserManager(auth.models.BaseUserManager):
+class UserManager(django.contrib.auth.models.BaseUserManager):
     def create_user(self, nickname=None, password=None):
         if not nickname:
             nickname = self.make_default_nickname()
@@ -93,7 +93,7 @@ class UserManager(auth.models.BaseUserManager):
         user.save(using=self._db)
         return user
 
-class User(auth.models.AbstractBaseUser, auth.models.PermissionsMixin):
+class User(django.contrib.auth.models.AbstractBaseUser, django.contrib.auth.models.PermissionsMixin):
     STATUS_JOINED = 'joined'
     STATUS_SMS_SENT = 'sms_sent'
     STATUS_INVITATION_VIEWED = 'invitation_viewed'
