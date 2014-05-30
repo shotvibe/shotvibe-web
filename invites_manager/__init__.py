@@ -6,6 +6,7 @@ import phonenumbers
 from phone_auth.models import PhoneNumberLinkCode
 from photos.models import Album
 import phone_auth.sms_send
+from analytics.event_tracking import track_event
 
 from invites_manager.models import SMSInviteMessage, ScheduledSMSInviteMessage
 
@@ -47,6 +48,9 @@ def send_invite(inviter, phone_number, current_time):
                 sms_sender_phone_override = None)
 
     send_immediate_invite(link_code, immediate_message_obj.message_template, None)
+    track_event(link_code.phone_number.user, 'New User SMS Invite Sent', {
+        'inviter': link_code.inviting_user.id,
+        'time_delay_hours': 0})
 
     return link_code
 
@@ -81,4 +85,8 @@ def send_immediate_invite(link_code, message_template, sms_sender_phone_override
 def process_scheduled_invites(current_time):
     for scheduled_message in ScheduledSMSInviteMessage.objects.get_scheduled_till(current_time):
         send_immediate_invite(scheduled_message.link_code, scheduled_message.message_template, scheduled_message.sms_sender_phone_override)
+        track_event(scheduled_message.link_code.phone_number.user, 'New User SMS Invite Sent', {
+            'inviter': scheduled_message.link_code.inviting_user.id,
+            'time_delay_hours': scheduled_message.time_delay_hours})
+
         scheduled_message.delete()
