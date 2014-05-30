@@ -4,27 +4,16 @@ from django.utils.timezone import utc
 from django.test import TestCase
 
 from phone_auth.models import User, PhoneNumber
+from phone_auth.sms_send import mark_sms_test_case, send_sms
 from photos.models import Album, AlbumMember
 
-from invites_manager.models import SMSInviteProcessor, SMSInviteMessage
+from invites_manager.models import SMSInviteMessage
+import invites_manager
 
 
-class PretendSMSSender(object):
-    def __init__(self):
-        self.clear_sentbox()
-
-    def __call__(self, destination_phone, message, sender_phone=None):
-        self.sentbox.append((destination_phone, message, sender_phone))
-
-    def clear_sentbox(self):
-        self.sentbox = []
-
-
+@mark_sms_test_case
 class InviteTest(TestCase):
     def setUp(self):
-        self.pretend_sms_sender = PretendSMSSender()
-        self.sms_invite_processor = SMSInviteProcessor(self.pretend_sms_sender)
-
         self.amanda = User.objects.create_user('amanda')
         PhoneNumber.objects.create(
                 phone_number = '+12127182002',
@@ -55,12 +44,12 @@ class InviteTest(TestCase):
                 added_by_user = self.amanda,
                 datetime_added = the_time)
 
-        link_code = self.sms_invite_processor.send_invite(self.amanda, phone_number, the_time)
+        link_code = invites_manager.send_invite(self.amanda, phone_number, the_time)
 
         invite_url_prefix = 'https://useglance.com'
         link = link_code.get_invite_page(invite_url_prefix)
 
-        self.assertEqual(self.pretend_sms_sender.sentbox, [('+12127182003', u'Hi barney. amanda shared an album: Party\n' + link, '+12127182002')])
+        self.assertEqual(send_sms.testing_outbox, [('+12127182003', u'Hi barney. amanda shared an album: Party\n' + link, '+12127182002')])
 
     def test_scheduled_default_invites(self):
         SMSInviteMessage.objects.create(
@@ -93,40 +82,39 @@ class InviteTest(TestCase):
                 added_by_user = self.amanda,
                 datetime_added = the_time)
 
-        link_code = self.sms_invite_processor.send_invite(self.amanda, phone_number, the_time)
+        link_code = invites_manager.send_invite(self.amanda, phone_number, the_time)
 
         invite_url_prefix = 'https://useglance.com'
         link = link_code.get_invite_page(invite_url_prefix)
 
-        self.assertEqual(self.pretend_sms_sender.sentbox, [('+12127182003', u'Hi barney. amanda shared an album: Party\n' + link, '+12127182002')])
-        self.pretend_sms_sender.clear_sentbox()
+        self.assertEqual(send_sms.testing_outbox, [('+12127182003', u'Hi barney. amanda shared an album: Party\n' + link, '+12127182002')])
+        send_sms.testing_outbox = []
 
-        self.sms_invite_processor.process_scheduled_invites(datetime.datetime(2000, 01, 02, 0, 0, 0, tzinfo=utc))
-        self.assertEqual(self.pretend_sms_sender.sentbox, [])
+        invites_manager.process_scheduled_invites(datetime.datetime(2000, 01, 02, 0, 0, 0, tzinfo=utc))
+        self.assertEqual(send_sms.testing_outbox, [])
 
-        self.sms_invite_processor.process_scheduled_invites(datetime.datetime(2000, 01, 02, 1, 0, 0, tzinfo=utc))
-        self.assertEqual(self.pretend_sms_sender.sentbox, [])
+        invites_manager.process_scheduled_invites(datetime.datetime(2000, 01, 02, 1, 0, 0, tzinfo=utc))
+        self.assertEqual(send_sms.testing_outbox, [])
 
-        self.sms_invite_processor.process_scheduled_invites(datetime.datetime(2000, 01, 02, 2, 0, 0, tzinfo=utc))
-        self.assertEqual(self.pretend_sms_sender.sentbox, [(u'+12127182003', u'Hi barney. amanda has been waiting 2 hours for you to view: Party\n' + link, '+12127182002')])
-        self.pretend_sms_sender.clear_sentbox()
+        invites_manager.process_scheduled_invites(datetime.datetime(2000, 01, 02, 2, 0, 0, tzinfo=utc))
+        self.assertEqual(send_sms.testing_outbox, [(u'+12127182003', u'Hi barney. amanda has been waiting 2 hours for you to view: Party\n' + link, '+12127182002')])
+        send_sms.testing_outbox = []
 
-        self.sms_invite_processor.process_scheduled_invites(datetime.datetime(2000, 01, 02, 3, 0, 0, tzinfo=utc))
-        self.assertEqual(self.pretend_sms_sender.sentbox, [])
-        self.pretend_sms_sender.clear_sentbox()
+        invites_manager.process_scheduled_invites(datetime.datetime(2000, 01, 02, 3, 0, 0, tzinfo=utc))
+        self.assertEqual(send_sms.testing_outbox, [])
+        send_sms.testing_outbox = []
 
-        self.sms_invite_processor.process_scheduled_invites(datetime.datetime(2000, 01, 02, 23, 0, 0, tzinfo=utc))
-        self.assertEqual(self.pretend_sms_sender.sentbox, [])
-        self.pretend_sms_sender.clear_sentbox()
+        invites_manager.process_scheduled_invites(datetime.datetime(2000, 01, 02, 23, 0, 0, tzinfo=utc))
+        self.assertEqual(send_sms.testing_outbox, [])
+        send_sms.testing_outbox = []
 
-        self.sms_invite_processor.process_scheduled_invites(datetime.datetime(2000, 01, 02, 23, 59, 0, tzinfo=utc))
-        self.assertEqual(self.pretend_sms_sender.sentbox, [])
-        self.pretend_sms_sender.clear_sentbox()
+        invites_manager.process_scheduled_invites(datetime.datetime(2000, 01, 02, 23, 59, 0, tzinfo=utc))
+        self.assertEqual(send_sms.testing_outbox, [])
+        send_sms.testing_outbox = []
 
-        self.sms_invite_processor.process_scheduled_invites(datetime.datetime(2000, 01, 03, 2, 0, 0, tzinfo=utc))
-        self.assertEqual(self.pretend_sms_sender.sentbox, [(u'+12127182003', u'An entire day has passed\n' + link, u'+12127182002')])
-        self.pretend_sms_sender.clear_sentbox()
+        invites_manager.process_scheduled_invites(datetime.datetime(2000, 01, 03, 2, 0, 0, tzinfo=utc))
+        self.assertEqual(send_sms.testing_outbox, [(u'+12127182003', u'An entire day has passed\n' + link, u'+12127182002')])
+        send_sms.testing_outbox = []
 
-        self.sms_invite_processor.process_scheduled_invites(datetime.datetime(2000, 01, 03, 2, 0, 1, tzinfo=utc))
-        self.assertEqual(self.pretend_sms_sender.sentbox, [])
-        self.pretend_sms_sender.clear_sentbox()
+        invites_manager.process_scheduled_invites(datetime.datetime(2000, 01, 03, 2, 0, 1, tzinfo=utc))
+        self.assertEqual(send_sms.testing_outbox, [])
