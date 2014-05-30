@@ -793,7 +793,7 @@ class MembersTests(BaseTestCase):
             self.assertEqual(item.get('success'), False)
 
         self.assertEqual(response_array[0].get('error'), 'invalid_user_id')
-        self.assertEqual(response_array[1].get('error'), 'not_possible_phone_number')
+        self.assertEqual(response_array[1].get('error'), 'invalid_phone_number')
         self.assertEqual(response_array[2].get('error'), 'invalid_phone_number')
 
     def test_add_new_phone(self):

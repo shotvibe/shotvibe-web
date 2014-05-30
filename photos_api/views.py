@@ -82,8 +82,32 @@ def parse_phone_number(phone_number, default_country):
     if not phonenumbers.is_possible_number(number):
         return None
 
-    return phonenumbers.format_number(number, phonenumbers.PhoneNumberFormat.E164)
+    return number
 
+def album_add_members(album, inviter, member_identifiers, date_added):
+    result = []
+
+    with album.modify(date_added) as m:
+        for member_identifier in member_identifiers:
+            if member_identifier.user_id is None:
+                number = parse_phone_number(member_identifier.phone_number, member_identifier.default_country)
+                if not number:
+                    result.append({"success": False, "error": "invalid_phone_number"})
+                else:
+                    m.add_phone_number(inviter, number, member_identifier.contact_nickname, None)
+
+                    # Later check for the result of the Twilio SMS send, which
+                    # will tell us if sending the SMS failed due to being an invalid
+                    # number. In this save success=False, error=invalid_phone_number
+                    result.append({"success": True})
+
+            else:
+                if m.add_user_id(inviter, member_identifier.user_id):
+                    result.append({"success": True})
+                else:
+                    result.append({"success": False, "error": "invalid_user_id"})
+
+    return result
 
 @supports_etag
 class AlbumDetail(generics.RetrieveAPIView):
@@ -141,7 +165,7 @@ class AlbumDetail(generics.RetrieveAPIView):
                                        by_user=request.user,
                                        to_album=self.album)
 
-        self.album.add_members(request.user, serializer.object.add_members, now, Album.default_sms_message_formatter)
+        album_add_members(self.album, request.user, serializer.object.add_members, now)
 
         responseSerializer = (self.get_serializer_class())(self.get_object(), context={'request': request})
         return Response(responseSerializer.data)
@@ -159,10 +183,7 @@ class AlbumMembersView(generics.CreateAPIView):
 
         if serializer.is_valid():
             album = Album.objects.get(pk=kwargs.get('pk'))
-            result = album.add_members(request.user,
-                                       serializer.object['members'],
-                                       now,
-                                       Album.default_sms_message_formatter)
+            result = album_add_members(album, request.user, serializer.object['members'], now)
 
             return Response(result, status=status.HTTP_200_OK)
         else:
@@ -380,7 +401,7 @@ class Albums(generics.ListAPIView):
         now = timezone.now()
 
         album = Album.objects.create_album(self.request.user, serializer.object.album_name)
-        album.add_members(request.user, serializer.object.members, now, Album.default_sms_message_formatter)
+        album_add_members(album, request.user, serializer.object.members, now)
 
         responseSerializer = AlbumSerializer(album, context={'request': request})
         return Response(responseSerializer.data)
