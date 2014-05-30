@@ -48,6 +48,7 @@ from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
     AlbumMembersSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
+import invites_manager
 from photos import photo_operations
 
 
@@ -94,7 +95,7 @@ def album_add_members(album, inviter, member_identifiers, date_added):
                 if not number:
                     result.append({"success": False, "error": "invalid_phone_number"})
                 else:
-                    m.add_phone_number(inviter, number, member_identifier.contact_nickname, None)
+                    m.add_phone_number(inviter, number, member_identifier.contact_nickname, invites_manager.send_invite)
 
                     # Later check for the result of the Twilio SMS send, which
                     # will tell us if sending the SMS failed due to being an invalid

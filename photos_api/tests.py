@@ -19,6 +19,7 @@ from phone_auth.models import AuthToken
 from phone_auth.models import PhoneNumber, PhoneContact, AnonymousPhoneNumber, PhoneNumberLinkCode
 from photos.models import Photo, PendingPhoto, Album, AlbumMember
 from photos_api import is_phone_number_mobile
+from invites_manager.models import SMSInviteMessage
 
 from photos_api.serializers import AlbumUpdateSerializer, MemberIdentifier, MemberIdentifierSerializer, AlbumAddSerializer
 import requests
@@ -646,6 +647,11 @@ class PhotoUpload(BaseTestCase):
 
 class MembersTests(BaseTestCase):
     def setUp(self):
+        SMSInviteMessage.objects.create(
+                country_calling_code = None, # Use as default
+                message_template = 'Hi ${name}. ${inviter} shared an album: ${album}',
+                time_delay_hours = 0)
+
         self.client.login(username='2', password='amanda')
 
     def test_invite_status(self):
