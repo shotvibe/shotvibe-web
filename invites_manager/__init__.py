@@ -83,6 +83,7 @@ def send_immediate_invite(link_code, message_template, sms_sender_phone_override
 
 
 def process_scheduled_invites(current_time):
+    num_sent = 0
     for scheduled_message in ScheduledSMSInviteMessage.objects.get_scheduled_till(current_time):
         send_immediate_invite(scheduled_message.link_code, scheduled_message.message_template, scheduled_message.sms_sender_phone_override)
         track_event(scheduled_message.link_code.phone_number.user, 'New User SMS Invite Sent', {
@@ -90,3 +91,7 @@ def process_scheduled_invites(current_time):
             'time_delay_hours': scheduled_message.time_delay_hours})
 
         scheduled_message.delete()
+
+        num_sent += 1
+
+    return num_sent
