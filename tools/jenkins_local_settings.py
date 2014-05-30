@@ -44,6 +44,7 @@ PROJECT_APPS = (
     'analytics',
     'affiliates',
     'frontend',
+    'invites_manager',
     'photos',
     'phone_auth',
     'photos_api',
