@@ -1,3 +1,4 @@
+import datetime
 import filecmp
 import httplib
 import json
@@ -5,11 +6,11 @@ import phonenumbers
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from django.core.urlresolvers import reverse
-from frontend.mobile_views import invite_page
 import os
 import shutil
 
 from django.conf import settings
+from django.conf.urls import patterns, include, url
 from django.contrib import auth
 from django.test import TestCase, Client
 from django.test.utils import override_settings
@@ -17,9 +18,13 @@ from django.utils import timezone
 
 from phone_auth.models import AuthToken
 from phone_auth.models import PhoneNumber, PhoneContact, AnonymousPhoneNumber, PhoneNumberLinkCode
+from phone_auth.sms_send import send_sms, mark_sms_test_case
 from photos.models import Photo, PendingPhoto, Album, AlbumMember
 from photos_api import is_phone_number_mobile
 from invites_manager.models import SMSInviteMessage
+import invites_manager
+import frontend.urls
+import photos_api.urls
 
 from photos_api.serializers import AlbumUpdateSerializer, MemberIdentifier, MemberIdentifierSerializer, AlbumAddSerializer
 import requests
@@ -951,6 +956,149 @@ class MembersTests(BaseTestCase):
         # Retrieving album details is forbidden, because user is not a member of the album anymore
         album_after_response = self.client.get(reverse('album-detail', kwargs={'pk':9}))
         self.assertEqual(album_after_response.status_code, httplib.FORBIDDEN)
+
+
+@mark_sms_test_case
+class ScheduledSMSTest(BaseTestCase):
+    class MockUrlConf(object):
+        urlpatterns = patterns('',
+                url(r'^', include(photos_api.urls)),
+                url(r'^frontend/', include(frontend.urls)),
+                )
+
+    urls = MockUrlConf
+
+    def setUp(self):
+        SMSInviteMessage.objects.create(
+                country_calling_code = None, # Use as default
+                message_template = 'Hi ${name}. ${inviter} shared an album: ${album}',
+                time_delay_hours = 0)
+
+        SMSInviteMessage.objects.create(
+                country_calling_code = None, # Use as default
+                message_template = 'Hi ${name}. ${inviter} has been waiting 4 hours for you to view: ${album}',
+                time_delay_hours = 4)
+
+        SMSInviteMessage.objects.create(
+                country_calling_code = None, # Use as default
+                message_template = 'An entire day has passed',
+                time_delay_hours = 24)
+
+        self.client.login(username='2', password='amanda')
+
+        # Create a phone number for amanda, to verify that the SMS's are sent
+        # from her
+        PhoneNumber.objects.create(
+                phone_number = '+12127182002',
+                user = get_user_model().objects.get(pk=2),
+                date_created = datetime.datetime(1999, 01, 01, tzinfo=timezone.utc),
+                verified = True)
+
+    def test_send_all_invites(self):
+        add_members = { 'members': [
+            {
+                'phone_number': '212-718-4000',
+                'default_country': 'US',
+                'contact_nickname': 'John Doe' }
+            ] }
+
+        now = timezone.now()
+        add_response = self.client.post('/albums/9/members/', content_type='application/json', data=json.dumps(add_members))
+        self.assertEqual(add_response.status_code, 200)
+
+        phone_number = PhoneNumber.objects.get(phone_number='+12127184000')
+        link_code = PhoneNumberLinkCode.objects.get(phone_number=phone_number)
+
+        invite_url_prefix = 'https://useglance.com'
+        link = link_code.get_invite_page(invite_url_prefix)
+
+        self.assertEqual(send_sms.testing_outbox, [('+12127184000', 'Hi John Doe. amanda shared an album: cautioned whoa\n' + link, '+12127182002')])
+        send_sms.testing_outbox = []
+
+        # Start traveling into the future, and verify that the SMS's are sent
+        # on time (after 4 hours, and after 24 hours):
+
+        invites_manager.process_scheduled_invites(now + datetime.timedelta(hours=0.5))
+        self.assertEqual(send_sms.testing_outbox, [])
+
+        invites_manager.process_scheduled_invites(now + datetime.timedelta(hours=1.5))
+        self.assertEqual(send_sms.testing_outbox, [])
+
+        invites_manager.process_scheduled_invites(now + datetime.timedelta(hours=2.5))
+        self.assertEqual(send_sms.testing_outbox, [])
+
+        invites_manager.process_scheduled_invites(now + datetime.timedelta(hours=3.5))
+        self.assertEqual(send_sms.testing_outbox, [])
+
+        invites_manager.process_scheduled_invites(now + datetime.timedelta(hours=4.5))
+        self.assertEqual(send_sms.testing_outbox, [('+12127184000', 'Hi John Doe. amanda has been waiting 4 hours for you to view: cautioned whoa\n' + link, '+12127182002')])
+        send_sms.testing_outbox = []
+
+        invites_manager.process_scheduled_invites(now + datetime.timedelta(hours=5.5))
+        self.assertEqual(send_sms.testing_outbox, [])
+
+        invites_manager.process_scheduled_invites(now + datetime.timedelta(hours=23.5))
+        self.assertEqual(send_sms.testing_outbox, [])
+
+        invites_manager.process_scheduled_invites(now + datetime.timedelta(hours=24.5))
+        self.assertEqual(send_sms.testing_outbox, [('+12127184000', u'An entire day has passed\n' + link, '+12127182002')])
+
+    def test_clear_invites_after_link_visit(self):
+        add_members = { 'members': [
+            {
+                'phone_number': '212-718-4000',
+                'default_country': 'US',
+                'contact_nickname': 'John Doe' }
+            ] }
+
+        now = timezone.now()
+        add_response = self.client.post('/albums/9/members/', content_type='application/json', data=json.dumps(add_members))
+        self.assertEqual(add_response.status_code, 200)
+
+        phone_number = PhoneNumber.objects.get(phone_number='+12127184000')
+        link_code = PhoneNumberLinkCode.objects.get(phone_number=phone_number)
+
+        invite_url_prefix = 'https://useglance.com'
+        link = link_code.get_invite_page(invite_url_prefix)
+
+        self.assertEqual(send_sms.testing_outbox, [('+12127184000', 'Hi John Doe. amanda shared an album: cautioned whoa\n' + link, '+12127182002')])
+        send_sms.testing_outbox = []
+
+        # Start traveling into the future, and verify that the SMS's are sent
+        # on time (after 4 hours, and after 24 hours):
+
+        invites_manager.process_scheduled_invites(now + datetime.timedelta(hours=0.5))
+        self.assertEqual(send_sms.testing_outbox, [])
+
+        invites_manager.process_scheduled_invites(now + datetime.timedelta(hours=1.5))
+        self.assertEqual(send_sms.testing_outbox, [])
+
+        invites_manager.process_scheduled_invites(now + datetime.timedelta(hours=2.5))
+        self.assertEqual(send_sms.testing_outbox, [])
+
+        invites_manager.process_scheduled_invites(now + datetime.timedelta(hours=3.5))
+        self.assertEqual(send_sms.testing_outbox, [])
+
+        invites_manager.process_scheduled_invites(now + datetime.timedelta(hours=4.5))
+        self.assertEqual(send_sms.testing_outbox, [('+12127184000', 'Hi John Doe. amanda has been waiting 4 hours for you to view: cautioned whoa\n' + link, '+12127182002')])
+        send_sms.testing_outbox = []
+
+        invites_manager.process_scheduled_invites(now + datetime.timedelta(hours=5.5))
+        self.assertEqual(send_sms.testing_outbox, [])
+
+        # Now have 'John Doe' visit the invite link:
+        sterile_client = Client()
+        invite_response = sterile_client.get(reverse('invite_page', kwargs={'invite_code':link_code.invite_code}))
+        self.assertEqual(invite_response.status_code, 200)
+
+
+        # After visiting the invite link, no more SMS invites should be sent:
+
+        invites_manager.process_scheduled_invites(now + datetime.timedelta(hours=23.5))
+        self.assertEqual(send_sms.testing_outbox, [])
+
+        invites_manager.process_scheduled_invites(now + datetime.timedelta(hours=24.5))
+        self.assertEqual(send_sms.testing_outbox, [])
 
 
 class TestPhoneNumberMobile(TestCase):
