@@ -8,14 +8,14 @@ class SMSInviteMessageManager(models.Manager):
         if SMSInviteMessage.objects.filter(country_calling_code=country_calling_code, time_delay_hours=0).exists():
             return False
         else:
-            if not SMSInviteMessage.objects.filter(country_calling_code=None, time_delay_hours=0).exists():
+            if not SMSInviteMessage.objects.filter(country_calling_code=SMSInviteMessage.COUNTRY_DEFAULT_VALUE, time_delay_hours=0).exists():
                 raise RuntimeError('No default SMSInviteMessage exists in database')
             return True
 
 
 class SMSInviteMessage(models.Model):
-    country_calling_code = models.PositiveSmallIntegerField(null=True, blank=True, help_text=
-            'See <a href="http://en.wikipedia.org/wiki/List_of_country_calling_codes">Full List</a>. If blank then this will be the default')
+    country_calling_code = models.PositiveSmallIntegerField(help_text=
+            'See <a href="http://en.wikipedia.org/wiki/List_of_country_calling_codes">Full List</a>. Use the number "0" for the default')
     message_template = models.TextField(help_text=
             'Available variables: <code>${inviter} ${name} ${album}</code>')
     time_delay_hours = models.PositiveIntegerField(help_text=
@@ -26,6 +26,7 @@ class SMSInviteMessage(models.Model):
 
     objects = SMSInviteMessageManager()
 
+    COUNTRY_DEFAULT_VALUE = 0
 
 class ScheduledSMSInviteMessageManager(models.Manager):
     def get_scheduled_till(self, time):

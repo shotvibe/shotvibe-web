@@ -25,7 +25,7 @@ class InviteTest(TestCase):
 
     def test_single_default_invite(self):
         SMSInviteMessage.objects.create(
-                country_calling_code = None, # Use as default
+                country_calling_code = SMSInviteMessage.COUNTRY_DEFAULT_VALUE,
                 message_template = 'Hi ${name}. ${inviter} shared an album: ${album}',
                 time_delay_hours = 0)
 
@@ -53,17 +53,17 @@ class InviteTest(TestCase):
 
     def test_scheduled_default_invites(self):
         SMSInviteMessage.objects.create(
-                country_calling_code = None, # Use as default
+                country_calling_code = SMSInviteMessage.COUNTRY_DEFAULT_VALUE,
                 message_template = 'Hi ${name}. ${inviter} shared an album: ${album}',
                 time_delay_hours = 0)
 
         SMSInviteMessage.objects.create(
-                country_calling_code = None, # Use as default
+                country_calling_code = SMSInviteMessage.COUNTRY_DEFAULT_VALUE,
                 message_template = 'Hi ${name}. ${inviter} has been waiting 2 hours for you to view: ${album}',
                 time_delay_hours = 2)
 
         SMSInviteMessage.objects.create(
-                country_calling_code = None, # Use as default
+                country_calling_code = SMSInviteMessage.COUNTRY_DEFAULT_VALUE,
                 message_template = 'An entire day has passed',
                 time_delay_hours = 24)
 

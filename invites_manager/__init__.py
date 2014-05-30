@@ -32,8 +32,8 @@ def send_invite(inviter, phone_number, current_time):
     destination_country_calling_code = phonenumbers.parse(phone_number.phone_number).country_code
 
     if SMSInviteMessage.objects.country_calling_code_use_default(destination_country_calling_code):
-        immediate_message_obj = SMSInviteMessage.objects.get(country_calling_code=None, time_delay_hours=0)
-        delayed_message_objs = SMSInviteMessage.objects.filter(country_calling_code=None, time_delay_hours__gt=0)
+        immediate_message_obj = SMSInviteMessage.objects.get(country_calling_code=SMSInviteMessage.COUNTRY_DEFAULT_VALUE, time_delay_hours=0)
+        delayed_message_objs = SMSInviteMessage.objects.filter(country_calling_code=SMSInviteMessage.COUNTRY_DEFAULT_VALUE, time_delay_hours__gt=0)
     else:
         immediate_message_obj = SMSInviteMessage.objects.get(country_calling_code=destination_country_calling_code, time_delay_hours=0)
         delayed_message_objs = SMSInviteMessage.objects.filter(country_calling_code=destination_country_calling_code, time_delay_hours__gt=0)
