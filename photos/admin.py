@@ -101,6 +101,8 @@ class PhotoAdmin(admin.ModelAdmin):
 
     readonly_fields = ('photo_id', 'storage_id', 'subdomain', 'date_created', 'author', 'album', 'photo_thumbnail',)
 
+    ordering = ('-date_created', '-album_index')
+
     def photo_thumbnail(self, instance):
         return format_html(u'<img src="{0}" />', instance.get_photo_url_no_ext() + '_thumb75.jpg')
 
