@@ -96,12 +96,16 @@ class AlbumAdmin(admin.ModelAdmin):
     inlines = [AlbumMemberInline, PhotoAdminInline]
 
 class PhotoAdmin(admin.ModelAdmin):
-    list_display = ('photo_id', 'album', 'date_created', 'author',)
+    list_display = ('photo_icon', 'photo_id', 'album', 'date_created', 'author',)
     list_display_links = list_display
 
     readonly_fields = ('photo_id', 'storage_id', 'subdomain', 'date_created', 'author', 'album', 'photo_thumbnail',)
 
     ordering = ('-date_created', '-album_index')
+
+    def photo_icon(self, obj):
+        return format_html(u'<img src="{0}" width="35" height="35">', obj.get_photo_url_no_ext() + '_crop140.jpg')
+    photo_icon.short_description = 'Photo'
 
     def photo_thumbnail(self, instance):
         return format_html(u'<img src="{0}" />', instance.get_photo_url_no_ext() + '_thumb75.jpg')
