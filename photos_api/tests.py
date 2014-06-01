@@ -650,6 +650,42 @@ class PhotoUpload(BaseTestCase):
         members_ids = [u['id'] for u in album_json['members']]
         self.assertIn(2, members_ids) # amanda
 
+class AlbumNameTest(BaseTestCase):
+    def setUp(self):
+        self.client.login(username='2', password='amanda')
+
+    def test_get_invalid_album_name(self):
+        name_response = self.client.get('/albums/0/name/')
+        self.assertEqual(name_response.status_code, 404)
+
+    def test_get_album_name(self):
+        name_response = self.client.get('/albums/9/name/')
+        self.assertEqual(name_response.status_code, 200)
+        j = json.loads(name_response.content)
+        self.assertEqual(j['name'], 'cautioned whoa')
+
+    def test_invalid_permission_set_album_name(self):
+        change_name = {
+                'name': 'My New Album Name'
+                }
+        set_response = self.client.put('/albums/9/name/', data=json.dumps(change_name))
+        self.assertEqual(set_response.status_code, httplib.FORBIDDEN)
+
+    def test_set_album_name(self):
+        client = Client()
+        client.login(username='11', password='jackie')
+        change_name = {
+                'name': 'My New Album Name'
+                }
+        set_response = client.put(
+                '/albums/9/name/',
+                data=json.dumps(change_name),
+                content_type='application/json')
+        self.assertEqual(set_response.status_code, 204)
+
+        self.assertEqual(Album.objects.get(pk=9).name, 'My New Album Name')
+
+
 class MembersTests(BaseTestCase):
     def setUp(self):
         d = SMSInviteMessage.objects.get(

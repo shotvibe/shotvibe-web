@@ -81,6 +81,10 @@ Delete photos that a user has uploaded.
 
 Used to add photos or members to an album.
 
+### PUT /albums/{aid}/name/
+
+Used to change the name of an album.
+
 ### POST /albums/{aid}/leave/
 
 Used to leave an album.
@@ -813,6 +817,30 @@ Example request:
     }
 
 The response returned is the same as for `GET /albums/{aid}/`, with the updated album
+
+### PUT /albums/{aid}/name/
+
+Used to change the name of an album.
+
+`aid` is the album that the user wishes to change.
+
+Only the creator of an album can change its name.
+
+The request JSON should contain a single field, "name", with a string value.
+
+Example request:
+
+    POST /albums/5/name/
+    Authorization: Token 01ba4719c80b6fe911b091a7c05124b64eeece96
+    Content-Type: application/json
+    Content-Length: 33
+
+    {
+        "name": "Birthday Party"
+    }
+
+
+The response will be 204 No Content.
 
 ## POST /albums/{aid}/leave/
 

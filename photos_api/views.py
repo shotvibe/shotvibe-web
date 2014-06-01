@@ -45,7 +45,7 @@ from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
     UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer, \
     QueryPhonesRequestSerializer, DeletePhotosSerializer, \
     AlbumMemberNameSerializer, AlbumMemberSerializer, AlbumViewSerializer, \
-    AlbumMembersSerializer
+    AlbumNameChangeSerializer, AlbumMembersSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
 import invites_manager
@@ -170,6 +170,35 @@ class AlbumDetail(generics.RetrieveAPIView):
 
         responseSerializer = (self.get_serializer_class())(self.get_object(), context={'request': request})
         return Response(responseSerializer.data)
+
+
+class AlbumNameView(GenericAPIView):
+    permission_classes = (IsAuthenticated, IsUserInAlbum)
+    serializer_class = AlbumNameChangeSerializer
+
+    def initial(self, request, pk, *args, **kwargs):
+        self.album = get_object_or_404(Album, pk=pk)
+
+        return super(AlbumNameView, self).initial(request, pk, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        responseSerializer = (self.get_serializer_class())()
+        responseSerializer.data['name'] = self.album.name
+        return Response(responseSerializer.data)
+
+    def put(self, request, *args, **kwargs):
+        if request.user != self.album.creator:
+            return Response(status=403)
+
+        serializer = self.get_serializer(data=request.DATA, files=request.FILES)
+        if serializer.is_valid():
+            with self.album.modify(timezone.now()):
+                self.album.name = serializer.object['name']
+                self.album.save(update_fields=['name'])
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class AlbumMembersView(generics.CreateAPIView):
