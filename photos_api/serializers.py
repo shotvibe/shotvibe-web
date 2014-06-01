@@ -71,6 +71,9 @@ class AlbumSerializer(serializers.ModelSerializer):
         return None
 
 
+class AlbumNameChangeSerializer(serializers.Serializer):
+    name = serializers.CharField()
+
 class AlbumMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = AlbumMember
