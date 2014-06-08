@@ -73,7 +73,7 @@ def send_immediate_invite(link_code, message_template, sms_sender_phone_override
     message = string.Template(message_template).safe_substitute(
             inviter = link_code.inviting_user.nickname,
             name = link_code.phone_number.user.nickname,
-            album = album)
+            album = album.name)
 
     invite_url_prefix = 'https://useglance.com'
     link = link_code.get_invite_page(invite_url_prefix)
