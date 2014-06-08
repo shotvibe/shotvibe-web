@@ -9,9 +9,17 @@
   <div id="main_photo">
     <img id="photo">
   </div>
+  {% comment %} Old frame is commented out for now
   <div id="frame">
     <img src="{% static "slideshow/img/frame.png" %}">
   </div>
+  {% endcomment %}
+  <div id="logo">
+    <img src="{% static "slideshow/img/zoom18_logo.png" %}">
+  </div>
+  <div id="caption">
+    Irit &amp; Rami
+  </caption>
   <script>
     startSlideshow('{% url "slideshow.views.slideshow_latest_photo" album.id %}');
   </script>
