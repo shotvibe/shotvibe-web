@@ -1,8 +1,11 @@
+import datetime
+
 from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.template import RequestContext
 from django.views.decorators.cache import never_cache
+from django.utils import timezone
 
 from photos.models import Album
 
@@ -23,6 +26,14 @@ def slideshow(request, album_id):
 def slideshow_latest_photo(request, album_id):
     album = get_object_or_404(Album, pk=album_id)
 
-    latest_photo = album.photo_set.order_by('-album_index')[0]
+    epoch_date = datetime.datetime(1970, 1, 1, tzinfo=timezone.utc)
+    epoch_seconds = int((timezone.now() - epoch_date).total_seconds())
+
+    transition_time = 40
+    cycles_length = 3
+
+    current_cycle = (epoch_seconds % (transition_time * cycles_length)) / transition_time
+
+    latest_photo = album.photo_set.order_by('-album_index')[current_cycle]
 
     return redirect(latest_photo.get_photo_url_no_ext() + '_r_fhd.jpg')
