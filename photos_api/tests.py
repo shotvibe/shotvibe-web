@@ -704,6 +704,31 @@ class PhotoGlanceTest(TestCase):
         photo_glance = PhotoGlance.objects.get(photo__photo_id='test-photo-id-1', author=self.arnold)
         self.assertEqual(photo_glance.emoticon_name, 'test-smile-2')
 
+    def test_glance_view(self):
+        blake = User.objects.create_user('blake')
+
+        PhotoGlance.objects.create(
+                photo = Photo.objects.get(photo_id='test-photo-id-1'),
+                emoticon_name = 'test-smile',
+                date_created = datetime.datetime(2000, 1, 3, tzinfo=timezone.utc),
+                author = self.arnold)
+
+        PhotoGlance.objects.create(
+                photo = Photo.objects.get(photo_id='test-photo-id-1'),
+                emoticon_name = 'test-wink',
+                date_created = datetime.datetime(2000, 1, 4, tzinfo=timezone.utc),
+                author = blake)
+
+        response = self.client.get(reverse('album-detail', kwargs={'pk': str(self.party_album.id)}))
+        self.assertEqual(response.status_code, 200)
+        j = json.loads(response.content)
+
+        self.assertEqual(j['photos'][0]['glances'][0]['emoticon_name'], 'test-smile')
+        self.assertEqual(j['photos'][0]['glances'][0]['author']['id'], self.arnold.id)
+
+        self.assertEqual(j['photos'][0]['glances'][1]['emoticon_name'], 'test-wink')
+        self.assertEqual(j['photos'][0]['glances'][1]['author']['id'], blake.id)
+
 
 class AlbumNameTest(BaseTestCase):
     def setUp(self):
