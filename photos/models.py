@@ -385,6 +385,19 @@ class PendingPhoto(models.Model):
         return not (self.processing_done_time is None)
 
 
+class PhotoGlance(models.Model):
+    photo = models.ForeignKey(Photo)
+    emoticon_name = models.CharField(max_length=255)
+    date_created = models.DateTimeField(db_index=True)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL)
+
+    class Meta:
+        unique_together = ('photo', 'author')
+
+    def __unicode__(self):
+        return unicode(self.photo) + ' ' + unicode(self.author) + ': ' + self.emoticon_name
+
+
 # This is a temporary solution until a more robust coordinator is implemented
 class PhotoServer(models.Model):
     photos_update_url = models.CharField(max_length=255, unique=True)

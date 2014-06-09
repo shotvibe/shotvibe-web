@@ -228,6 +228,11 @@ class QueryPhonesRequestSerializer(serializers.Serializer):
 class PhotoUploadInitSerializer(serializers.Serializer):
     user_auth_token = serializers.CharField()
 
+
+class PhotoGlanceSerializer(serializers.Serializer):
+    emoticon_name = serializers.CharField(max_length=255)
+
+
 class PhotoServerRegisterSerializer(serializers.Serializer):
     update_url = serializers.CharField()
     subdomain = serializers.CharField()

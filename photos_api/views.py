@@ -40,12 +40,13 @@ import requests
 import phonenumbers
 
 from photos.image_uploads import process_file_upload
-from photos.models import Album, PendingPhoto, AlbumMember, Photo
+from photos.models import Album, PendingPhoto, AlbumMember, Photo, PhotoGlance
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
     UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer, \
     QueryPhonesRequestSerializer, DeletePhotosSerializer, \
     AlbumMemberNameSerializer, AlbumMemberSerializer, AlbumViewSerializer, \
-    AlbumNameChangeSerializer, AlbumMembersSerializer
+    AlbumNameChangeSerializer, AlbumMembersSerializer, \
+    PhotoGlanceSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
 import invites_manager
@@ -526,6 +527,40 @@ class PhotoUpload(views.APIView):
     def put(self, request, photo_id, format=None):
         return self.process_upload_request(request, photo_id,
                                            request.DATA.chunks())
+
+
+class PhotoGlanceView(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = PhotoGlanceSerializer
+
+    def initial(self, request, photo_id, *args, **kwargs):
+        self.photo = get_object_or_404(Photo, pk=photo_id)
+
+        return super(PhotoGlanceView, self).initial(request, photo_id, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.DATA, files=request.FILES)
+        if serializer.is_valid():
+            now = timezone.now()
+            with self.photo.album.modify(now):
+                photo_glance, created = PhotoGlance.objects.get_or_create(
+                        photo = self.photo,
+                        author = request.user,
+                        defaults = {
+                            'date_created': now,
+                            'emoticon_name': serializer.object['emoticon_name']
+                            })
+                if not created:
+                    photo_glance.date_created = now
+                    photo_glance.emoticon_name = serializer.object['emoticon_name']
+                    photo_glance.save(update_fields=['date_created', 'emoticon_name'])
+
+            # TODO need to send push notification to photo author
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        PhotoGlance.objects.get_or_create()
 
 
 class QueryPhoneNumbers(GenericAPIView):
