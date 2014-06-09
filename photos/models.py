@@ -138,6 +138,24 @@ class Album(models.Model):
 
             return phone_number
 
+        def glance_photo(self, photo, glancer, emoticon_name):
+            if photo.album != self.album:
+                raise ValueError('photo is not part of this album')
+
+            photo_glance, created = PhotoGlance.objects.get_or_create(
+                    photo = photo,
+                    author = glancer,
+                    defaults = {
+                        'date_created': self.current_date,
+                        'emoticon_name': emoticon_name
+                        })
+            if not created:
+                photo_glance.date_created = self.current_date
+                photo_glance.emoticon_name = emoticon_name
+                photo_glance.save(update_fields=['date_created', 'emoticon_name'])
+
+            # TODO need to send push notification to photo author
+
 
     def modify(self, current_date):
         return Album.ModificationContext(self, current_date)

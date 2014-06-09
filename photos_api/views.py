@@ -541,21 +541,8 @@ class PhotoGlanceView(GenericAPIView):
     def put(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.DATA, files=request.FILES)
         if serializer.is_valid():
-            now = timezone.now()
-            with self.photo.album.modify(now):
-                photo_glance, created = PhotoGlance.objects.get_or_create(
-                        photo = self.photo,
-                        author = request.user,
-                        defaults = {
-                            'date_created': now,
-                            'emoticon_name': serializer.object['emoticon_name']
-                            })
-                if not created:
-                    photo_glance.date_created = now
-                    photo_glance.emoticon_name = serializer.object['emoticon_name']
-                    photo_glance.save(update_fields=['date_created', 'emoticon_name'])
-
-            # TODO need to send push notification to photo author
+            with self.photo.album.modify(timezone.now()) as m:
+                m.glance_photo(self.photo, request.user, serializer.object['emoticon_name'])
 
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
