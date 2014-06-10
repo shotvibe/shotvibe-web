@@ -51,6 +51,8 @@ PROJECT_APPS = (
     'slideshow',
 )
 
+USING_LOCAL_PHOTOS = True
+
 # Buckets where we upload new avatars
 AVATAR_BUCKETS = (
     's3:shotvibe-avatars-01:{filename}',
