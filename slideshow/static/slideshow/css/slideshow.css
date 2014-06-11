@@ -42,10 +42,10 @@ html, body {
 
 #caption {
 	position: absolute;
-	bottom: 48px;
-	left: 48px;
+	bottom: 8px;
+	left: 8px;
 
 	color: #eeeeee;
-	font-size: 90px;
+	font-size: 40px;
 	text-shadow: 4px 4px 2px rgba(64, 64, 64, 0.5);
 }
