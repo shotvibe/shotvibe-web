@@ -36,8 +36,12 @@ html, body {
 
 #logo {
 	position: absolute;
-	bottom: 16px;
-	right: 16px;
+	bottom: 0px;
+	right: 0px;
+}
+
+#logo img {
+	width: 160px;
 }
 
 #caption {
