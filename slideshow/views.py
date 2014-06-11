@@ -29,7 +29,7 @@ def slideshow_latest_photo(request, album_id):
     epoch_date = datetime.datetime(1970, 1, 1, tzinfo=timezone.utc)
     epoch_seconds = int((timezone.now() - epoch_date).total_seconds())
 
-    transition_time = 40
+    transition_time = 15
     cycles_length = 3
 
     current_cycle = (epoch_seconds % (transition_time * cycles_length)) / transition_time
