@@ -16,8 +16,17 @@ def index(request):
 def slideshow(request, album_id):
     album = get_object_or_404(Album, pk=album_id)
 
+    # Temporary hard-coded captions
+    if album.id == 2794:
+        caption = 'Maria & Niv'
+    elif album.id == 2795:
+        caption = 'Moran & Yaniv'
+    else:
+        caption = ''
+
     data = {
-            'album': album
+            'album': album,
+            'caption': caption
             }
     return render_to_response('slideshow/slideshow.html', data, context_instance=RequestContext(request))
 

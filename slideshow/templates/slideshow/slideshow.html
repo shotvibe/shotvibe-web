@@ -18,7 +18,7 @@
     <img src="{% static "slideshow/img/zoom18_logo_dark.jpg" %}">
   </div>
   <div id="caption">
-    Liron &amp; Adir
+    {{ caption }}
   </caption>
   <script>
     startSlideshow('{% url "slideshow.views.slideshow_latest_photo" album.id %}');
