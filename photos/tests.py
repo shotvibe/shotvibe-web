@@ -86,6 +86,63 @@ class ModelTest(TestCase):
         the_album = Album.objects.get(pk=the_album.id)
         self.assertEqual(the_album.last_updated, update_date)
 
+    def test_copy_photo_to_album(self):
+        date1 = datetime.datetime(2010, 1, 1, tzinfo=utc)
+        album1 = Album.objects.create_album(self.amanda, 'Album 1', date1)
+        pending_photo = Photo.objects.upload_request(author=self.amanda)
+        with open('photos/test_photos/death-valley-sand-dunes.jpg') as f:
+            image_uploads.process_file_upload(pending_photo, read_in_chunks(f))
+
+        photo_operations.add_pending_photos_to_album([pending_photo.photo_id], album1.id, date1)
+
+        date2 = datetime.datetime(2010, 1, 2, tzinfo=utc)
+        album2 = Album.objects.create_album(self.barney, 'Album 2', date2)
+        photo_operations.copy_photos_to_album(self.barney, [pending_photo.photo_id], album2.id, date2)
+
+        album2_photos = album2.get_photos()
+
+        self.assertEqual(len(album2_photos), 1)
+        self.assertEqual(album2_photos[0].storage_id, Photo.objects.get(pk=pending_photo.photo_id).storage_id)
+
+    def test_copy_photo_to_album_twice(self):
+        date1 = datetime.datetime(2010, 1, 1, tzinfo=utc)
+        album1 = Album.objects.create_album(self.amanda, 'Album 1', date1)
+        pending_photo = Photo.objects.upload_request(author=self.amanda)
+        with open('photos/test_photos/death-valley-sand-dunes.jpg') as f:
+            image_uploads.process_file_upload(pending_photo, read_in_chunks(f))
+
+        photo_operations.add_pending_photos_to_album([pending_photo.photo_id], album1.id, date1)
+
+        date2 = datetime.datetime(2010, 1, 2, tzinfo=utc)
+        album2 = Album.objects.create_album(self.barney, 'Album 2', date2)
+        photo_operations.copy_photos_to_album(self.barney, [pending_photo.photo_id, pending_photo.photo_id], album2.id, date2)
+
+        album2_photos = album2.get_photos()
+
+        self.assertEqual(len(album2_photos), 1)
+        self.assertEqual(album2_photos[0].storage_id, Photo.objects.get(pk=pending_photo.photo_id).storage_id)
+
+    def test_copy_photo_to_album_multiple_authors(self):
+        date1 = datetime.datetime(2010, 1, 1, tzinfo=utc)
+        album1 = Album.objects.create_album(self.amanda, 'Album 1', date1)
+        pending_photo = Photo.objects.upload_request(author=self.amanda)
+        with open('photos/test_photos/death-valley-sand-dunes.jpg') as f:
+            image_uploads.process_file_upload(pending_photo, read_in_chunks(f))
+
+        photo_operations.add_pending_photos_to_album([pending_photo.photo_id], album1.id, date1)
+
+        date2 = datetime.datetime(2010, 1, 2, tzinfo=utc)
+        album2 = Album.objects.create_album(self.barney, 'Album 2', date2)
+        photo_operations.copy_photos_to_album(self.barney, [pending_photo.photo_id], album2.id, date2)
+        photo_operations.copy_photos_to_album(self.amanda, [pending_photo.photo_id], album2.id, date2)
+
+        album2_photos = album2.get_photos()
+
+        self.assertEqual(len(album2_photos), 2)
+        self.assertEqual(album2_photos[0].storage_id, Photo.objects.get(pk=pending_photo.photo_id).storage_id)
+        self.assertEqual(album2_photos[1].storage_id, Photo.objects.get(pk=pending_photo.photo_id).storage_id)
+
+
 class AlbumTest(TestCase):
     def setUp(self):
         self.amanda = User.objects.create_user('amanda')
