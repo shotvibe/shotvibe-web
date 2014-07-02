@@ -239,6 +239,100 @@ class AddPendingPhotosToAlbumAction(ExThread):
             album.save_revision(self.date_created)
 
 
+class CopyPhotosToAlbumAction(ExThread):
+    def __init__(self, author, photo_ids, album_id, date_created):
+        ExThread.__init__(self)
+
+        self.author = author
+        self.photo_ids = photo_ids
+        self.album_id = album_id
+        self.date_created = date_created
+
+    def add_photos_to_db(self, photo_ids):
+        """
+        Returns a dictionary from subdomain values to lists of Photo objects
+        """
+        added_photos = {}
+
+        album = Album.objects.get(pk=self.album_id)
+        album_index_q = Photo.objects.filter(album=album).aggregate(Max('album_index'))
+
+        max_album_index = album_index_q['album_index__max']
+        if max_album_index is None:
+            next_album_index = 0
+        else:
+            next_album_index = max_album_index + 1
+
+        for photo_id in photo_ids:
+            try:
+                photo = Photo.objects.get(photo_id=photo_id)
+            except Photo.DoesNotExist:
+                # Silently ignore any non-existing photo_ids
+                pass
+            else:
+                if not Photo.objects.filter(
+                        album=album,
+                        storage_id=photo.storage_id,
+                        author=self.author).exists():
+                    chosen_subdomain = choose_random_subdomain()
+                    p = Photo.objects.create(
+                        photo_id=Photo.generate_photo_id(),
+                        storage_id = photo.storage_id,
+                        subdomain = chosen_subdomain,
+                        date_created = self.date_created,
+                        author=self.author,
+                        album=album,
+                        album_index = next_album_index,
+                    )
+                    if chosen_subdomain in added_photos:
+                        added_photos[chosen_subdomain].append(p)
+                    else:
+                        added_photos[chosen_subdomain] = [p]
+
+                    if PendingPhoto.objects.filter(photo_id=p.photo_id).exists():
+                        raise IntegrityError
+
+                    next_album_index += 1
+
+        return added_photos
+
+    def run_with_exception(self):
+        try:
+            self.perform_action()
+        finally:
+            django.db.close_old_connections()
+
+    def perform_action(self):
+        with transaction.atomic():
+            success = False
+            while not success:
+                try:
+                    with transaction.atomic():
+                        added_photos = self.add_photos_to_db(self.photo_ids)
+                except IntegrityError:
+                    success = False
+                else:
+                    success = True
+
+            for subdomain, photos in added_photos.iteritems():
+                for photo_server in PhotoServer.objects.filter(subdomain=subdomain, unreachable=False):
+                    # TODO We should use concurrent requests for this
+
+                    num_retries = 5
+                    initial_retry_time = 4
+
+                    try:
+                        request_with_n_retries(num_retries, initial_retry_time,
+                                lambda: photo_server_set_photos(photo_server.photos_update_url, photo_server.auth_key, photos))
+                    except requests.exceptions.RequestException:
+                        # TODO Log this
+                        photo_server.set_unreachable()
+
+
+            album = Album.objects.get(pk=self.album_id)
+            album.save_revision(self.date_created)
+
+
 def request_with_n_retries(num_retries, initial_retry_time, action):
     num_retries_left = num_retries
     retry_time = initial_retry_time
@@ -267,6 +361,20 @@ def add_pending_photos_to_album(photo_ids, album_id, date_created):
         action.perform_action()
     else:
         thread = AddPendingPhotosToAlbumAction(photo_ids, album_id, date_created)
+        thread.daemon = False
+        thread.start()
+        thread.join_with_exception()
+
+
+def copy_photos_to_album(author, photo_ids, album_id, date_created):
+    # TODO This is only current needed to make tests work with sqlite
+    # See this bug:
+    #     https://code.djangoproject.com/ticket/12118
+    if settings.USING_LOCAL_PHOTOS:
+        action = CopyPhotosToAlbumAction(author, photo_ids, album_id, date_created)
+        action.perform_action()
+    else:
+        thread = CopyPhotosToAlbumAction(author, photo_ids, album_id, date_created)
         thread.daemon = False
         thread.start()
         thread.join_with_exception()
