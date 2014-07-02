@@ -21,6 +21,8 @@ def slideshow(request, album_id):
         caption = 'Maria & Niv'
     elif album.id == 2795:
         caption = 'Moran & Yaniv'
+    elif album.id == 2963:
+        caption = 'Limor & Itay\'s Wedding'
     else:
         caption = ''
 
