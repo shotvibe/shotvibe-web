@@ -8,9 +8,11 @@ from django.db import models, transaction, IntegrityError
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils import timezone
+import django.db
 
 from phone_auth.models import PhoneNumber, PhoneNumberLinkCode
 from photos.models import Album
+from photos import photo_operations
 
 
 class Organization(models.Model):
@@ -64,6 +66,42 @@ class EventManager(models.Manager):
             eventAlbum = event.album
             inviter = event.created_by
             eventAlbum.add_members(inviter, [MemberIdentifier(user_id=user.id)], timezone.now(), Album.default_sms_message_formatter)
+
+    def handle_partner_registration_payload(self, user, partner_id):
+        if partner_id == 'mazaltov':
+            # Hard-coded album id that is used as a template
+            MAZALTOV_ALBUM_ID = 2811
+
+            mazaltov_album = Album.objects.get(pk=MAZALTOV_ALBUM_ID)
+            photo_ids = [p.photo_id for p in mazaltov_album.get_photos()]
+
+            now = timezone.now()
+
+            class CreateAlbumAction(photo_operations.ExThread):
+                def run_with_exception(self):
+                    try:
+                        self.perform_action()
+                    finally:
+                        django.db.close_old_connections()
+
+                def perform_action(self):
+                    with transaction.atomic():
+                        self.new_album = Album.objects.create_album(mazaltov_album.creator, mazaltov_album.name, now)
+                        with self.new_album.modify(now) as m:
+                            m.add_user_id(mazaltov_album.creator, user.id)
+
+            action = CreateAlbumAction()
+            # TODO This is only current needed to make tests work with sqlite
+            # See this bug:
+            #     https://code.djangoproject.com/ticket/12118
+            if settings.USING_LOCAL_PHOTOS:
+                action.perform_action()
+            else:
+                action.daemon = False
+                action.start()
+                action.join_with_exception()
+
+            photo_operations.copy_photos_to_album(mazaltov_album.creator, photo_ids, action.new_album.id, now)
 
 
 class Event(models.Model):
