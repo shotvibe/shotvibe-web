@@ -6,12 +6,16 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.http import HttpResponseRedirect, HttpResponse, HttpResponseForbidden
+from django.http import HttpResponseRedirect, HttpResponse, HttpResponseForbidden, HttpResponseNotAllowed
 from django.http import Http404
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.http import urlencode
 from functools import wraps
 
 import requests
+
+import phonenumbers
 
 from affiliates.models import Organization, OrganizationUser, Event, EventLink
 from affiliates.forms import EventForm, EventLinkForm, \
@@ -19,6 +23,7 @@ from affiliates.forms import EventForm, EventLinkForm, \
 from frontend.user_device import get_device, parse_version
 
 from phone_auth.models import AuthToken
+from phone_auth.sms_send import send_sms
 from photos.models import Album, Photo, PendingPhoto, AlbumMember
 from photos import image_uploads
 from photos import photo_operations
@@ -331,3 +336,34 @@ def event_link(request, slug):
         'min_os_supported': min_os_supported,
         'app_button_text': eventLink.event.app_button_custom_text
     })
+
+
+@csrf_exempt
+def request_sms(request):
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    partner = request.POST.get('partner')
+    phone_number = request.POST.get('phone_number')
+    default_country = request.POST.get('default_country')
+
+    if not partner or not phone_number or not default_country:
+        return HttpResponse('Invalid POST')
+
+    try:
+        number = phonenumbers.parse(phone_number, default_country)
+    except phonenumbers.phonenumberutil.NumberParseException as e:
+        return HttpResponse(unicode(e))
+
+    domain = u'https://useglance.com'
+    link = domain + reverse('get_app') + u'?' + partner
+
+    message = u'\u05dc\u05d4\u05d5\u05e8\u05d3\u05ea \u05d4\u05d0\u05e4\u05dc\u05d9\u05e7\u05e6\u05d9\u05d9\u05d4 \u05dc\u05d7\u05e5\u003a'
+
+    sms_text = message + u'\n' + link
+
+    phone_number_str = phonenumbers.format_number(number, phonenumbers.PhoneNumberFormat.E164)
+
+    send_sms(phone_number_str, sms_text)
+
+    return HttpResponse('SMS Sent')

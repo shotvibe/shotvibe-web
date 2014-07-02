@@ -74,6 +74,13 @@ def invite_page(request, invite_code):
 def get_app(request):
     device = get_device(request.META.get('HTTP_USER_AGENT', ''))
 
+    # Check querystring for partner identifier, in the form:
+    #   /app/?partner
+    if request.GET.keys():
+        partner = request.GET.keys()[0]
+        if partner == 'mazaltov':
+            request.session['custom_payload'] = "partner:mazaltov"
+
     if device.os == 'Android':
         app_url = settings.GOOGLE_PLAY_URL
     elif device.os == 'iOS':

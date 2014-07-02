@@ -62,6 +62,8 @@ class ConfirmSMSCode(APIView):
                 payload_type, payload_id = custom_payload.split(":", 1)
                 if payload_type == 'event':
                     Event.objects.handle_event_registration_payload(result.user, payload_id)
+                elif payload_type == 'partner':
+                    Event.objects.handle_partner_registration_payload(result.user, payload_id)
 
         return Response({
             'user_id': result.user.id,
