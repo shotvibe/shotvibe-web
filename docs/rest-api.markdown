@@ -73,6 +73,10 @@ Upload a single photo. Returns an empty response body.
 Alternative method for uploading a single photo. Returns an empty response
 body.
 
+### PUT /photos/{photo_id}/glance/
+
+Add a glance emoticon to a photo.
+
 ### POST /photos/delete/
 
 Delete photos that a user has uploaded.
@@ -747,6 +751,30 @@ Example response:
     Vary: Accept
     Content-Type: application/json
     Allow: POST, OPTIONS
+
+### PUT /photos/{photo_id}/glance/
+
+Add a glance emoticon to a photo.
+
+Any user can glance any photo.
+
+The request JSON should include an object with a field "emoticon_name" with a
+string value.
+
+The response will be 204 No Content.
+
+Example request:
+
+```
+PUT /photos/5a7e5e6afd698dc0ae2221469fd25b6f9b9941ddab20c90d95f6cba9efa57905/glance/
+Authorization: Token 01ba4719c80b6fe911b091a7c05124b64eeece96
+Content-Type: application/json
+Content-Length: 281
+
+{
+    "emoticon_name": "tango_smile.png"
+}
+```
 
 ## POST /photos/delete/
 
