@@ -631,7 +631,8 @@ Example response:
                     "url": "https://api.shotvibe.com/users/670666295/",
                     "nickname": "x",
                     "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
-                }
+                },
+                "glances": []
             },
             {
                 "photo_id": "b6cf10999bb7c504dac93f9eeacc75f9c255ab5ab32d882618f80bd22e7ddd5b",
@@ -642,7 +643,17 @@ Example response:
                     "url": "https://api.shotvibe.com/users/12/",
                     "nickname": "kevin",
                     "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
-                }
+                },
+                "glances": [
+                    {
+                        "author": {
+                            "id": 670666295,
+                            "nickname": "x",
+                            "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                        },
+                        "emoticon_name": "tango_smile.png"
+                    }
+                ]
             },
             {
                 "photo_id": "ea301d20b438dca24ffc7408d990629ca274a961f676e01f2e0be8f3911f1e1f",
@@ -653,7 +664,8 @@ Example response:
                     "url": "https://api.shotvibe.com/users/8/",
                     "nickname": "george",
                     "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
-                }
+                },
+                "glances": []
             }
         ]
     }
