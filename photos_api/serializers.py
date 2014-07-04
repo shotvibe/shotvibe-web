@@ -2,7 +2,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib import auth
 from rest_framework import serializers
 
-from photos.models import Album, AlbumMember, Photo
+from photos.models import Album, AlbumMember, Photo, PhotoGlance
 
 
 class ListField(serializers.WritableField):
@@ -36,13 +36,31 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     invite_status = serializers.CharField(source='get_invite_status')
 
 
+class UserCompactSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = auth.get_user_model()
+        fields = ('id', 'nickname', 'avatar_url')
+
+    id = serializers.IntegerField(source='id')
+    avatar_url = serializers.CharField(source='get_avatar_url')
+
+
+class GlanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PhotoGlance
+        fields = ('date_created', 'author', 'emoticon_name')
+
+    author = UserCompactSerializer(source='author')
+
+
 class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photo
-        fields = ('photo_id', 'photo_url', 'date_created', 'author')
+        fields = ('photo_id', 'photo_url', 'date_created', 'author', 'glances')
 
     photo_url = serializers.CharField(source='get_photo_url')
     author = UserSerializer(source='author')
+    glances = GlanceSerializer(source='get_glances')
 
 
 class StaticField(serializers.Field):
@@ -227,6 +245,11 @@ class QueryPhonesRequestSerializer(serializers.Serializer):
 
 class PhotoUploadInitSerializer(serializers.Serializer):
     user_auth_token = serializers.CharField()
+
+
+class PhotoGlanceSerializer(serializers.Serializer):
+    emoticon_name = serializers.CharField(max_length=255)
+
 
 class PhotoServerRegisterSerializer(serializers.Serializer):
     update_url = serializers.CharField()

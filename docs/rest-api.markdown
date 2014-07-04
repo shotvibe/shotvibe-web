@@ -73,6 +73,10 @@ Upload a single photo. Returns an empty response body.
 Alternative method for uploading a single photo. Returns an empty response
 body.
 
+### PUT /photos/{photo_id}/glance/
+
+Add a glance emoticon to a photo.
+
 ### POST /photos/delete/
 
 Delete photos that a user has uploaded.
@@ -627,7 +631,8 @@ Example response:
                     "url": "https://api.shotvibe.com/users/670666295/",
                     "nickname": "x",
                     "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
-                }
+                },
+                "glances": []
             },
             {
                 "photo_id": "b6cf10999bb7c504dac93f9eeacc75f9c255ab5ab32d882618f80bd22e7ddd5b",
@@ -638,7 +643,17 @@ Example response:
                     "url": "https://api.shotvibe.com/users/12/",
                     "nickname": "kevin",
                     "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
-                }
+                },
+                "glances": [
+                    {
+                        "author": {
+                            "id": 670666295,
+                            "nickname": "x",
+                            "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                        },
+                        "emoticon_name": "tango_smile.png"
+                    }
+                ]
             },
             {
                 "photo_id": "ea301d20b438dca24ffc7408d990629ca274a961f676e01f2e0be8f3911f1e1f",
@@ -649,7 +664,8 @@ Example response:
                     "url": "https://api.shotvibe.com/users/8/",
                     "nickname": "george",
                     "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
-                }
+                },
+                "glances": []
             }
         ]
     }
@@ -747,6 +763,30 @@ Example response:
     Vary: Accept
     Content-Type: application/json
     Allow: POST, OPTIONS
+
+### PUT /photos/{photo_id}/glance/
+
+Add a glance emoticon to a photo.
+
+Any user can glance any photo.
+
+The request JSON should include an object with a field "emoticon_name" with a
+string value.
+
+The response will be 204 No Content.
+
+Example request:
+
+```
+PUT /photos/5a7e5e6afd698dc0ae2221469fd25b6f9b9941ddab20c90d95f6cba9efa57905/glance/
+Authorization: Token 01ba4719c80b6fe911b091a7c05124b64eeece96
+Content-Type: application/json
+Content-Length: 281
+
+{
+    "emoticon_name": "tango_smile.png"
+}
+```
 
 ## POST /photos/delete/
 

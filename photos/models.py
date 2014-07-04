@@ -138,6 +138,24 @@ class Album(models.Model):
 
             return phone_number
 
+        def glance_photo(self, photo, glancer, emoticon_name):
+            if photo.album != self.album:
+                raise ValueError('photo is not part of this album')
+
+            photo_glance, created = PhotoGlance.objects.get_or_create(
+                    photo = photo,
+                    author = glancer,
+                    defaults = {
+                        'date_created': self.current_date,
+                        'emoticon_name': emoticon_name
+                        })
+            if not created:
+                photo_glance.date_created = self.current_date
+                photo_glance.emoticon_name = emoticon_name
+                photo_glance.save(update_fields=['date_created', 'emoticon_name'])
+
+            # TODO need to send push notification to photo author
+
 
     def modify(self, current_date):
         return Album.ModificationContext(self, current_date)
@@ -342,6 +360,10 @@ class Photo(models.Model):
         image_dimensions_calculator = image_uploads.image_sizes[image_size_str]
         return image_dimensions_calculator.get_image_dimensions(self.width, self.height)
 
+    def get_glances(self):
+        return self.photoglance_set.order_by('date_created')
+
+
 def get_pending_photo_default_photo_id():
     photo_id_generated = False
     photo_id = None
@@ -383,6 +405,19 @@ class PendingPhoto(models.Model):
 
     def is_processing_done(self):
         return not (self.processing_done_time is None)
+
+
+class PhotoGlance(models.Model):
+    photo = models.ForeignKey(Photo)
+    emoticon_name = models.CharField(max_length=255)
+    date_created = models.DateTimeField(db_index=True)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL)
+
+    class Meta:
+        unique_together = ('photo', 'author')
+
+    def __unicode__(self):
+        return unicode(self.photo) + ' ' + unicode(self.author) + ': ' + self.emoticon_name
 
 
 # This is a temporary solution until a more robust coordinator is implemented

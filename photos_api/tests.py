@@ -19,7 +19,7 @@ from django.utils import timezone
 from phone_auth.models import AuthToken
 from phone_auth.models import PhoneNumber, PhoneContact, AnonymousPhoneNumber, PhoneNumberLinkCode
 from phone_auth.sms_send import send_sms, mark_sms_test_case
-from photos.models import Photo, PendingPhoto, Album, AlbumMember
+from photos.models import Photo, PendingPhoto, Album, AlbumMember, PhotoGlance
 from photos_api import is_phone_number_mobile
 from invites_manager.models import SMSInviteMessage
 import invites_manager
@@ -649,6 +649,86 @@ class PhotoUpload(BaseTestCase):
         self.assertEqual(len(album_json['members']), 1)
         members_ids = [u['id'] for u in album_json['members']]
         self.assertIn(2, members_ids) # amanda
+
+
+class PhotoGlanceTest(TestCase):
+    urls = 'photos_api.urls'
+
+    def setUp(self):
+        self.arnold = User.objects.create_user('arnold', password='mypass')
+        self.party_album = Album.objects.create_album(self.arnold, 'Party', datetime.datetime(2000, 1, 1, tzinfo=timezone.utc))
+
+        Photo.objects.create(
+                photo_id = 'test-photo-id-1',
+                storage_id = 'test-storage-id-1',
+                subdomain = 'test-subdomain',
+                date_created = datetime.datetime(2000, 1, 2, tzinfo=timezone.utc),
+                author = self.arnold,
+                album = self.party_album,
+                album_index = 0)
+
+        self.client.login(username=str(self.arnold.id), password='mypass')
+
+    def test_glance_photo(self):
+        data = {
+                'emoticon_name': 'test-smile'
+                }
+        response = self.client.put(
+                reverse('photo-glance', kwargs={'photo_id':'test-photo-id-1'}),
+                data = json.dumps(data),
+                content_type = 'application/json')
+        self.assertEqual(response.status_code, 204)
+
+        photo_glance = PhotoGlance.objects.get(photo__photo_id='test-photo-id-1', author=self.arnold)
+        self.assertEqual(photo_glance.emoticon_name, 'test-smile')
+
+    def test_glance_photo_multiple(self):
+        data1 = {
+                'emoticon_name': 'test-smile-1'
+                }
+        response = self.client.put(
+                reverse('photo-glance', kwargs={'photo_id':'test-photo-id-1'}),
+                data = json.dumps(data1),
+                content_type = 'application/json')
+        self.assertEqual(response.status_code, 204)
+
+        data2 = {
+                'emoticon_name': 'test-smile-2'
+                }
+        response = self.client.put(
+                reverse('photo-glance', kwargs={'photo_id':'test-photo-id-1'}),
+                data = json.dumps(data2),
+                content_type = 'application/json')
+        self.assertEqual(response.status_code, 204)
+
+        photo_glance = PhotoGlance.objects.get(photo__photo_id='test-photo-id-1', author=self.arnold)
+        self.assertEqual(photo_glance.emoticon_name, 'test-smile-2')
+
+    def test_glance_view(self):
+        blake = User.objects.create_user('blake')
+
+        PhotoGlance.objects.create(
+                photo = Photo.objects.get(photo_id='test-photo-id-1'),
+                emoticon_name = 'test-smile',
+                date_created = datetime.datetime(2000, 1, 3, tzinfo=timezone.utc),
+                author = self.arnold)
+
+        PhotoGlance.objects.create(
+                photo = Photo.objects.get(photo_id='test-photo-id-1'),
+                emoticon_name = 'test-wink',
+                date_created = datetime.datetime(2000, 1, 4, tzinfo=timezone.utc),
+                author = blake)
+
+        response = self.client.get(reverse('album-detail', kwargs={'pk': str(self.party_album.id)}))
+        self.assertEqual(response.status_code, 200)
+        j = json.loads(response.content)
+
+        self.assertEqual(j['photos'][0]['glances'][0]['emoticon_name'], 'test-smile')
+        self.assertEqual(j['photos'][0]['glances'][0]['author']['id'], self.arnold.id)
+
+        self.assertEqual(j['photos'][0]['glances'][1]['emoticon_name'], 'test-wink')
+        self.assertEqual(j['photos'][0]['glances'][1]['author']['id'], blake.id)
+
 
 class AlbumNameTest(BaseTestCase):
     def setUp(self):

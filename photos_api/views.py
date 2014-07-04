@@ -40,12 +40,13 @@ import requests
 import phonenumbers
 
 from photos.image_uploads import process_file_upload
-from photos.models import Album, PendingPhoto, AlbumMember, Photo
+from photos.models import Album, PendingPhoto, AlbumMember, Photo, PhotoGlance
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
     UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer, \
     QueryPhonesRequestSerializer, DeletePhotosSerializer, \
     AlbumMemberNameSerializer, AlbumMemberSerializer, AlbumViewSerializer, \
-    AlbumNameChangeSerializer, AlbumMembersSerializer
+    AlbumNameChangeSerializer, AlbumMembersSerializer, \
+    PhotoGlanceSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
 import invites_manager
@@ -526,6 +527,27 @@ class PhotoUpload(views.APIView):
     def put(self, request, photo_id, format=None):
         return self.process_upload_request(request, photo_id,
                                            request.DATA.chunks())
+
+
+class PhotoGlanceView(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = PhotoGlanceSerializer
+
+    def initial(self, request, photo_id, *args, **kwargs):
+        self.photo = get_object_or_404(Photo, pk=photo_id)
+
+        return super(PhotoGlanceView, self).initial(request, photo_id, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.DATA, files=request.FILES)
+        if serializer.is_valid():
+            with self.photo.album.modify(timezone.now()) as m:
+                m.glance_photo(self.photo, request.user, serializer.object['emoticon_name'])
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        PhotoGlance.objects.get_or_create()
 
 
 class QueryPhoneNumbers(GenericAPIView):
