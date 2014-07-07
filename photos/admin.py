@@ -2,6 +2,7 @@ from django import forms
 from django.contrib import admin
 from django.db import models
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 from phone_auth.models import PhoneNumberLinkCode
 from photos.models import Album, AlbumMember, Photo, PendingPhoto, PhotoGlance
@@ -10,8 +11,8 @@ from photos.models import PhotoServer
 class PhotoAdminInline(admin.TabularInline):
     model = Photo
 
-    fields = ('photo_id', 'storage_id', 'subdomain', 'date_created', 'author', 'album', 'photo_thumbnail')
-    readonly_fields = ('subdomain', 'date_created', 'author', 'album', 'photo_thumbnail')
+    fields = ('photo_id', 'storage_id', 'subdomain', 'date_created', 'author', 'album', 'photo_thumbnail', 'glances')
+    readonly_fields = ('subdomain', 'date_created', 'author', 'album', 'photo_thumbnail', 'glances')
 
     ordering = ['album_index']
 
@@ -33,6 +34,20 @@ class PhotoAdminInline(admin.TabularInline):
 
     def photo_thumbnail(self, instance):
         return format_html(u'<img src="{0}" />', instance.get_photo_url_no_ext() + '_thumb75.jpg')
+
+    def glances(self, obj):
+        glances = obj.get_glances()
+        if not glances:
+            return None
+
+        html = u'<ul>'
+        for glance in glances:
+            html += format_html(u'<li><img src="{0}"> <a href="{1}">{2}</a></li>',
+                    PhotoGlance.GLANCE_EMOTICONS_BASE_URL + glance.emoticon_name,
+                    u'../../../{0}/{1}/{2}/'.format(glance.author._meta.app_label, glance.author._meta.module_name, glance.author.id),
+                    glance.author)
+        html += u'</ul>'
+        return mark_safe(html)
 
 class AlbumMemberInline(admin.TabularInline):
     model = AlbumMember
