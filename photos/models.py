@@ -413,6 +413,8 @@ class PhotoGlance(models.Model):
     date_created = models.DateTimeField(db_index=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL)
 
+    GLANCE_EMOTICONS_BASE_URL = 'https://glance-emoticons.s3.amazonaws.com/'
+
     class Meta:
         unique_together = ('photo', 'author')
 
