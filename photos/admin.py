@@ -132,6 +132,8 @@ class PhotoGlanceAdmin(admin.ModelAdmin):
     list_display = ('photo_icon', 'album_link', 'emoticon_icon', 'date_created', 'author_link')
     list_display_links = list_display
 
+    ordering = ('-date_created',)
+
     def photo_icon(self, obj):
         return format_html(u'<img src="{0}" width="35" height="35">', obj.photo.get_photo_url_no_ext() + '_crop140.jpg')
     photo_icon.short_description = 'Photo'
