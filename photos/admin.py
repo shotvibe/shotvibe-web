@@ -2,16 +2,17 @@ from django import forms
 from django.contrib import admin
 from django.db import models
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 from phone_auth.models import PhoneNumberLinkCode
-from photos.models import Album, AlbumMember, Photo, PendingPhoto
+from photos.models import Album, AlbumMember, Photo, PendingPhoto, PhotoGlance
 from photos.models import PhotoServer
 
 class PhotoAdminInline(admin.TabularInline):
     model = Photo
 
-    fields = ('photo_id', 'storage_id', 'subdomain', 'date_created', 'author', 'album', 'photo_thumbnail')
-    readonly_fields = ('storage_id', 'subdomain', 'date_created', 'author', 'album', 'photo_thumbnail')
+    fields = ('photo_id', 'storage_id', 'subdomain', 'date_created', 'author', 'album', 'photo_thumbnail', 'glances')
+    readonly_fields = ('subdomain', 'date_created', 'author', 'album', 'photo_thumbnail', 'glances')
 
     ordering = ['album_index']
 
@@ -33,6 +34,20 @@ class PhotoAdminInline(admin.TabularInline):
 
     def photo_thumbnail(self, instance):
         return format_html(u'<img src="{0}" />', instance.get_photo_url_no_ext() + '_thumb75.jpg')
+
+    def glances(self, obj):
+        glances = obj.get_glances()
+        if not glances:
+            return None
+
+        html = u'<ul>'
+        for glance in glances:
+            html += format_html(u'<li><img src="{0}"> <a href="{1}">{2}</a></li>',
+                    PhotoGlance.GLANCE_EMOTICONS_BASE_URL + glance.emoticon_name,
+                    u'../../../{0}/{1}/{2}/'.format(glance.author._meta.app_label, glance.author._meta.module_name, glance.author.id),
+                    glance.author)
+        html += u'</ul>'
+        return mark_safe(html)
 
 class AlbumMemberInline(admin.TabularInline):
     model = AlbumMember
@@ -127,10 +142,43 @@ class PhotoAdmin(admin.ModelAdmin):
 class PendingPhotoAdmin(admin.ModelAdmin):
     pass
 
+
+class PhotoGlanceAdmin(admin.ModelAdmin):
+    list_display = ('photo_icon', 'album_link', 'emoticon_icon', 'date_created', 'author_link')
+    list_display_links = list_display
+
+    ordering = ('-date_created',)
+
+    def photo_icon(self, obj):
+        return format_html(u'<img src="{0}" width="35" height="35">', obj.photo.get_photo_url_no_ext() + '_crop140.jpg')
+    photo_icon.short_description = 'Photo'
+    photo_icon.admin_order_field = 'photo'
+
+    def album_link(self, obj):
+        return format_html(u'<a href="{0}">{1}</a>',
+                u'../../{0}/{1}/{2}/'.format(obj.photo.album._meta.app_label, obj.photo.album._meta.module_name, obj.photo.album.id),
+                obj.photo.album.name)
+    album_link.short_description = 'Album'
+    album_link.admin_order_field = 'album'
+
+    def emoticon_icon(self, obj):
+        return format_html(u'<img src="{0}">', PhotoGlance.GLANCE_EMOTICONS_BASE_URL + obj.emoticon_name)
+    emoticon_icon.short_description = 'Glance'
+    emoticon_icon.admin_order_field = 'emoticon_name'
+
+    def author_link(self, obj):
+        return format_html(u'<a href="{0}">{1}</a>',
+                u'../../{0}/{1}/{2}/'.format(obj.author._meta.app_label, obj.author._meta.module_name, obj.author.id),
+                obj.author)
+    author_link.short_description = 'Author'
+    author_link.admin_order_field = 'author'
+
+
 class PhotoServerAdmin(admin.ModelAdmin):
     pass
 
 admin.site.register(Photo, PhotoAdmin)
 admin.site.register(PendingPhoto, PendingPhotoAdmin)
 admin.site.register(Album, AlbumAdmin)
+admin.site.register(PhotoGlance, PhotoGlanceAdmin)
 admin.site.register(PhotoServer, PhotoServerAdmin)
