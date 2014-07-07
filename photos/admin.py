@@ -11,7 +11,7 @@ class PhotoAdminInline(admin.TabularInline):
     model = Photo
 
     fields = ('photo_id', 'storage_id', 'subdomain', 'date_created', 'author', 'album', 'photo_thumbnail')
-    readonly_fields = ('storage_id', 'subdomain', 'date_created', 'author', 'album', 'photo_thumbnail')
+    readonly_fields = ('subdomain', 'date_created', 'author', 'album', 'photo_thumbnail')
 
     ordering = ['album_index']
 
