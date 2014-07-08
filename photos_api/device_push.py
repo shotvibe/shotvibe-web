@@ -208,3 +208,28 @@ def broadcast_album_sync(user_ids, album_id):
                 }
             }
     send_message_or_log_errors(rq)
+
+
+def broadcast_photo_glance(author_id, glance_user_name, album_id, album_name):
+    payload = {
+            'type': 'photo_glance',
+            'album_id': album_id,
+            'album_name': album_name,
+            'user_nickname': glance_user_name
+        }
+
+    rq = {
+            'user_ids': [str(author_id)],
+            'gcm': {
+                'data': {
+                    'd': json.dumps(payload)
+                    }
+                },
+            'apns': {
+                'aps': {
+                    'alert': glance_user_name + ' glanced your photo in ' + album_name,
+                    'sound': 'default'
+                    }
+                }
+            }
+    send_message_or_log_errors(rq)
