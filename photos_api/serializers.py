@@ -111,7 +111,7 @@ class AlbumMemberSerializer(serializers.ModelSerializer):
 class AlbumNameSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Album
-        fields = ('id', 'url', 'name', 'last_updated', 'etag', 'latest_photos')
+        fields = ('id', 'url', 'name', 'date_created', 'last_updated', 'etag', 'latest_photos')
 
     id = serializers.IntegerField(source='id')
 
