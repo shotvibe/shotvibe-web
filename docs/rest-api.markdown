@@ -330,6 +330,12 @@ Example response:
             "id": 5,
             "url": "https://api.shotvibe.com/albums/5/",
             "name": "sprinkling guardhouses segment",
+            "creator": {
+                "id": 8,
+                "url": "https://api.shotvibe.com/users/8/",
+                "nickname": "george",
+                "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+            },
             "date_created": "2009-10-26T20:53:49Z",
             "last_updated": "2009-11-12T20:20:03Z",
             "etag": "1",
@@ -353,6 +359,12 @@ Example response:
             "id": 9,
             "url": "https://api.shotvibe.com/albums/9/",
             "name": "licorice grindstone's heterosexual crunchier",
+            "creator": {
+                "id": 8,
+                "url": "https://api.shotvibe.com/users/8/",
+                "nickname": "george",
+                "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+            },
             "date_created": "2008-10-26T20:53:49Z",
             "last_updated": "2009-08-30T08:29:34Z",
             "etag": "2",
@@ -387,6 +399,12 @@ Example response:
             "id": 12,
             "url": "https://api.shotvibe.com/albums/12/",
             "name": "grandad's pep's",
+            "creator": {
+                "id": 8,
+                "url": "https://api.shotvibe.com/users/8/",
+                "nickname": "george",
+                "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+            },
             "date_created": "2010-10-26T20:53:49Z",
             "last_updated": "2013-02-10T18:57:15.155Z",
             "etag": "3",
@@ -410,6 +428,12 @@ Example response:
             "id": 18,
             "url": "https://api.shotvibe.com/albums/18/",
             "name": "Copperfield Olsen's explorations left's reproduce",
+            "creator": {
+                "id": 8,
+                "url": "https://api.shotvibe.com/users/8/",
+                "nickname": "george",
+                "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+            },
             "date_created": "2009-07-26T20:53:49Z",
             "last_updated": "2009-08-14T13:27:43Z",
             "etag": "8",
@@ -500,6 +524,12 @@ Example response:
     {
         "id": 5,
         "name": "sprinkling guardhouses segment",
+        "creator": {
+            "id": 8,
+            "url": "https://api.shotvibe.com/users/8/",
+            "nickname": "george",
+            "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+        },
         "date_created": "2009-10-26T20:53:49Z",
         "last_updated": "2009-11-12T20:20:03Z",
         "num_new_photos": 3,
