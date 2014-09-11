@@ -13,6 +13,7 @@ import phonenumbers
 from phone_auth.models import PhoneNumber, PhoneNumberLinkCode
 from photos import image_uploads
 from photos_api.signals import members_added_to_album, album_created
+from photos_api import device_push
 
 
 class AlbumManager(models.Manager):
@@ -154,7 +155,7 @@ class Album(models.Model):
                 photo_glance.emoticon_name = emoticon_name
                 photo_glance.save(update_fields=['date_created', 'emoticon_name'])
 
-            # TODO need to send push notification to photo author
+            device_push.broadcast_photo_glance(photo.author.id, glancer.nickname, photo.album.id, photo.album.name)
 
 
     def modify(self, current_date):
