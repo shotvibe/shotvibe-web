@@ -96,10 +96,11 @@ class AlbumNameChangeSerializer(serializers.Serializer):
 class AlbumMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = AlbumMember
-        fields = ('id', 'name', 'date_created', 'last_updated', 'members', 'photos', 'num_new_photos', 'last_access')
+        fields = ('id', 'name', 'creator', 'date_created', 'last_updated', 'members', 'photos', 'num_new_photos', 'last_access')
 
     id = serializers.IntegerField(source='album.id')
     name = serializers.Field(source='album.name')
+    creator = UserSerializer(source='album.creator')
     date_created = serializers.Field(source='album.date_created')
     last_updated = serializers.Field(source='album.last_updated')
     photos = PhotoSerializer(source='album.get_photos')
@@ -128,11 +129,13 @@ class AlbumNameSerializer(serializers.HyperlinkedModelSerializer):
 class AlbumMemberNameSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = AlbumMember
-        fields = ('id', 'url', 'name', 'last_updated', 'etag', 'latest_photos', 'num_new_photos', 'last_access')
+        fields = ('id', 'url', 'name', 'creator', 'date_created', 'last_updated', 'etag', 'latest_photos', 'num_new_photos', 'last_access')
 
     id = serializers.IntegerField(source='album.id')
     url = serializers.HyperlinkedRelatedField(view_name='album-detail', source='album')
     name = serializers.Field(source='album.name')
+    creator = UserSerializer(source='album.creator')
+    date_created = serializers.Field(source='album.date_created')
     last_updated = serializers.Field(source='album.last_updated')
     etag = serializers.IntegerField(source='album.get_etag')
     latest_photos = PhotoSerializer(source='album.get_latest_photos')
