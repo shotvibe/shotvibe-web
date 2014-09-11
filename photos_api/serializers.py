@@ -75,8 +75,9 @@ class StaticField(serializers.Field):
 class AlbumSerializer(serializers.ModelSerializer):
     class Meta:
         model = Album
-        fields = ('id', 'name', 'date_created', 'last_updated', 'members', 'photos', 'num_new_photos', 'last_access')
+        fields = ('id', 'name', 'creator', 'date_created', 'last_updated', 'members', 'photos', 'num_new_photos', 'last_access')
 
+    creator = UserSerializer(source='creator')
     photos = PhotoSerializer(source='get_photos')
     members = UserSerializer(source='get_member_users')
 
@@ -111,9 +112,11 @@ class AlbumMemberSerializer(serializers.ModelSerializer):
 class AlbumNameSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Album
-        fields = ('id', 'url', 'name', 'date_created', 'last_updated', 'etag', 'latest_photos')
+        fields = ('id', 'url', 'name', 'creator', 'date_created', 'last_updated', 'etag', 'latest_photos')
 
     id = serializers.IntegerField(source='id')
+
+    creator = UserSerializer(source='creator')
 
     etag = serializers.IntegerField(source='get_etag')
 
