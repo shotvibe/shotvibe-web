@@ -166,6 +166,7 @@ def get_request_country_code(request):
 
 @login_required
 @event_mod_required
+@transaction.non_atomic_requests
 def event_invites(request, event):
     country_code = get_request_country_code(request)
     data = None
