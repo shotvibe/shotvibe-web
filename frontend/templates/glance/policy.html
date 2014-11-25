@@ -1,0 +1,632 @@
+{% load static %}
+{% load analytics %}
+<!DOCTYPE HTML>
+<html>
+	<head><script type="text/javascript">var NREUMQ=NREUMQ||[];NREUMQ.push(["mark","firstbyte",new Date().getTime()]);</script>
+		<title>Glance</title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<!--[if lte IE 8]>
+			<script src="/{% static "glance/js/html5shiv.js" %}"></script>
+		<![endif]-->
+		<script src="{% static "glance/js/jquery.min.js" %}"></script>
+		<script src="{% static "glance/js/skel.min.js" %}"></script>
+		<script src="{% static "glance/js/init.js" %}"></script>
+		<noscript>
+			<link rel="stylesheet" href="{% static "glance/css/skel-noscript.css" %}" />
+			<link rel="stylesheet" href="{% static "glance/css/style.css" %}" />
+		</noscript>
+		<!--[if lte IE 8]>
+			<link rel="stylesheet" href="{% static "glance/css/ie8.css" %}" />
+		<![endif]-->
+		<link rel="icon" type="image/png" href="{% static "glance/images/icon48px.png" %}">
+		{% analytics_mixpanel_init %}
+	</head>
+	<body>
+		<div id="wrapper" class="loading">
+		
+			<div id="header">
+				<div class="container">
+					<h1 id="logo"><a href="/">Glance</a></h1>
+				</div>
+			</div>
+			<section id="banner" class="alt">
+			
+			</section>
+			<section id="download">
+				<div id="sms-form" class="container">
+			<div id="header">
+				<div class="container">
+					<div class="row">
+					
+						<div class="4u">
+							<h1 id="logo"><a href="/">Glance</a></h1>
+						</div>
+						
+						<div class="8u">
+							<ul class="menu">
+								<li><a href="/about/">About</a></li>
+								<li><a href="/help/">Help/FAQ</a></li>
+								<li><a href="http://blog.useglance.com">Blog</a></li>
+								<li><a href="/policy/">Privacy policy</a></li>
+								<li><a href="/terms/">Terms of use</a></li>
+							</ul>					
+						</div>
+					
+					</div>
+				</div>
+			</div>
+					<form>
+						<input type='hidden' name='csrfmiddlewaretoken' value='5Inxfkg8wlZFiBkzWEsee2LQyg8UcO9i' />
+						<div class="row half">
+							<div class="4u">
+								<div class="select"><select id="country_code" name="country_code">
+									<option value="AF">Afghanistan (+93)</option>
+									<option value="AX">Åland Islands (+358)</option>
+									<option value="AL">Albania (+355)</option>
+									<option value="DZ">Algeria (+213)</option>
+									<option value="AS">American Samoa (+1)</option>
+									<option value="AD">Andorra (+376)</option>
+									<option value="AO">Angola (+244)</option>
+									<option value="AI">Anguilla (+1)</option>
+									<option value="AG">Antigua and Barbuda (+1)</option>
+									<option value="AR">Argentina (+54)</option>
+									<option value="AM">Armenia (+374)</option>
+									<option value="AW">Aruba (+297)</option>
+									<option value="AU">Australia (+61)</option>
+									<option value="AT">Austria (+43)</option>
+									<option value="AZ">Azerbaijan (+994)</option>
+									<option value="BS">Bahamas (+1)</option>
+									<option value="BH">Bahrain (+973)</option>
+									<option value="BD">Bangladesh (+880)</option>
+									<option value="BB">Barbados (+1)</option>
+									<option value="BY">Belarus (+375)</option>
+									<option value="BE">Belgium (+32)</option>
+									<option value="BZ">Belize (+501)</option>
+									<option value="BJ">Benin (+229)</option>
+									<option value="BM">Bermuda (+1)</option>
+									<option value="BT">Bhutan (+975)</option>
+									<option value="BO">Bolivia, Plurinational State of (+591)</option>
+									<option value="BQ">Bonaire, Sint Eustatius and Saba (+599)</option>
+									<option value="BA">Bosnia and Herzegovina (+387)</option>
+									<option value="BW">Botswana (+267)</option>
+									<option value="BR">Brazil (+55)</option>
+									<option value="IO">British Indian Ocean Territory (+246)</option>
+									<option value="BN">Brunei Darussalam (+673)</option>
+									<option value="BG">Bulgaria (+359)</option>
+									<option value="BF">Burkina Faso (+226)</option>
+									<option value="BI">Burundi (+257)</option>
+									<option value="KH">Cambodia (+855)</option>
+									<option value="CM">Cameroon (+237)</option>
+									<option value="CA">Canada (+1)</option>
+									<option value="CV">Cape Verde (+238)</option>
+									<option value="KY">Cayman Islands (+1)</option>
+									<option value="CF">Central African Republic (+236)</option>
+									<option value="TD">Chad (+235)</option>
+									<option value="CL">Chile (+56)</option>
+									<option value="CN">China (+86)</option>
+									<option value="CX">Christmas Island (+61)</option>
+									<option value="CC">Cocos (Keeling) Islands (+61)</option>
+									<option value="CO">Colombia (+57)</option>
+									<option value="KM">Comoros (+269)</option>
+									<option value="CG">Congo (+242)</option>
+									<option value="CD">Congo, the Democratic Republic of the (+243)</option>
+									<option value="CK">Cook Islands (+682)</option>
+									<option value="CR">Costa Rica (+506)</option>
+									<option value="HR">Croatia (+385)</option>
+									<option value="CU">Cuba (+53)</option>
+									<option value="CW">Curaçao (+599)</option>
+									<option value="CY">Cyprus (+357)</option>
+									<option value="CZ">Czech Republic (+420)</option>
+									<option value="CI">Côte d'Ivoire (+225)</option>
+									<option value="DK">Denmark (+45)</option>
+									<option value="DJ">Djibouti (+253)</option>
+									<option value="DM">Dominica (+1)</option>
+									<option value="DO">Dominican Republic (+1)</option>
+									<option value="EC">Ecuador (+593)</option>
+									<option value="EG">Egypt (+20)</option>
+									<option value="SV">El Salvador (+503)</option>
+									<option value="GQ">Equatorial Guinea (+240)</option>
+									<option value="ER">Eritrea (+291)</option>
+									<option value="EE">Estonia (+372)</option>
+									<option value="ET">Ethiopia (+251)</option>
+									<option value="FK">Falkland Islands (Malvinas) (+500)</option>
+									<option value="FO">Faroe Islands (+298)</option>
+									<option value="FJ">Fiji (+679)</option>
+									<option value="FI">Finland (+358)</option>
+									<option value="FR">France (+33)</option>
+									<option value="GF">French Guiana (+594)</option>
+									<option value="PF">French Polynesia (+689)</option>
+									<option value="GA">Gabon (+241)</option>
+									<option value="GM">Gambia (+220)</option>
+									<option value="GE">Georgia (+995)</option>
+									<option value="DE">Germany (+49)</option>
+									<option value="GH">Ghana (+233)</option>
+									<option value="GI">Gibraltar (+350)</option>
+									<option value="GR">Greece (+30)</option>
+									<option value="GL">Greenland (+299)</option>
+									<option value="GD">Grenada (+1)</option>
+									<option value="GP">Guadeloupe (+590)</option>
+									<option value="GU">Guam (+1)</option>
+									<option value="GT">Guatemala (+502)</option>
+									<option value="GG">Guernsey (+44)</option>
+									<option value="GN">Guinea (+224)</option>
+									<option value="GW">Guinea-Bissau (+245)</option>
+									<option value="GY">Guyana (+592)</option>
+									<option value="HT">Haiti (+509)</option>
+									<option value="VA">Holy See (Vatican City State) (+379)</option>
+									<option value="HN">Honduras (+504)</option>
+									<option value="HK">Hong Kong (+852)</option>
+									<option value="HU">Hungary (+36)</option>
+									<option value="IS">Iceland (+354)</option>
+									<option value="IN">India (+91)</option>
+									<option value="ID">Indonesia (+62)</option>
+									<option value="IR">Iran, Islamic Republic of (+98)</option>
+									<option value="IQ">Iraq (+964)</option>
+									<option value="IE">Ireland (+353)</option>
+									<option value="IM">Isle of Man (+44)</option>
+									<option value="IL">Israel (+972)</option>
+									<option value="IT">Italy (+39)</option>
+									<option value="JM">Jamaica (+1)</option>
+									<option value="JP">Japan (+81)</option>
+									<option value="JE">Jersey (+44)</option>
+									<option value="JO">Jordan (+962)</option>
+									<option value="KZ">Kazakhstan (+7)</option>
+									<option value="KE">Kenya (+254)</option>
+									<option value="KI">Kiribati (+686)</option>
+									<option value="KP">Korea, Democratic People's Republic of (+850)</option>
+									<option value="KR">Korea, Republic of (+82)</option>
+									<option value="KW">Kuwait (+965)</option>
+									<option value="KG">Kyrgyzstan (+996)</option>
+									<option value="LA">Lao People's Democratic Republic (+856)</option>
+									<option value="LV">Latvia (+371)</option>
+									<option value="LB">Lebanon (+961)</option>
+									<option value="LS">Lesotho (+266)</option>
+									<option value="LR">Liberia (+231)</option>
+									<option value="LY">Libya (+218)</option>
+									<option value="LI">Liechtenstein (+423)</option>
+									<option value="LT">Lithuania (+370)</option>
+									<option value="LU">Luxembourg (+352)</option>
+									<option value="MO">Macao (+853)</option>
+									<option value="MK">Macedonia, the former Yugoslav Republic of (+389)</option>
+									<option value="MG">Madagascar (+261)</option>
+									<option value="MW">Malawi (+265)</option>
+									<option value="MY">Malaysia (+60)</option>
+									<option value="MV">Maldives (+960)</option>
+									<option value="ML">Mali (+223)</option>
+									<option value="MT">Malta (+356)</option>
+									<option value="MH">Marshall Islands (+692)</option>
+									<option value="MQ">Martinique (+596)</option>
+									<option value="MR">Mauritania (+222)</option>
+									<option value="MU">Mauritius (+230)</option>
+									<option value="YT">Mayotte (+262)</option>
+									<option value="MX">Mexico (+52)</option>
+									<option value="FM">Micronesia, Federated States of (+691)</option>
+									<option value="MD">Moldova, Republic of (+373)</option>
+									<option value="MC">Monaco (+377)</option>
+									<option value="MN">Mongolia (+976)</option>
+									<option value="ME">Montenegro (+382)</option>
+									<option value="MS">Montserrat (+1)</option>
+									<option value="MA">Morocco (+212)</option>
+									<option value="MZ">Mozambique (+258)</option>
+									<option value="MM">Myanmar (+95)</option>
+									<option value="NA">Namibia (+264)</option>
+									<option value="NR">Nauru (+674)</option>
+									<option value="NP">Nepal (+977)</option>
+									<option value="NL">Netherlands (+31)</option>
+									<option value="NC">New Caledonia (+687)</option>
+									<option value="NZ">New Zealand (+64)</option>
+									<option value="NI">Nicaragua (+505)</option>
+									<option value="NE">Niger (+227)</option>
+									<option value="NG">Nigeria (+234)</option>
+									<option value="NU">Niue (+683)</option>
+									<option value="NF">Norfolk Island (+672)</option>
+									<option value="MP">Northern Mariana Islands (+1)</option>
+									<option value="NO">Norway (+47)</option>
+									<option value="OM">Oman (+968)</option>
+									<option value="PK">Pakistan (+92)</option>
+									<option value="PW">Palau (+680)</option>
+									<option value="PS">Palestine, State of (+970)</option>
+									<option value="PA">Panama (+507)</option>
+									<option value="PG">Papua New Guinea (+675)</option>
+									<option value="PY">Paraguay (+595)</option>
+									<option value="PE">Peru (+51)</option>
+									<option value="PH">Philippines (+63)</option>
+									<option value="PL">Poland (+48)</option>
+									<option value="PT">Portugal (+351)</option>
+									<option value="PR">Puerto Rico (+1)</option>
+									<option value="QA">Qatar (+974)</option>
+									<option value="RO">Romania (+40)</option>
+									<option value="RU">Russian Federation (+7)</option>
+									<option value="RW">Rwanda (+250)</option>
+									<option value="RE">Réunion (+262)</option>
+									<option value="BL">Saint Barthélemy (+590)</option>
+									<option value="SH">Saint Helena, Ascension and Tristan da Cunha (+290)</option>
+									<option value="KN">Saint Kitts and Nevis (+1)</option>
+									<option value="LC">Saint Lucia (+1)</option>
+									<option value="MF">Saint Martin (French part) (+590)</option>
+									<option value="PM">Saint Pierre and Miquelon (+508)</option>
+									<option value="VC">Saint Vincent and the Grenadines (+1)</option>
+									<option value="WS">Samoa (+685)</option>
+									<option value="SM">San Marino (+378)</option>
+									<option value="ST">Sao Tome and Principe (+239)</option>
+									<option value="SA">Saudi Arabia (+966)</option>
+									<option value="SN">Senegal (+221)</option>
+									<option value="RS">Serbia (+381)</option>
+									<option value="SC">Seychelles (+248)</option>
+									<option value="SL">Sierra Leone (+232)</option>
+									<option value="SG">Singapore (+65)</option>
+									<option value="SX">Sint Maarten (Dutch part) (+1)</option>
+									<option value="SK">Slovakia (+421)</option>
+									<option value="SI">Slovenia (+386)</option>
+									<option value="SB">Solomon Islands (+677)</option>
+									<option value="SO">Somalia (+252)</option>
+									<option value="ZA">South Africa (+27)</option>
+									<option value="SS">South Sudan (+211)</option>
+									<option value="ES">Spain (+34)</option>
+									<option value="LK">Sri Lanka (+94)</option>
+									<option value="SD">Sudan (+249)</option>
+									<option value="SR">Suriname (+597)</option>
+									<option value="SJ">Svalbard and Jan Mayen (+47)</option>
+									<option value="SZ">Swaziland (+268)</option>
+									<option value="SE">Sweden (+46)</option>
+									<option value="CH">Switzerland (+41)</option>
+									<option value="SY">Syrian Arab Republic (+963)</option>
+									<option value="TW">Taiwan, Province of China (+886)</option>
+									<option value="TJ">Tajikistan (+992)</option>
+									<option value="TZ">Tanzania, United Republic of (+255)</option>
+									<option value="TH">Thailand (+66)</option>
+									<option value="TL">Timor-Leste (+670)</option>
+									<option value="TG">Togo (+228)</option>
+									<option value="TK">Tokelau (+690)</option>
+									<option value="TO">Tonga (+676)</option>
+									<option value="TT">Trinidad and Tobago (+1)</option>
+									<option value="TN">Tunisia (+216)</option>
+									<option value="TR">Turkey (+90)</option>
+									<option value="TM">Turkmenistan (+993)</option>
+									<option value="TC">Turks and Caicos Islands (+1)</option>
+									<option value="TV">Tuvalu (+688)</option>
+									<option value="UG">Uganda (+256)</option>
+									<option value="UA">Ukraine (+380)</option>
+									<option value="AE">United Arab Emirates (+971)</option>
+									<option value="GB">United Kingdom (+44)</option>
+									<option value="US" selected>United States (+1)</option>
+									<option value="UY">Uruguay (+598)</option>
+									<option value="UZ">Uzbekistan (+998)</option>
+									<option value="VU">Vanuatu (+678)</option>
+									<option value="VE">Venezuela, Bolivarian Republic of (+58)</option>
+									<option value="VN">Viet Nam (+84)</option>
+									<option value="VG">Virgin Islands, British (+1)</option>
+									<option value="VI">Virgin Islands, U.S. (+1)</option>
+									<option value="WF">Wallis and Futuna (+681)</option>
+									<option value="EH">Western Sahara (+212)</option>
+									<option value="YE">Yemen (+967)</option>
+									<option value="ZM">Zambia (+260)</option>
+									<option value="ZW">Zimbabwe (+263)</option>
+								</select><span class="arrow"></span></div>
+							</div>
+							<div class="4u">
+								<input id="phone_number" type="text" name="phone_number" placeholder="Your Phone Number" />
+							</div>
+							<div class="2u">
+								<input id="sms-send" type="submit" value="Send" class="button" />
+							</div>
+						</div>
+						<div id="sms-error" class="row">
+							<div class="4u">
+								Error: Invalid phone number.
+							</div>
+						</div>
+						<div class="row">
+							<div class="12u">
+								<a href="https://itunes.apple.com/ro/app/shotvibe/id721122774?mt=8" class="button ios">Download iOS App</a>
+								<a href="https://play.google.com/store/apps/details?id=com.shotvibe.shotvibe&amp;hl=en" class="button android">Download Android App</a>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div id="sms-throttle" class="container">
+					Error: Too many requests, please try again later.
+				</div>
+				<div id="sms-success" class="container">
+					<header>
+						<h2>Success!</h2>
+					</header>
+				</div>
+			</section>				
+			<section class="feature first seven last">
+				<div class="container">
+					<div class="row double">
+						<div class="12u">
+							<header>
+								<h2>Privacy Policy</h2>
+							</header>
+							<h3>Introduction</h3>
+							<p>We, at Pics On Air LTD. are committed to protecting your privacy and your personally identifiable information (“Personal Information”).</p>
+							
+							<p>We have created this Privacy Policy to let you know what information we collect from you and about you when you use our website, our mobile site, our application and/or the services contained within (the " Services"), how is this information collected and how is it used.</p>
+							<p>This Privacy Policy is part of and should be read i
+							n conjunction with our Terms &
+							Conditions. When you access or use
+							our
+							website, mobile site and/or application, you
+							agree that we may collect, use and disclose your in
+							formation (including Personal
+							Information) in accordance with the terms of this P
+							rivacy Policy. </p>
+							<h3>Collection of Information</h3>
+							<p>When signing on to use the Services, you provide us
+							with your mobile phone number
+							and allow us to access the address book stored on y
+							our mobile phone as well as the
+							picture and video gallery stored on, or which can b
+							e accessed via, your mobile phone.
+							We will save the abovementioned address book as wel
+							l as the picture and video
+							gallery on our servers (or servers owned by third p
+							arties which we use); you hereby
+							acknowledge that we may constantly access the above
+							mentioned address book as well
+							as the picture and video gallery and update the inf
+							ormation on our servers (or servers
+							owned by third parties which we use). You hereby au
+							thorize us to use the contact
+							details included in your address book for the purpo
+							se of contacting your contacts in
+							accordance with our Terms & Conditions for the purp
+							ose of providing the Services.</p>
+							<p>In addition, if applicable, you may provide us with
+							your billing information; if
+							provided, we will store such information on our ser
+							vers (or servers owned by third
+							parties which we use) as well. </p>
+							<p>We also collect an activity log unique to you that
+							collects certain administrative and
+							traffic information including without limitation IP
+							address, time of access, date of
+							access, web, mobile and application page(s) visited
+							and amount of time spent on each
+							page, language use, software crash reports and type
+							of browser and platform used. We
+							collect the aforesaid information when you visit or
+							use our website, mobile site and/or
+							application, and also in your communications with u
+							s. </p>
+							<p>You are hereby advised that we may not be able to r
+							emove any information provided
+							by you or in respect of you from our servers (or se
+							rvers owned by third parties which
+							we use) or make it unavailable to anyone you shared
+							it with, and you hereby
+							acknowledge that you may no longer be in control of
+							such information, how it is used
+							and whether it becomes publicly available or not.</p>
+							
+							<h3>Use of Information</h3>
+							
+							<p>We use the Personal Information and other informati
+							on we collect from or about you
+							to deliver the Services, to provide customer suppor
+							t, to process any of your online
+							transactions, to create new features, functionality
+							and/or services, meet certain
+							business requirements and for any other purpose rel
+							ated, directly or indirectly, to the
+							operation of the Services. We may disclose your Per
+							sonal Information (and any other
+							information) to any third party that provides servi
+							ces to us in order to allow, enable or
+							improve the provision of the Services. We may also
+							use the aforesaid information to
+							track your use of our website, mobile site and/or a
+							pplication and for other internal
+							purposes, such as evaluating, providing, and improv
+							ing our services and our website,
+							mobile site and/or application. </p>
+							
+							<p>Without derogating from the above, it is hereby cla
+							rified that we may periodically
+							access the address book and photo and video gallery
+							which are stored on our servers
+							(or servers owned by third parties which we use). </p>
+							
+							<p>We may disclose your Personal Information and other
+							information we collect from or
+							about you if required to do so by law, or if we bel
+							ieve in good faith that such action is
+							necessary to comply with laws, judicial proceeding,
+							a court order or legal process, or
+							to protect and defend our rights or property (inclu
+							ding, but not limited to, enforcing
+							our Terms & Conditions and/or this Privacy Policy),
+							the personal safety of users of
+							the Services or the public. We reserve the right to
+							share the aforesaid information with
+							banks, credit card companies, and appropriate agenc
+							ies, if we determine in our sole
+							discretion that you have cheated or attempted to de
+							fraud us, or if we suspect you of
+							committing any fraudulent activity (including of fr
+							audulent payment), or any other
+							prohibited activity. </p>
+							
+							<p>We may transfer any information (including Personal
+							Information) outside your
+							country of residence and outside the European Union
+							(if applicable to you) and store
+							it in other countries; the data protection legislat
+							ion and other laws of these countries
+							may not be as comprehensive as those your country o
+							f residence or in the European
+							Union (if applicable to you) - in these instances w
+							e will take steps to ensure that a
+							similar level of protection is given to your Person
+							al Information. </p>
+							<h3>Communications from Us</h3>
+							
+							<p>By agreeing to this privacy policy, you hereby allo
+							w us to provide you with
+							communications from us in connection with the Servi
+							ces, our website, mobile site
+							and/or application. You hereby acknowledge and cons
+							ent to the sending of such
+							communications, and will not argue that such activi
+							ty amounts to sending of
+							unsolicited communications.</p>
+							
+							<h3>Cookies</h3>
+							<p>We use a feature known as cookies, which are small
+							text files which are placed on
+							your computer and/or mobile phone when you visit ce
+							rtain website, mobile site and/or
+							application pages, to track your activities, record
+							your preferences, and make our
+							website, mobile site and/or application more respon
+							sive to your needs including, but
+							not limited to, by delivering a better and more per
+							sonalized experience to you. The
+							cookies are stored on your equipment and are used b
+							y us to help track your clicks and
+							pass information as you go through the pages within
+							our website, mobile site and/or application. Cookies can allow us to associate navi
+							gational information from
+							browsing visits with Personal Information you provi
+							de at our website, mobile site
+							and/or application. </p>
+							<h3>Security</h3>
+							<p>We have implemented suitable security policies, rul
+							es and technical measures to
+							protect and safeguard the Personal Information unde
+							r our control from unauthorized
+							access, improper use or disclosure, unauthorized mo
+							dification, unlawful destruction or
+							accidental loss. All our employees and contractors
+							that have access to, and are
+							associated with the processing of your Personal Inf
+							ormation, are obliged to respect the
+							confidentiality of your information. </p>
+							<h3>Links to Other Sites</h3>
+							<p>Our website, mobile site and/or application may con
+							tain links to other websites,
+							mobile sites and/or applications. Other websites, m
+							obile sites and/or applications may
+							also reference or link to our website, mobile site
+							and/or application. We are not
+							responsible for the privacy practices or the conten
+							t of such other websites, mobile
+							sites and/or applications, and any information coll
+							ected by these third party websites ,
+							mobile sites and/or applications is not governed by
+							this Privacy Policy, and we
+							assume no responsibility or liability whatsoever fo
+							r the policies (including privacy
+							policies), practices, actions or omissions of such
+							third parties. </p>
+							<h3>Special Circumstances</h3>
+							<p>In the event that we sell, assign or transfer some
+							or all of our business or assets to a
+							successor or acquirer, or if we are acquired by or
+							merge with a third party, or if we
+							file for bankruptcy or become insolvent, we may sel
+							l, assign or transfer all of your
+							Personal Information and other information provided
+							by you or about you, regardless
+							of your opt status, to such successor or acquirer.  </p>
+							<h3>Disclaimer</h3>
+							<p>The Services operate “AS-IS” and “AS-AVAILABLE”, wi
+							thout liability of any kind.
+							We cannot guarantee nor do we represent that there
+							will be error-free performance
+							regarding the privacy of your Personal Information,
+							and we will not be liable for any
+							indirect, incidental, consequential or punitive dam
+							ages and/or losses relating to the
+							use or release of Personal Information, including,
+							but not limited to, anything
+							connected with the breach of the security measures
+							used to protect any information
+							about or relating to you. </p>
+							<h3>Your Acceptance of this Policy</h3>
+							<p>By agreeing to our Terms & Conditions during the re
+							gistration process on our
+							website, mobile site or application, or by continue
+							d use of our Services, you agree to
+							be bound by this Privacy Policy, and to any changes
+							we may make to this Privacy
+							Policy from time to time. We will notify you of any
+							changes to our Privacy Policy by
+							posting the changes on our website, mobile site and
+							/or application. We recommend
+							that you revisit this Privacy Policy regularly so a
+							s to be kept apprised of any such changes. Your continued use of our Services followi
+							ng the posting of changes to this privacy policy means you accept these changes. </p> 
+							
+						</div>
+
+					</div>
+				</div>
+			</section>
+			<div id="alt-header">
+				<span class="logo"><a href="/">Glance</a></span>
+				<ul class="actions">
+					<li class="default"><a href="#download" class="button big download">Get the App</a></li>
+					<li class="ios"><a href="https://itunes.apple.com/ro/app/shotvibe/id721122774?mt=8" class="button ios">Download iOS App</a></li>
+					<li class="android"><a href="https://play.google.com/store/apps/details?id=com.shotvibe.shotvibe&amp;hl=en" class="button android">Download Android App</a></li>
+				</ul>
+			</div>
+			<div id="footer">
+				<div class="container">
+					<span class="logo"><a href="/">Glance</a></span>
+					<div class="inner">
+					
+						<a href="/login/" class="button secondary">Login</a>
+						
+						<ul class="actions2">
+							<li><a href="http://www.facebook.com/glancemobileapp" class="fa fa-facebook"><span>Facebook</span></a></li>
+							<li><a href="https://twitter.com/GlanceMobileApp" class="fa fa-twitter"><span>Twitter</span></a></li>
+							<li><a href="https://www.linkedin.com/company/glance-app" class="fa fa-linkedin"><span>LinkedIn</span></a></li>
+							<li><a href="http://glancemobileapp.tumblr.com/" class="fa fa-tumblr"><span>Tumblr</span></a></li>
+							<li><a href="https://www.youtube.com/channel/UCn0NmSU1F5xnNJDXFpaaFuQ" class="fa fa-youtube"><span>Youtube</span></a></li>
+							<li><a href="https://github.com/shotvibe" class="fa fa-github"><span>Github</span></a></li>
+							<li><a href="mailto:info@useglance.com" class="fa fa-envelope-o"><span>Email</span></a></li>
+						</ul>
+						
+						<ul class="likes">
+							<li>
+								<div class="fb-like" data-href="https://www.useglance.com" data-layout="button_count" data-action="like" data-show-faces="false" data-share="false"></div>
+								<div id="fb-root"></div>
+								<script>(function(d, s, id) {
+								  var js, fjs = d.getElementsByTagName(s)[0];
+								  if (d.getElementById(id)) return;
+								  js = d.createElement(s); js.id = id;
+								  js.src = "http://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+								  fjs.parentNode.insertBefore(js, fjs);
+								}(document, 'script', 'facebook-jssdk'));</script>							
+							</li>						
+							<li>
+								<a href="https://twitter.com/share" class="twitter-share-button" data-url="https://www.useglance.com">Tweet</a>
+								<script>
+									!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');
+								</script>
+								
+							</li>
+							<li><a href="https://mixpanel.com/f/partner"><img src="https://cdn.mxpnl.com/site_media/images/partner/badge_blue.png" alt="Mobile Analytics" /></a></li>
+						</ul>							
+						
+					</div>
+					<ul class="menu">
+						<li><a href="/about/">About</a></li>
+						<li><a href="/help/">Help/FAQ</a></li>
+						<li><a href="http://blog.useglance.com">Blog</a></li>
+						<li><a href="/policy/">Privacy policy</a></li>
+						<li><a href="/terms/">Terms of use</a></li>
+					</ul>
+					<p class="copyright">&copy; 2013 Pics On Air LTD.</p>
+				</div>
+			</div>
+
+		</div>
+		
+	</body>
+</html>

@@ -29,6 +29,21 @@ def index(request):
                 }
         return render_to_response('glance/index.html', data, context_instance=RequestContext(request))
 
+def about(request):
+    return render_to_response('glance/about.html', {}, context_instance=RequestContext(request))
+
+def help(request):
+    return render_to_response('glance/help.html', {}, context_instance=RequestContext(request))
+
+def policy(request):
+    return render_to_response('glance/policy.html', {}, context_instance=RequestContext(request))
+
+def contact(request):
+    return render_to_response('glance/contact.html', {}, context_instance=RequestContext(request))
+
+def terms(request):
+    return render_to_response('glance/terms.html', {}, context_instance=RequestContext(request))
+
 
 def home(request):
     if request.method == 'POST' and 'create_album' in request.POST:

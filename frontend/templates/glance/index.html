@@ -8,7 +8,7 @@
 		<meta name="description" content="" />
 		<meta name="keywords" content="" />
 		<!--[if lte IE 8]>
-			<script src="/static/glance/js/html5shiv.js"></script>
+			<script src="{% static "glance/js/html5shiv.js" %}"></script>
 		<![endif]-->
 		<script src="{% static "glance/js/jquery.min.js" %}"></script>
 		<script src="{% static "glance/js/skel.min.js" %}"></script>
@@ -23,7 +23,7 @@
 		<link rel="icon" type="image/png" href="{% static "glance/images/icon48px.png" %}">
 		{% analytics_mixpanel_init %}
 	</head>
-	<body>
+	<body class="homepage">
 		<script type="text/javascript">
 			mixpanel.track('Visit Home Page');
 		</script>
@@ -32,27 +32,32 @@
 		
 			<div id="header">
 				<div class="container">
-					<h1 id="logo">Glance</h1>
+					<div class="row">
+
+						<div class="4u">
+							<h1 id="logo"><a href="/">Glance</a></h1>
+						</div>
+
+						<div class="8u">
+							<ul class="menu">
+								<li><a href="/about/">About</a></li>
+								<li><a href="/help/">Help/FAQ</a></li>
+								<li><a href="http://blog.useglance.com">Blog</a></li>
+								<li><a href="/policy/">Privacy policy</a></li>
+								<li><a href="/terms/">Terms of use</a></li>
+							</ul>
+						</div>
+
+					</div>
 				</div>
 			</div>
 			
 			<section id="banner">
 				<div class="container">
 					<div class="row half">
-						<div class="5u">
-							<div class="image full phone">
-								<img src="{% static "glance/images/banner.png" %}" alt="" />
-								<div class="screen">
-									<div class="reel">
-										<div class="image"><img src="{% static "glance/images/screenshot01.jpg" %}" alt="" /></div><div class="image"><img src="{% static "glance/images/screenshot02.jpg" %}" alt="" /></div><div class="image"><img src="{% static "glance/images/screenshot03.jpg" %}" alt="" /></div><div class="image"><img src="{% static "glance/images/screenshot04.jpg" %}" alt="" /></div><div class="image"><img src="{% static "glance/images/screenshot05.jpg" %}" alt="" /></div>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="7u skel-cell-important">
+						<div class="12u skel-cell-important">
 							<header>
-								<h2>The fastest way to create and share albums
-								with friends and family.</h2>
+								<h2>The fastest way to create and share albums<br /> with friends and family.</h2>
 							</header>
 							<p>Glance is a fast and easy way to create and share albums
 							in private groups. Easily create a new album by uploading photos
@@ -60,10 +65,12 @@
 							family to contribute their own &ndash; quickly, conveniently, and totally
 							free. Glance is your living album in the cloud.
 							<footer>
-								<ul class="actions">
+								<ul class="actions2">
 									<li class="default"><a href="#download" class="button big download">Get the App</a></li>
-									<li class="ios"><a href="{{ apple_app_store_url }}" class="button ios">Download iOS App</a><span>Also available for <a href="{{ google_play_url }}">Android</a></span></li>
-									<li class="android"><a href="{{ google_play_url }}" class="button android">Download Android App</a><span>Also available for <a href="{{ apple_app_store_url }}">iPhone</a></span></li>
+								</ul>
+								<ul class="actions3">
+									<li class="ios-top"><a href="{{ apple_app_store_url }}" class="button ios small">Download iOS App</a></li>
+									<li class="android-top"><a href="{{ google_play_url }}" class="button android small">Download Android App</a></li>
 								</ul>
 							</footer>
 						</div>
@@ -486,7 +493,7 @@
 			</section>
 			
 			<div id="alt-header">
-				<span class="logo">Glance</span>
+				<span class="logo"><a href="/">Glance</a></span>
 				<ul class="actions">
 					<li class="default"><a href="#download" class="button big download">Get the App</a></li>
 					<li class="ios"><a href="{{ apple_app_store_url }}" class="button ios">Download iOS App</a></li>
@@ -496,29 +503,48 @@
 
 			<div id="footer">
 				<div class="container">
-					<span class="logo">Glance</span>
+					<span class="logo"><a href="/">Glance</a></span>
 					<div class="inner">
 						<a href="{% url "django.contrib.auth.views.login" %}" class="button secondary">Login</a>
 						<ul class="actions2">
-							<li><a href="#" class="fa fa-facebook"><span>Facebook</span></a></li>
-							<li><a href="#" class="fa fa-twitter"><span>Twitter</span></a></li>
-							<li><a href="#" class="fa fa-linkedin"><span>LinkedIn</span></a></li>
-							<li><a href="#" class="fa fa-google-plus"><span>Google+</span></a></li>
-							<li><a href="#" class="fa fa-pinterest"><span>Pinterest</span></a></li>
-							<li><a href="#" class="fa fa-share"><span>Share</span></a></li>
+							<li><a href="http://www.facebook.com/glancemobileapp" class="fa fa-facebook"><span>Facebook</span></a></li>
+							<li><a href="https://twitter.com/GlanceMobileApp" class="fa fa-twitter"><span>Twitter</span></a></li>
+							<li><a href="https://www.linkedin.com/company/glance-app" class="fa fa-linkedin"><span>LinkedIn</span></a></li>
+							<li><a href="http://glancemobileapp.tumblr.com/" class="fa fa-tumblr"><span>Tumblr</span></a></li>
+							<li><a href="https://www.youtube.com/channel/UCn0NmSU1F5xnNJDXFpaaFuQ" class="fa fa-youtube"><span>Youtube</span></a></li>
+							<li><a href="https://github.com/shotvibe" class="fa fa-github"><span>Github</span></a></li>
+							<li><a href="mailto:info@useglance.com" class="fa fa-envelope-o"><span>Email</span></a></li>
 						</ul>
+						<ul class="likes">
+							<li>
+								<div class="fb-like" data-href="https://www.useglance.com" data-layout="button_count" data-action="like" data-show-faces="false" data-share="false"></div>
+								<div id="fb-root"></div>
+								<script>(function(d, s, id) {
+								  var js, fjs = d.getElementsByTagName(s)[0];
+								  if (d.getElementById(id)) return;
+								  js = d.createElement(s); js.id = id;
+								  js.src = "http://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+								  fjs.parentNode.insertBefore(js, fjs);
+								}(document, 'script', 'facebook-jssdk'));</script>
+							</li>
+							<li>
+								<a href="https://twitter.com/share" class="twitter-share-button" data-url="https://www.useglance.com">Tweet</a>
+								<script>
+									!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');
+								</script>
+
+							</li>
+							<li><a href="https://mixpanel.com/f/partner"><img src="https://cdn.mxpnl.com/site_media/images/partner/badge_blue.png" alt="Mobile Analytics" /></a></li>
+						</ul>
+
 					</div>
 					<ul class="menu">
-						<li><a href="#">About</a></li>
-						<li><a href="#">Help/FAQ</a></li>
-						<li><a href="#">Contact</a></li>
-						<li><a href="#">Press release</a></li>
-						<li><a href="#">Privacy policy</a></li>
-						<li><a href="#">Terms of use</a></li>
+						<li><a href="/about/">About</a></li>
+						<li><a href="/help/">Help/FAQ</a></li>
+						<li><a href="http://blog.useglance.com">Blog</a></li>
+						<li><a href="/policy/">Privacy policy</a></li>
+						<li><a href="/terms/">Terms of use</a></li>
 					</ul>
-					<div style="float:right">
-						<a href="https://mixpanel.com/f/partner"><img src="//cdn.mxpnl.com/site_media/images/partner/badge_blue.png" alt="Mobile Analytics" /></a>
-					</div>
 					<p class="copyright">&copy; 2013 Pics On Air LTD.</p>
 				</div>
 			</div>

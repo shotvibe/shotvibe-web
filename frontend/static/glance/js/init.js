@@ -14,8 +14,10 @@ var scriptSource = (function() {
     return script.getAttribute('src', 2)
 }());
 
+var staticPrefix = scriptSource.substr(0, scriptSource.lastIndexOf('/') - 'js'.length);
+
 skel.init({
-    prefix: scriptSource.substr(0, scriptSource.lastIndexOf('/') - 'js'.length) + 'css/style',
+    prefix: staticPrefix + 'css/style',
     resetCSS: true,
     boxModel: 'border',
     useOrientation: true,
@@ -227,5 +229,32 @@ $(function() {
             $altHeader.addClass('inactive');
 
     });
+
+    // Homepage.
+    if ($body.hasClass('homepage')) {
+
+        // Video banner.
+        if (!skel.vars.isMobile
+                && !skel.isActive('mobile')) {
+            var $banner = $('#banner'),
+                $video = $('<video loop="loop" autoplay="autoplay" preload="auto"'
+                    + 'poster="' + staticPrefix + 'images/banner.png">'
+                    + '<source src="' + staticPrefix + 'videos/video.webm" type="video/webm">'
+                    + '<source src="' + staticPrefix + 'videos/video.mp4" type="video/mp4">'
+                    + '</video>');
+
+            $banner.css('background-image', 'none');
+
+            $video
+                .fadeTo(0, 0)
+                .appendTo($banner);
+
+            $window
+                .on('load', function() {
+                    $video.fadeTo(3000, 1);
+                    $video[0].play();
+                });
+        }
+    }
 
 });

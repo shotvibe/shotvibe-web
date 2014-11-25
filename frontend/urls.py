@@ -6,6 +6,12 @@ import phone_auth.views
 
 urlpatterns = patterns('',
     url(r'^$', views.index, name="index"),
+    url(r'^about/$', views.about, name="about"),
+    url(r'^help/$', views.help, name="help"),
+    url(r'^policy/$', views.policy, name="policy"),
+    url(r'^contact/$', views.contact, name="contact"),
+    url(r'^terms/$', views.terms, name="terms"),
+
     url(r'^album/(?P<pk>\d+)/$', views.album),
     url(r'^album/(?P<album_pk>\d+)/photo/(?P<photo_id>[\w-]+)/$', views.photo),
     url(r'^album/(?P<album_pk>\d+)/members/$', views.album_members),

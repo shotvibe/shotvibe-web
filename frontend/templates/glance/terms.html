@@ -1,0 +1,468 @@
+{% load static %}
+{% load analytics %}
+<!DOCTYPE HTML>
+<html>
+	<head><script type="text/javascript">var NREUMQ=NREUMQ||[];NREUMQ.push(["mark","firstbyte",new Date().getTime()]);</script>
+		<title>Glance</title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<!--[if lte IE 8]>
+			<script src="/{% static "glance/js/html5shiv.js" %}"></script>
+		<![endif]-->
+		<script src="{% static "glance/js/jquery.min.js" %}"></script>
+		<script src="{% static "glance/js/skel.min.js" %}"></script>
+		<script src="{% static "glance/js/init.js" %}"></script>
+		<noscript>
+			<link rel="stylesheet" href="{% static "glance/css/skel-noscript.css" %}" />
+			<link rel="stylesheet" href="{% static "glance/css/style.css" %}" />
+		</noscript>
+		<!--[if lte IE 8]>
+			<link rel="stylesheet" href="{% static "glance/css/ie8.css" %}" />
+		<![endif]-->
+		<link rel="icon" type="image/png" href="{% static "glance/images/icon48px.png" %}">
+		{% analytics_mixpanel_init %}
+	</head>
+	<body>
+		<div id="wrapper" class="loading">
+			<div id="header">
+				<div class="container">
+					<div class="row">
+					
+						<div class="4u">
+							<h1 id="logo"><a href="/">Glance</a></h1>
+						</div>
+						
+						<div class="8u">
+							<ul class="menu">
+								<li><a href="/about/">About</a></li>
+								<li><a href="/help/">Help/FAQ</a></li>
+								<li><a href="http://blog.useglance.com">Blog</a></li>
+								<li><a href="/policy/">Privacy policy</a></li>
+								<li><a href="/terms/">Terms of use</a></li>
+							</ul>					
+						</div>
+					
+					</div>
+				</div>
+			</div>
+			<section id="banner" class="alt">
+			
+			</section>
+			<section id="download">
+				<div id="sms-form" class="container">
+					<header>
+						<h2>Text download link<br class="only-mobile" />
+						to your phone</h2>
+						<span class="closer fa fa-times-circle"></span>
+					</header>
+					<form>
+						<input type='hidden' name='csrfmiddlewaretoken' value='5Inxfkg8wlZFiBkzWEsee2LQyg8UcO9i' />
+						<div class="row half">
+							<div class="4u">
+								<div class="select"><select id="country_code" name="country_code">
+									<option value="AF">Afghanistan (+93)</option>
+									<option value="AX">Åland Islands (+358)</option>
+									<option value="AL">Albania (+355)</option>
+									<option value="DZ">Algeria (+213)</option>
+									<option value="AS">American Samoa (+1)</option>
+									<option value="AD">Andorra (+376)</option>
+									<option value="AO">Angola (+244)</option>
+									<option value="AI">Anguilla (+1)</option>
+									<option value="AG">Antigua and Barbuda (+1)</option>
+									<option value="AR">Argentina (+54)</option>
+									<option value="AM">Armenia (+374)</option>
+									<option value="AW">Aruba (+297)</option>
+									<option value="AU">Australia (+61)</option>
+									<option value="AT">Austria (+43)</option>
+									<option value="AZ">Azerbaijan (+994)</option>
+									<option value="BS">Bahamas (+1)</option>
+									<option value="BH">Bahrain (+973)</option>
+									<option value="BD">Bangladesh (+880)</option>
+									<option value="BB">Barbados (+1)</option>
+									<option value="BY">Belarus (+375)</option>
+									<option value="BE">Belgium (+32)</option>
+									<option value="BZ">Belize (+501)</option>
+									<option value="BJ">Benin (+229)</option>
+									<option value="BM">Bermuda (+1)</option>
+									<option value="BT">Bhutan (+975)</option>
+									<option value="BO">Bolivia, Plurinational State of (+591)</option>
+									<option value="BQ">Bonaire, Sint Eustatius and Saba (+599)</option>
+									<option value="BA">Bosnia and Herzegovina (+387)</option>
+									<option value="BW">Botswana (+267)</option>
+									<option value="BR">Brazil (+55)</option>
+									<option value="IO">British Indian Ocean Territory (+246)</option>
+									<option value="BN">Brunei Darussalam (+673)</option>
+									<option value="BG">Bulgaria (+359)</option>
+									<option value="BF">Burkina Faso (+226)</option>
+									<option value="BI">Burundi (+257)</option>
+									<option value="KH">Cambodia (+855)</option>
+									<option value="CM">Cameroon (+237)</option>
+									<option value="CA">Canada (+1)</option>
+									<option value="CV">Cape Verde (+238)</option>
+									<option value="KY">Cayman Islands (+1)</option>
+									<option value="CF">Central African Republic (+236)</option>
+									<option value="TD">Chad (+235)</option>
+									<option value="CL">Chile (+56)</option>
+									<option value="CN">China (+86)</option>
+									<option value="CX">Christmas Island (+61)</option>
+									<option value="CC">Cocos (Keeling) Islands (+61)</option>
+									<option value="CO">Colombia (+57)</option>
+									<option value="KM">Comoros (+269)</option>
+									<option value="CG">Congo (+242)</option>
+									<option value="CD">Congo, the Democratic Republic of the (+243)</option>
+									<option value="CK">Cook Islands (+682)</option>
+									<option value="CR">Costa Rica (+506)</option>
+									<option value="HR">Croatia (+385)</option>
+									<option value="CU">Cuba (+53)</option>
+									<option value="CW">Curaçao (+599)</option>
+									<option value="CY">Cyprus (+357)</option>
+									<option value="CZ">Czech Republic (+420)</option>
+									<option value="CI">Côte d'Ivoire (+225)</option>
+									<option value="DK">Denmark (+45)</option>
+									<option value="DJ">Djibouti (+253)</option>
+									<option value="DM">Dominica (+1)</option>
+									<option value="DO">Dominican Republic (+1)</option>
+									<option value="EC">Ecuador (+593)</option>
+									<option value="EG">Egypt (+20)</option>
+									<option value="SV">El Salvador (+503)</option>
+									<option value="GQ">Equatorial Guinea (+240)</option>
+									<option value="ER">Eritrea (+291)</option>
+									<option value="EE">Estonia (+372)</option>
+									<option value="ET">Ethiopia (+251)</option>
+									<option value="FK">Falkland Islands (Malvinas) (+500)</option>
+									<option value="FO">Faroe Islands (+298)</option>
+									<option value="FJ">Fiji (+679)</option>
+									<option value="FI">Finland (+358)</option>
+									<option value="FR">France (+33)</option>
+									<option value="GF">French Guiana (+594)</option>
+									<option value="PF">French Polynesia (+689)</option>
+									<option value="GA">Gabon (+241)</option>
+									<option value="GM">Gambia (+220)</option>
+									<option value="GE">Georgia (+995)</option>
+									<option value="DE">Germany (+49)</option>
+									<option value="GH">Ghana (+233)</option>
+									<option value="GI">Gibraltar (+350)</option>
+									<option value="GR">Greece (+30)</option>
+									<option value="GL">Greenland (+299)</option>
+									<option value="GD">Grenada (+1)</option>
+									<option value="GP">Guadeloupe (+590)</option>
+									<option value="GU">Guam (+1)</option>
+									<option value="GT">Guatemala (+502)</option>
+									<option value="GG">Guernsey (+44)</option>
+									<option value="GN">Guinea (+224)</option>
+									<option value="GW">Guinea-Bissau (+245)</option>
+									<option value="GY">Guyana (+592)</option>
+									<option value="HT">Haiti (+509)</option>
+									<option value="VA">Holy See (Vatican City State) (+379)</option>
+									<option value="HN">Honduras (+504)</option>
+									<option value="HK">Hong Kong (+852)</option>
+									<option value="HU">Hungary (+36)</option>
+									<option value="IS">Iceland (+354)</option>
+									<option value="IN">India (+91)</option>
+									<option value="ID">Indonesia (+62)</option>
+									<option value="IR">Iran, Islamic Republic of (+98)</option>
+									<option value="IQ">Iraq (+964)</option>
+									<option value="IE">Ireland (+353)</option>
+									<option value="IM">Isle of Man (+44)</option>
+									<option value="IL">Israel (+972)</option>
+									<option value="IT">Italy (+39)</option>
+									<option value="JM">Jamaica (+1)</option>
+									<option value="JP">Japan (+81)</option>
+									<option value="JE">Jersey (+44)</option>
+									<option value="JO">Jordan (+962)</option>
+									<option value="KZ">Kazakhstan (+7)</option>
+									<option value="KE">Kenya (+254)</option>
+									<option value="KI">Kiribati (+686)</option>
+									<option value="KP">Korea, Democratic People's Republic of (+850)</option>
+									<option value="KR">Korea, Republic of (+82)</option>
+									<option value="KW">Kuwait (+965)</option>
+									<option value="KG">Kyrgyzstan (+996)</option>
+									<option value="LA">Lao People's Democratic Republic (+856)</option>
+									<option value="LV">Latvia (+371)</option>
+									<option value="LB">Lebanon (+961)</option>
+									<option value="LS">Lesotho (+266)</option>
+									<option value="LR">Liberia (+231)</option>
+									<option value="LY">Libya (+218)</option>
+									<option value="LI">Liechtenstein (+423)</option>
+									<option value="LT">Lithuania (+370)</option>
+									<option value="LU">Luxembourg (+352)</option>
+									<option value="MO">Macao (+853)</option>
+									<option value="MK">Macedonia, the former Yugoslav Republic of (+389)</option>
+									<option value="MG">Madagascar (+261)</option>
+									<option value="MW">Malawi (+265)</option>
+									<option value="MY">Malaysia (+60)</option>
+									<option value="MV">Maldives (+960)</option>
+									<option value="ML">Mali (+223)</option>
+									<option value="MT">Malta (+356)</option>
+									<option value="MH">Marshall Islands (+692)</option>
+									<option value="MQ">Martinique (+596)</option>
+									<option value="MR">Mauritania (+222)</option>
+									<option value="MU">Mauritius (+230)</option>
+									<option value="YT">Mayotte (+262)</option>
+									<option value="MX">Mexico (+52)</option>
+									<option value="FM">Micronesia, Federated States of (+691)</option>
+									<option value="MD">Moldova, Republic of (+373)</option>
+									<option value="MC">Monaco (+377)</option>
+									<option value="MN">Mongolia (+976)</option>
+									<option value="ME">Montenegro (+382)</option>
+									<option value="MS">Montserrat (+1)</option>
+									<option value="MA">Morocco (+212)</option>
+									<option value="MZ">Mozambique (+258)</option>
+									<option value="MM">Myanmar (+95)</option>
+									<option value="NA">Namibia (+264)</option>
+									<option value="NR">Nauru (+674)</option>
+									<option value="NP">Nepal (+977)</option>
+									<option value="NL">Netherlands (+31)</option>
+									<option value="NC">New Caledonia (+687)</option>
+									<option value="NZ">New Zealand (+64)</option>
+									<option value="NI">Nicaragua (+505)</option>
+									<option value="NE">Niger (+227)</option>
+									<option value="NG">Nigeria (+234)</option>
+									<option value="NU">Niue (+683)</option>
+									<option value="NF">Norfolk Island (+672)</option>
+									<option value="MP">Northern Mariana Islands (+1)</option>
+									<option value="NO">Norway (+47)</option>
+									<option value="OM">Oman (+968)</option>
+									<option value="PK">Pakistan (+92)</option>
+									<option value="PW">Palau (+680)</option>
+									<option value="PS">Palestine, State of (+970)</option>
+									<option value="PA">Panama (+507)</option>
+									<option value="PG">Papua New Guinea (+675)</option>
+									<option value="PY">Paraguay (+595)</option>
+									<option value="PE">Peru (+51)</option>
+									<option value="PH">Philippines (+63)</option>
+									<option value="PL">Poland (+48)</option>
+									<option value="PT">Portugal (+351)</option>
+									<option value="PR">Puerto Rico (+1)</option>
+									<option value="QA">Qatar (+974)</option>
+									<option value="RO">Romania (+40)</option>
+									<option value="RU">Russian Federation (+7)</option>
+									<option value="RW">Rwanda (+250)</option>
+									<option value="RE">Réunion (+262)</option>
+									<option value="BL">Saint Barthélemy (+590)</option>
+									<option value="SH">Saint Helena, Ascension and Tristan da Cunha (+290)</option>
+									<option value="KN">Saint Kitts and Nevis (+1)</option>
+									<option value="LC">Saint Lucia (+1)</option>
+									<option value="MF">Saint Martin (French part) (+590)</option>
+									<option value="PM">Saint Pierre and Miquelon (+508)</option>
+									<option value="VC">Saint Vincent and the Grenadines (+1)</option>
+									<option value="WS">Samoa (+685)</option>
+									<option value="SM">San Marino (+378)</option>
+									<option value="ST">Sao Tome and Principe (+239)</option>
+									<option value="SA">Saudi Arabia (+966)</option>
+									<option value="SN">Senegal (+221)</option>
+									<option value="RS">Serbia (+381)</option>
+									<option value="SC">Seychelles (+248)</option>
+									<option value="SL">Sierra Leone (+232)</option>
+									<option value="SG">Singapore (+65)</option>
+									<option value="SX">Sint Maarten (Dutch part) (+1)</option>
+									<option value="SK">Slovakia (+421)</option>
+									<option value="SI">Slovenia (+386)</option>
+									<option value="SB">Solomon Islands (+677)</option>
+									<option value="SO">Somalia (+252)</option>
+									<option value="ZA">South Africa (+27)</option>
+									<option value="SS">South Sudan (+211)</option>
+									<option value="ES">Spain (+34)</option>
+									<option value="LK">Sri Lanka (+94)</option>
+									<option value="SD">Sudan (+249)</option>
+									<option value="SR">Suriname (+597)</option>
+									<option value="SJ">Svalbard and Jan Mayen (+47)</option>
+									<option value="SZ">Swaziland (+268)</option>
+									<option value="SE">Sweden (+46)</option>
+									<option value="CH">Switzerland (+41)</option>
+									<option value="SY">Syrian Arab Republic (+963)</option>
+									<option value="TW">Taiwan, Province of China (+886)</option>
+									<option value="TJ">Tajikistan (+992)</option>
+									<option value="TZ">Tanzania, United Republic of (+255)</option>
+									<option value="TH">Thailand (+66)</option>
+									<option value="TL">Timor-Leste (+670)</option>
+									<option value="TG">Togo (+228)</option>
+									<option value="TK">Tokelau (+690)</option>
+									<option value="TO">Tonga (+676)</option>
+									<option value="TT">Trinidad and Tobago (+1)</option>
+									<option value="TN">Tunisia (+216)</option>
+									<option value="TR">Turkey (+90)</option>
+									<option value="TM">Turkmenistan (+993)</option>
+									<option value="TC">Turks and Caicos Islands (+1)</option>
+									<option value="TV">Tuvalu (+688)</option>
+									<option value="UG">Uganda (+256)</option>
+									<option value="UA">Ukraine (+380)</option>
+									<option value="AE">United Arab Emirates (+971)</option>
+									<option value="GB">United Kingdom (+44)</option>
+									<option value="US" selected>United States (+1)</option>
+									<option value="UY">Uruguay (+598)</option>
+									<option value="UZ">Uzbekistan (+998)</option>
+									<option value="VU">Vanuatu (+678)</option>
+									<option value="VE">Venezuela, Bolivarian Republic of (+58)</option>
+									<option value="VN">Viet Nam (+84)</option>
+									<option value="VG">Virgin Islands, British (+1)</option>
+									<option value="VI">Virgin Islands, U.S. (+1)</option>
+									<option value="WF">Wallis and Futuna (+681)</option>
+									<option value="EH">Western Sahara (+212)</option>
+									<option value="YE">Yemen (+967)</option>
+									<option value="ZM">Zambia (+260)</option>
+									<option value="ZW">Zimbabwe (+263)</option>
+								</select><span class="arrow"></span></div>
+							</div>
+							<div class="4u">
+								<input id="phone_number" type="text" name="phone_number" placeholder="Your Phone Number" />
+							</div>
+							<div class="2u">
+								<input id="sms-send" type="submit" value="Send" class="button" />
+							</div>
+						</div>
+						<div id="sms-error" class="row">
+							<div class="4u">
+								Error: Invalid phone number.
+							</div>
+						</div>
+						<div class="row">
+							<div class="12u">
+								<a href="https://itunes.apple.com/ro/app/shotvibe/id721122774?mt=8" class="button ios">Download iOS App</a>
+								<a href="https://play.google.com/store/apps/details?id=com.shotvibe.shotvibe&amp;hl=en" class="button android">Download Android App</a>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div id="sms-throttle" class="container">
+					Error: Too many requests, please try again later.
+				</div>
+				<div id="sms-success" class="container">
+					<header>
+						<h2>Success!</h2>
+					</header>
+				</div>
+			</section>				
+			<section class="feature first seven last">
+				<div class="container">
+					<div class="row double">
+						<div class="12u">
+							<header>
+								<h2>Terms of Use</h2>
+							</header>
+								<p>THE FOLLOWING IS A LEGALLY BINDING AGREEMENT (THE "<strong>AGREEMENT</strong>") BETWEEN PICS ON AIR LIMITED (THE "<strong>COMPANY</strong>"), AND YOURSELF. PLEASE READ CAREFULLY AND MAKE SURE YOU FULLY UNDERSTAND THE CONTENTS OF THIS AGREEMENT PRIOR TO THE USE OF THE SITE AND/OR SERVICES. IF YOU HAVE ANY DOUBTS ABOUT ANY OF YOUR RIGHTS AND OBLIGATIONS RESULTING FROM ENTERING INTO THIS AGREEMENT, PLEASE CONSULT LEGAL COUNSEL. BY CLICKING ON “SUBMIT” OR “I AGREE” OR BY USING THE SERVICES, YOU ACKNOWLEDGE THAT YOU HAVE READ THIS AGREEMENT AND AGREED, IN FREE WILL AND CONSENT, TO BE BOUND BY THE TERMS OF THIS AGREEMENT WITHOUT ANY RESERVATIONS. YOU ALSO AGREE TO THE USE OF ELECTRONIC COMMUNICATIONS IN ORDER TO ENTER INTO CONTRACTS, AND YOU WAIVE ANY RIGHTS OR REQUIREMENTS UNDER APPLICABLE LAWS IN ANY JURISDICTION WHICH REQUIRE AN ORIGINAL (NON-ELECTRONIC) SIGNATURE.</p>
+								<p>IF YOU DO NOT AGREE WITH ANY OF THE TERMS OF THIS AGREEMENT, DO NOT CONTINUE TO USE THE SITE OR SERVICES.</p>
+								<h3>1.	DEFINITIONS</h3>
+								<p>1.1	In this Agreement, the following words and phrases shall (unless the context otherwise requires) have the meanings set out beside them:</p>
+								<ul>
+									<li><strong>Album</strong> means the dedicated album created by You via the use of the Services. </li>
+									<li><strong>Book</strong> means the address book hosted on, or which can be accessed via, Your Device.</li>
+									<li><strong>Content</strong> means any and all content posted by You on or via the Site, including, without limitation information, the Book, the Gallery and any content posted by you on the Albums. </li>
+									<li><strong>Device</strong> means the mobile phone for which You have provided its number to the Company. </li>
+									<li><strong>Gallery</strong> means the photo and/or video gallery hosted on, or which can be accessed via, the Device. </li> 
+									<li><strong>Person</strong> means a natural person and any type of legal person. </li>
+									<li><strong>Services</strong> means the Company’s services of providing picture and video hosting, sharing services and Albums creation, as well as connection with other Persons, as offered via the Site. </li>
+									<li><strong>Site</strong> means any website, mobile site and/or mobile application owned, operated and/or hosted by the Company, and any software or content that is used to access such website, mobile site and/or mobile application.</li>
+									<li><strong>Us/We/Our</strong> means the Company, and any subsidiaries, affiliates, directors, officers, employees, representatives, agents and contractors, and any other Person acting for or on behalf of the Company.</li>
+									<li><strong>You/Your</strong> means the user of the Site.</li>
+								</ul>
+								<p>1.2	The preamble and definitions of this Agreement shall for all purposes form part of this Agreement, and constitute a material and substantial part of it.</p>
+<h3>2.	THE SERVICES</h3>
+<p>2.1	For the purpose of using the Services, You will be required to provide the phone number of the Device. The Company will send a text message to the phone number You provided, which You will be required to confirm. Upon confirmation, the Company shall access the Book and Gallery and shall store the Book and Gallery on its servers (or servers owned by third parties and used by the Company); such access and storage will be performed upon confirmation as well as on an ongoing basis. You hereby provide Your consent for such access and storage and for the provision of the Services accordingly.</p>
+<p>2.2	After confirmation, You will be able to create Album(s), name them and post any and/or all of the photos and/or videos included in the Gallery (including directly posting when creating such photo and/or video) in the Album(s). After the creation of the Album(s), You will be able to send an invitation to join and view the Album(s) to any Person whose mobile phone number appears in the Book. Any such invitation sent to a Person who has already signed on to the use of the Services will be sent directly from the Device; any such invitation sent to a Person who has not signed on to the use of the Services will be sent from the Company's servers (or servers owned by third parties and used by the Company). Any Person receiving such an invitation will be allowed to join the Album, view any and all photos and videos included in the Album, as well as upload additional Content (such upload of Content will not require Your consent), provided that such invitee completes the registration process in accordance with Section 2.1. </p>
+<p>2.3	When signing on to the Services, You hereby represent, warrant, acknowledge and undertake that (a) the details and information You submitted to the Company are true and correct, (b) You have the legal right to use the Device, (c) You will use the Services in good faith towards Us and others using the Services, (d) You will not harass any Person whose mobile phone number appears in the Book and, without derogating from the generality of the above, will not send any communication via the Services to any Person that is not interested in accepting such communications, nor will You stalk or threaten any Person; (e) You will not use the Services to send any unsolicited communications nor will You use the Services for the purpose of sending any kind of SPAM, (f) Your use of the Services is in compliance with and does not breach any applicable legislation, (g) You are legally competent to enter into this Agreement and be bound by its provisions, (h) any and all Content posted by You does not infringe any intellectual property rights of any kind and manner of any third party, and that You have the full right and license to post such Content (including the right and license to allow the Company to allow third parties to access and view the Content), (i) You will not use the Services for any illegal or unlawful purpose;  (j) You will not transmit worms, viruses, other malicious and/or destructive codes, (k) You shall not post any Content which is inaccurate, offensive, hateful, obscene, pornographic, infringes a right of privacy, defamatory, harmful, indecent, illegal, abusive and/or objectionable, (l) You may be exposed to Content which is inaccurate, offensive, hateful, obscene, pornographic, infringes a right of privacy, defamatory, harmful, indecent, illegal, abusive and/or objectionable, and You hereby waive any and all claims against Us in connection with such Content, (m) the Company is under no obligation to preserve, provide access to and/or return to You or any other Person any Content, and (n) You shall indemnify Us and hold Us harmless, from and against all claims, liabilities, damages, losses, costs and expenses, including legal fees, arising out of or in connection with any breach of this Agreement by You, and any other liabilities arising out of Your use of the Services.</p>
+<p>2.4	The Company shall be entitled to inform relevant authorities and/or entities of Your personal identifiable information and of any suspected unlawful, fraudulent or improper activity performed by You, and You will cooperate fully with the Company to investigate any such activity.</p>
+<p>2.5	The Company reserves the right, for any reason whatsoever and at its sole discretion without the need to provide notice and with immediate effect, to (i) remove and/or delete any or all Content (including, but not limited to, due to claims concerning an infringement of intellectual property rights of third parties due to the Content), (ii) remove and/or block access to any or all Albums, and/or (iii) block and/or prohibit Your access to the Site. Any such decision of the Company is final and is not subject to an appeal. </p>
+<p>2.6	The Company reserves the right to change, discontinue, suspend, disable and/or terminate any of the Services and/or the Site for any reason whatsoever at its sole discretion with immediate effect and without the need to provide notice. We shall not be liable for any loss suffered resulting from any changes made no one shall have any claims against Us in such regard.</p>
+<h3>3.	INTELECUATL PROPERTY RIGHTS</h3>
+<p>3.1	All the rights, including the intellectual property rights (including, but not limited to, patents, copyright, trademarks, service marks, logos, trade names, and know-how) concerning the Site, and all of its content (including, but not limited to, software and programs, files, video, audio, music, pictures, images, photographs, graphics, animations, pictures, text and software) and/or the Services (collectively the “Rights"), are and shall remain the sole and exclusive property of the Company. You may not use any of the Rights without the express prior written approval of the Company, except pursuant to this Agreement, and You shall not, by using the Services and/or the Site or otherwise, acquire any rights in any of the Rights. Without derogating from the above, You are strictly prohibited from: (i) copying. redistributing, publishing, reverse engineering, decompiling, disassembling, modifying, translating or making any attempt to access the source code of the Site, the Services and/or any content within the Site to create derivate works of the source code; (ii) selling, assigning, licensing, sublicensing, transferring, distributing any content of the Site and/or the Services, and (iii) making the Site and/or the Services (or any part thereof) available to any third party.</p>
+<p>3.2	Without derogating from the generality of the foregoing, it is hereby clarified that are the Company's trademarks, and any use thereof or of similar signs or marks is prohibited and will constitute a violation of the Company’s rights.</p>
+<p>3.3	The use of the Site and/or the Services is for personal and non-commercial purposes only. Any other use is strictly prohibited and You will be solely liable for any damages, costs or expenses arising out of or in connection with the commission of any such use.</p>
+<p>3.4	Any comments, feedback, suggestions and any other communication (the “Communication”) provided by You to Us shall become property solely owned by the Company, and the Company shall have the sole and exclusive right to use such Communication (and any derivatives of and/or from such Communication) as it sees fit, without providing You or any other Person any compensation and/or consideration for it. </p>
+<h3>4.	LIMITATION OF LIABILITY & INDEMNIFICATION</h3>
+<p>4.1	We shall not be liable in contract, tort, negligence, or otherwise, for any loss, liability, claim, damage, cost and/or expense (including reasonable attorneys' fees)  whatsoever arising from or in any way connected with Your use of the Site and/or Services and/or the provision of the Services, whether direct or indirect, incidental, special, punitive or consequential, including, but not limited to, damage for loss of business, loss of profits, loss of revenue, business interruption, loss of business information and/or loss of data (even where We have been notified of the possibility of such loss or damage), including without limitation, to any action taken by the Company in accordance with this Agreement. We will not be liable for any loss, deletion, corruption and/or deletion of any Content. Without derogating from the above, Our total liability to You for any and all losses, claims, liabilities, damages, costs and expenses (including reasonable attorneys' fees) shall not exceed 50 US Dollars. Any cause of action arising out, or related to, this Agreement must commence within 1 (one) year from the date in which the cause of action was created, otherwise such cause of action will be permanently barred.</p> 
+<p>4.2	In addition to the above, it is clarified that the We are not responsible for any error, omission, interruption, deletion, defect, delay in operation or transmission, communications line failure, theft or destruction or unauthorized access to, or alteration of, data or information (including, but not limited to the Content) and any direct or indirect loss which arises from these occurrences. We are not responsible for any problems or technical malfunction of any telephone network or lines, computers, systems, servers or providers, computer equipment, software, emails or for traffic congestion on the internet or at any website. </p>
+<p>4.3	We make no representations about the suitability, reliability, availability, timeliness and accuracy of the information, software and Services contained and/or offered on the Site for any purpose. All information, software and Services are provided "as is" without warranty of any kind. We hereby disclaim all warranties with respect to information, software and Services contained or offered on the Site, whether express or implied. In any event, We shall have no liability with respect to any damage or loss that was caused due to reliance, of any type, on the information or any other publication or content appearing on the Site.</p> 
+<p>4.4	We shall not be responsible or liable to You in the event of systems or communications errors, bugs, viruses or other malicious software relating to the Services or which will result in damage to Your hardware (including, but not limited to, the Device), software and/or data. </p>
+<p>4.5	We shall not be liable for any damage caused as a result of any attempt by You (or on Your behalf) to use the Site and/or Services by any methods, means or ways not intended or authorized by the Company. </p>
+<p>4.6	We shall not be responsible or liable for any actions or omissions of internet service provider or any other third party which provides You with access to the Site and/or the Services.</p>
+<p>4.7	You will use the Site and Services at Your own risk, and We shall not be responsible for any damage or loss You shall incur as a result of modifications, enhancement, termination, suspension or discontinuation of the Site and/or the Services. We will not be responsible for any damage or loss You shall incur as a result of Your use or reliance on the content of any website to which links appear on the Site. Any third-party links, services, resources and information that We provide on or make available through the Site are not controlled by Us. Accordingly, We make no warranties regarding such third-party services, resources and information, and We will not be liable for Your use of or reliance on such third-party services, resources or information</p>
+<p>4.8	You will indemnify and hold Us harmless against all direct and indirect claims, liabilities, damages, losses, costs and expenses (including attorneys' fees) arising from (i) Your breach of this Agreement, and/or (ii) Your use of the Services and/or the Site. <p>
+<p>4.9	We shall not be liable for failure and/or delay to perform any obligation under this Agreement (in whole or in part).</p> 
+<p>4.10	We shall not be responsible for any content posted on the Site by any third party, including, but not limited to, any content that (i) infringes intellectual property rights or privacy rights, and/or (ii) is inaccurate, offensive, hateful, obscene, pornographic, infringes a right of privacy, defamatory, harmful, indecent, illegal, abusive and/or objectionable, and You shall bear any and all damages resulting from any act or omission in contravention of this Section.</p>
+<p>4.11	THE SITE, SERVICES AND THE SOFTWARE USED IN CONNECTION THEREWITH ARE PROVIDED "AS IS", AND WE MAKE NO WARRANTY OR REPRESENTATION, WHETHER EXPRESS OR IMPLIED (WHETHER BY LAW, STATUTE, OR OTHERWISE), INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES AND CONDITIONS OF MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A PARTICULAR PURPOSE, COMPLETENESS OR ACCURACY, NON INFRINGEMENT OF THIRD PARTIES RIGHTS OR OF APPLICABLE LAWS, RULES AND REGULATION, OR THAT THE SITE, SERVICES, THE SITE CONTENT OR THE SOFTWARE USED IN CONNECTION THEREWITH WILL BE UNINTERRUPTED, TIMELY, SECURE OR ERROR-FREE, OR WILL BE FREE OF VIRUSES OR BUGS OR AS TO RESULTS OR THE ACCURACY OF ANY INFORMATION THROUGH THE SITE OR SERVICES, OR THAT DEFECTS WILL BE CORRECTED.</p>
+<p>4.12	We shall not be responsible for any damage caused to the Device, including any information of any form or manner stored in the Device. </p>
+
+<h3>5.	COMPLAINTS</h3>
+<p>If You or any other Person have any complaints, claims or disputes with regard to the Site and/or the Services (including, but not limited to, due to claims concerning an infringement of intellectual property rights of third parties due to the Content), the complaint has to be submitted to the Company in writing as soon as is reasonably practicable following the occurrence of the matter to which the complaint, claim or dispute refers. Complaints may be submitted by email to <a href="mailto:info@useglance.com">info@useglance.com</a> , or via our Contact Us Page indicating the claim/complaint with maximum description and details. </p>
+
+<h3>6.	MISCELLANEOUS</h3>
+<p>6.1	The Company may, at its sole discretion, transfer or assign this Agreement (in whole or in part) to any third party without any prior notice; without derogating from the above, the Site and/or any of the Services may be operated by third parties. You may not transfer, assign or pledge in any manner whatsoever any of Your rights or obligations under this Agreement.</p>
+<p>6.2	You understand that You will receive electronic communications from the Company which shall be posted on the Site and/or sent to You via e-mail. All such communications will be considered "in writing" and will be considered received by You immediately after the notice was posted on the Site or sent to You via e-mail.</p>
+<p>6.3	This Agreement, together with the Company’s privacy policy and any other policies posted on the Site, constitutes the entire agreement between the Company and You with respect to the subject matter hereof and supersedes any and all prior agreement between the Company and You in relation to the same. You confirm that, in agreeing to accept this Agreement, You have not relied on any representation made by Us. Any representation, promise, undertaking or consent, whether verbal or in writing, which is not included in this Agreement, or in the Company’s privacy policy or any other policy posted on the Site, will not be valid. </p>
+<p>6.4	The failure of the Company at any time in enforcing any right or remedy under this Agreement shall not be construed as a waiver of any future or other exercise of such right or remedy.</p>
+<p>6.5	This Agreement shall be governed by and construed in accordance with the laws of Israel. You irrevocably agree to submit to the exclusive jurisdiction of the courts of the Tel Aviv District, Israel for settlement of any disputes or matters arising out of or concerning this Agreement and/or its enforceability. </p>
+<p>6.6	If any provision of this Agreement is found by a court of competent jurisdiction to be invalid, illegal or unenforceable in any respect, then such provision shall be excluded from this Agreement and the remainder of this Agreement shall be interpreted as if such provision was so excluded and shall be enforceable in accordance with its terms; provided, however, that in such event this Agreement shall be interpreted so as to give effect, to the greatest extent consistent with and permitted by applicable law, to the meaning and intention of the excluded provision as determined by such court of competent jurisdiction.</p>
+<p>6.7	The Company is entitled to amend this Agreement with immediate effect at any time and post the amended version on the Site, and to do so according to its absolute and exclusive discretion, and without providing any notice in advance. It is Your sole responsibility to review this Agreement and any amendments, before performing any activity via the Site. Any use by You of the Site and/or Services after making an amendment shall be deemed as Your awareness and acceptance of any amendment of this Agreement. If any amendment of this Agreement is unacceptable to You, Your only recourse is to cease using the Site and Services.</p>
+<p>6.8	This Agreement has been drafted in the English language. In the event of any discrepancy between the meanings of any translated versions of this Agreement and the English language version, the meaning of the English language version shall prevail.</p>
+<p>6.9	Unless explicitly stated in this Agreement, nothing in this Agreement shall: (i) be construed as creating any agency, arrangement, partnership, joint venture, trust, fiduciary relationship or any other similar relationship between You and Us and (ii) create or confer any rights or benefits to any third party except Us. </p>
+							
+						</div>
+
+					</div>
+				</div>
+			</section>
+			<div id="alt-header">
+				<span class="logo"><a href="/">Glance</a></span>
+				<ul class="actions">
+					<li class="default"><a href="#download" class="button big download">Get the App</a></li>
+					<li class="ios"><a href="https://itunes.apple.com/ro/app/shotvibe/id721122774?mt=8" class="button ios">Download iOS App</a></li>
+					<li class="android"><a href="https://play.google.com/store/apps/details?id=com.shotvibe.shotvibe&amp;hl=en" class="button android">Download Android App</a></li>
+				</ul>
+			</div>
+			<div id="footer">
+				<div class="container">
+					<span class="logo"><a href="/">Glance</a></span>
+					<div class="inner">
+					
+						<a href="/login/" class="button secondary">Login</a>
+						
+						<ul class="actions2">
+							<li><a href="http://www.facebook.com/glancemobileapp" class="fa fa-facebook"><span>Facebook</span></a></li>
+							<li><a href="https://twitter.com/GlanceMobileApp" class="fa fa-twitter"><span>Twitter</span></a></li>
+							<li><a href="https://www.linkedin.com/company/glance-app" class="fa fa-linkedin"><span>LinkedIn</span></a></li>
+							<li><a href="http://glancemobileapp.tumblr.com/" class="fa fa-tumblr"><span>Tumblr</span></a></li>
+							<li><a href="https://www.youtube.com/channel/UCn0NmSU1F5xnNJDXFpaaFuQ" class="fa fa-youtube"><span>Youtube</span></a></li>
+							<li><a href="https://github.com/shotvibe" class="fa fa-github"><span>Github</span></a></li>
+							<li><a href="mailto:info@useglance.com" class="fa fa-envelope-o"><span>Email</span></a></li>
+						</ul>
+						
+						<ul class="likes">
+							<li>
+								<div class="fb-like" data-href="https://www.useglance.com" data-layout="button_count" data-action="like" data-show-faces="false" data-share="false"></div>
+								<div id="fb-root"></div>
+								<script>(function(d, s, id) {
+								  var js, fjs = d.getElementsByTagName(s)[0];
+								  if (d.getElementById(id)) return;
+								  js = d.createElement(s); js.id = id;
+								  js.src = "http://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+								  fjs.parentNode.insertBefore(js, fjs);
+								}(document, 'script', 'facebook-jssdk'));</script>							
+							</li>						
+							<li>
+								<a href="https://twitter.com/share" class="twitter-share-button" data-url="https://www.useglance.com">Tweet</a>
+								<script>
+									!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');
+								</script>
+								
+							</li>
+							<li><a href="https://mixpanel.com/f/partner"><img src="https://cdn.mxpnl.com/site_media/images/partner/badge_blue.png" alt="Mobile Analytics" /></a></li>
+						</ul>							
+						
+					</div>
+					<ul class="menu">
+						<li><a href="/about/">About</a></li>
+						<li><a href="/help/">Help/FAQ</a></li>
+						<li><a href="http://blog.useglance.com">Blog</a></li>
+						<li><a href="/policy/">Privacy policy</a></li>
+						<li><a href="/terms/">Terms of use</a></li>
+					</ul>
+					<p class="copyright">&copy; 2013 Pics On Air LTD.</p>
+				</div>
+			</div>
+
+		</div>
+		
+	</body>
+</html>

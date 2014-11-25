@@ -1,0 +1,489 @@
+{% load static %}
+{% load analytics %}
+<!DOCTYPE HTML>
+<html>
+	<head><script type="text/javascript">var NREUMQ=NREUMQ||[];NREUMQ.push(["mark","firstbyte",new Date().getTime()]);</script>
+		<title>Glance</title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<!--[if lte IE 8]>
+			<script src="/{% static "glance/js/html5shiv.js" %}"></script>
+		<![endif]-->
+		<script src="{% static "glance/js/jquery.min.js" %}"></script>
+		<script src="{% static "glance/js/skel.min.js" %}"></script>
+		<script src="{% static "glance/js/init.js" %}"></script>
+		<noscript>
+			<link rel="stylesheet" href="{% static "glance/css/skel-noscript.css" %}" />
+			<link rel="stylesheet" href="{% static "glance/css/style.css" %}" />
+		</noscript>
+		<!--[if lte IE 8]>
+			<link rel="stylesheet" href="{% static "glance/css/ie8.css" %}" />
+		<![endif]-->
+		<link rel="icon" type="image/png" href="{% static "glance/images/icon48px.png" %}">
+		{% analytics_mixpanel_init %}
+	</head>
+	<body>
+		<div id="wrapper" class="loading">
+		
+			<div id="header">
+				<div class="container">
+					<h1 id="logo"><a href="/">Glance</a></h1>
+				</div>
+			</div>
+			<section id="banner" class="alt">
+			
+			</section>
+			<section id="download">
+				<div id="sms-form" class="container">
+			<div id="header">
+				<div class="container">
+					<div class="row">
+					
+						<div class="4u">
+							<h1 id="logo"><a href="/">Glance</a></h1>
+						</div>
+						
+						<div class="8u">
+							<ul class="menu">
+								<li><a href="/about/">About</a></li>
+								<li><a href="/help/">Help/FAQ</a></li>
+								<li><a href="http://blog.useglance.com">Blog</a></li>
+								<li><a href="/policy/">Privacy policy</a></li>
+								<li><a href="/terms/">Terms of use</a></li>
+							</ul>					
+						</div>
+					
+					</div>
+				</div>
+			</div>
+					<form>
+						<input type='hidden' name='csrfmiddlewaretoken' value='5Inxfkg8wlZFiBkzWEsee2LQyg8UcO9i' />
+						<div class="row half">
+							<div class="4u">
+								<div class="select"><select id="country_code" name="country_code">
+									<option value="AF">Afghanistan (+93)</option>
+									<option value="AX">Åland Islands (+358)</option>
+									<option value="AL">Albania (+355)</option>
+									<option value="DZ">Algeria (+213)</option>
+									<option value="AS">American Samoa (+1)</option>
+									<option value="AD">Andorra (+376)</option>
+									<option value="AO">Angola (+244)</option>
+									<option value="AI">Anguilla (+1)</option>
+									<option value="AG">Antigua and Barbuda (+1)</option>
+									<option value="AR">Argentina (+54)</option>
+									<option value="AM">Armenia (+374)</option>
+									<option value="AW">Aruba (+297)</option>
+									<option value="AU">Australia (+61)</option>
+									<option value="AT">Austria (+43)</option>
+									<option value="AZ">Azerbaijan (+994)</option>
+									<option value="BS">Bahamas (+1)</option>
+									<option value="BH">Bahrain (+973)</option>
+									<option value="BD">Bangladesh (+880)</option>
+									<option value="BB">Barbados (+1)</option>
+									<option value="BY">Belarus (+375)</option>
+									<option value="BE">Belgium (+32)</option>
+									<option value="BZ">Belize (+501)</option>
+									<option value="BJ">Benin (+229)</option>
+									<option value="BM">Bermuda (+1)</option>
+									<option value="BT">Bhutan (+975)</option>
+									<option value="BO">Bolivia, Plurinational State of (+591)</option>
+									<option value="BQ">Bonaire, Sint Eustatius and Saba (+599)</option>
+									<option value="BA">Bosnia and Herzegovina (+387)</option>
+									<option value="BW">Botswana (+267)</option>
+									<option value="BR">Brazil (+55)</option>
+									<option value="IO">British Indian Ocean Territory (+246)</option>
+									<option value="BN">Brunei Darussalam (+673)</option>
+									<option value="BG">Bulgaria (+359)</option>
+									<option value="BF">Burkina Faso (+226)</option>
+									<option value="BI">Burundi (+257)</option>
+									<option value="KH">Cambodia (+855)</option>
+									<option value="CM">Cameroon (+237)</option>
+									<option value="CA">Canada (+1)</option>
+									<option value="CV">Cape Verde (+238)</option>
+									<option value="KY">Cayman Islands (+1)</option>
+									<option value="CF">Central African Republic (+236)</option>
+									<option value="TD">Chad (+235)</option>
+									<option value="CL">Chile (+56)</option>
+									<option value="CN">China (+86)</option>
+									<option value="CX">Christmas Island (+61)</option>
+									<option value="CC">Cocos (Keeling) Islands (+61)</option>
+									<option value="CO">Colombia (+57)</option>
+									<option value="KM">Comoros (+269)</option>
+									<option value="CG">Congo (+242)</option>
+									<option value="CD">Congo, the Democratic Republic of the (+243)</option>
+									<option value="CK">Cook Islands (+682)</option>
+									<option value="CR">Costa Rica (+506)</option>
+									<option value="HR">Croatia (+385)</option>
+									<option value="CU">Cuba (+53)</option>
+									<option value="CW">Curaçao (+599)</option>
+									<option value="CY">Cyprus (+357)</option>
+									<option value="CZ">Czech Republic (+420)</option>
+									<option value="CI">Côte d'Ivoire (+225)</option>
+									<option value="DK">Denmark (+45)</option>
+									<option value="DJ">Djibouti (+253)</option>
+									<option value="DM">Dominica (+1)</option>
+									<option value="DO">Dominican Republic (+1)</option>
+									<option value="EC">Ecuador (+593)</option>
+									<option value="EG">Egypt (+20)</option>
+									<option value="SV">El Salvador (+503)</option>
+									<option value="GQ">Equatorial Guinea (+240)</option>
+									<option value="ER">Eritrea (+291)</option>
+									<option value="EE">Estonia (+372)</option>
+									<option value="ET">Ethiopia (+251)</option>
+									<option value="FK">Falkland Islands (Malvinas) (+500)</option>
+									<option value="FO">Faroe Islands (+298)</option>
+									<option value="FJ">Fiji (+679)</option>
+									<option value="FI">Finland (+358)</option>
+									<option value="FR">France (+33)</option>
+									<option value="GF">French Guiana (+594)</option>
+									<option value="PF">French Polynesia (+689)</option>
+									<option value="GA">Gabon (+241)</option>
+									<option value="GM">Gambia (+220)</option>
+									<option value="GE">Georgia (+995)</option>
+									<option value="DE">Germany (+49)</option>
+									<option value="GH">Ghana (+233)</option>
+									<option value="GI">Gibraltar (+350)</option>
+									<option value="GR">Greece (+30)</option>
+									<option value="GL">Greenland (+299)</option>
+									<option value="GD">Grenada (+1)</option>
+									<option value="GP">Guadeloupe (+590)</option>
+									<option value="GU">Guam (+1)</option>
+									<option value="GT">Guatemala (+502)</option>
+									<option value="GG">Guernsey (+44)</option>
+									<option value="GN">Guinea (+224)</option>
+									<option value="GW">Guinea-Bissau (+245)</option>
+									<option value="GY">Guyana (+592)</option>
+									<option value="HT">Haiti (+509)</option>
+									<option value="VA">Holy See (Vatican City State) (+379)</option>
+									<option value="HN">Honduras (+504)</option>
+									<option value="HK">Hong Kong (+852)</option>
+									<option value="HU">Hungary (+36)</option>
+									<option value="IS">Iceland (+354)</option>
+									<option value="IN">India (+91)</option>
+									<option value="ID">Indonesia (+62)</option>
+									<option value="IR">Iran, Islamic Republic of (+98)</option>
+									<option value="IQ">Iraq (+964)</option>
+									<option value="IE">Ireland (+353)</option>
+									<option value="IM">Isle of Man (+44)</option>
+									<option value="IL">Israel (+972)</option>
+									<option value="IT">Italy (+39)</option>
+									<option value="JM">Jamaica (+1)</option>
+									<option value="JP">Japan (+81)</option>
+									<option value="JE">Jersey (+44)</option>
+									<option value="JO">Jordan (+962)</option>
+									<option value="KZ">Kazakhstan (+7)</option>
+									<option value="KE">Kenya (+254)</option>
+									<option value="KI">Kiribati (+686)</option>
+									<option value="KP">Korea, Democratic People's Republic of (+850)</option>
+									<option value="KR">Korea, Republic of (+82)</option>
+									<option value="KW">Kuwait (+965)</option>
+									<option value="KG">Kyrgyzstan (+996)</option>
+									<option value="LA">Lao People's Democratic Republic (+856)</option>
+									<option value="LV">Latvia (+371)</option>
+									<option value="LB">Lebanon (+961)</option>
+									<option value="LS">Lesotho (+266)</option>
+									<option value="LR">Liberia (+231)</option>
+									<option value="LY">Libya (+218)</option>
+									<option value="LI">Liechtenstein (+423)</option>
+									<option value="LT">Lithuania (+370)</option>
+									<option value="LU">Luxembourg (+352)</option>
+									<option value="MO">Macao (+853)</option>
+									<option value="MK">Macedonia, the former Yugoslav Republic of (+389)</option>
+									<option value="MG">Madagascar (+261)</option>
+									<option value="MW">Malawi (+265)</option>
+									<option value="MY">Malaysia (+60)</option>
+									<option value="MV">Maldives (+960)</option>
+									<option value="ML">Mali (+223)</option>
+									<option value="MT">Malta (+356)</option>
+									<option value="MH">Marshall Islands (+692)</option>
+									<option value="MQ">Martinique (+596)</option>
+									<option value="MR">Mauritania (+222)</option>
+									<option value="MU">Mauritius (+230)</option>
+									<option value="YT">Mayotte (+262)</option>
+									<option value="MX">Mexico (+52)</option>
+									<option value="FM">Micronesia, Federated States of (+691)</option>
+									<option value="MD">Moldova, Republic of (+373)</option>
+									<option value="MC">Monaco (+377)</option>
+									<option value="MN">Mongolia (+976)</option>
+									<option value="ME">Montenegro (+382)</option>
+									<option value="MS">Montserrat (+1)</option>
+									<option value="MA">Morocco (+212)</option>
+									<option value="MZ">Mozambique (+258)</option>
+									<option value="MM">Myanmar (+95)</option>
+									<option value="NA">Namibia (+264)</option>
+									<option value="NR">Nauru (+674)</option>
+									<option value="NP">Nepal (+977)</option>
+									<option value="NL">Netherlands (+31)</option>
+									<option value="NC">New Caledonia (+687)</option>
+									<option value="NZ">New Zealand (+64)</option>
+									<option value="NI">Nicaragua (+505)</option>
+									<option value="NE">Niger (+227)</option>
+									<option value="NG">Nigeria (+234)</option>
+									<option value="NU">Niue (+683)</option>
+									<option value="NF">Norfolk Island (+672)</option>
+									<option value="MP">Northern Mariana Islands (+1)</option>
+									<option value="NO">Norway (+47)</option>
+									<option value="OM">Oman (+968)</option>
+									<option value="PK">Pakistan (+92)</option>
+									<option value="PW">Palau (+680)</option>
+									<option value="PS">Palestine, State of (+970)</option>
+									<option value="PA">Panama (+507)</option>
+									<option value="PG">Papua New Guinea (+675)</option>
+									<option value="PY">Paraguay (+595)</option>
+									<option value="PE">Peru (+51)</option>
+									<option value="PH">Philippines (+63)</option>
+									<option value="PL">Poland (+48)</option>
+									<option value="PT">Portugal (+351)</option>
+									<option value="PR">Puerto Rico (+1)</option>
+									<option value="QA">Qatar (+974)</option>
+									<option value="RO">Romania (+40)</option>
+									<option value="RU">Russian Federation (+7)</option>
+									<option value="RW">Rwanda (+250)</option>
+									<option value="RE">Réunion (+262)</option>
+									<option value="BL">Saint Barthélemy (+590)</option>
+									<option value="SH">Saint Helena, Ascension and Tristan da Cunha (+290)</option>
+									<option value="KN">Saint Kitts and Nevis (+1)</option>
+									<option value="LC">Saint Lucia (+1)</option>
+									<option value="MF">Saint Martin (French part) (+590)</option>
+									<option value="PM">Saint Pierre and Miquelon (+508)</option>
+									<option value="VC">Saint Vincent and the Grenadines (+1)</option>
+									<option value="WS">Samoa (+685)</option>
+									<option value="SM">San Marino (+378)</option>
+									<option value="ST">Sao Tome and Principe (+239)</option>
+									<option value="SA">Saudi Arabia (+966)</option>
+									<option value="SN">Senegal (+221)</option>
+									<option value="RS">Serbia (+381)</option>
+									<option value="SC">Seychelles (+248)</option>
+									<option value="SL">Sierra Leone (+232)</option>
+									<option value="SG">Singapore (+65)</option>
+									<option value="SX">Sint Maarten (Dutch part) (+1)</option>
+									<option value="SK">Slovakia (+421)</option>
+									<option value="SI">Slovenia (+386)</option>
+									<option value="SB">Solomon Islands (+677)</option>
+									<option value="SO">Somalia (+252)</option>
+									<option value="ZA">South Africa (+27)</option>
+									<option value="SS">South Sudan (+211)</option>
+									<option value="ES">Spain (+34)</option>
+									<option value="LK">Sri Lanka (+94)</option>
+									<option value="SD">Sudan (+249)</option>
+									<option value="SR">Suriname (+597)</option>
+									<option value="SJ">Svalbard and Jan Mayen (+47)</option>
+									<option value="SZ">Swaziland (+268)</option>
+									<option value="SE">Sweden (+46)</option>
+									<option value="CH">Switzerland (+41)</option>
+									<option value="SY">Syrian Arab Republic (+963)</option>
+									<option value="TW">Taiwan, Province of China (+886)</option>
+									<option value="TJ">Tajikistan (+992)</option>
+									<option value="TZ">Tanzania, United Republic of (+255)</option>
+									<option value="TH">Thailand (+66)</option>
+									<option value="TL">Timor-Leste (+670)</option>
+									<option value="TG">Togo (+228)</option>
+									<option value="TK">Tokelau (+690)</option>
+									<option value="TO">Tonga (+676)</option>
+									<option value="TT">Trinidad and Tobago (+1)</option>
+									<option value="TN">Tunisia (+216)</option>
+									<option value="TR">Turkey (+90)</option>
+									<option value="TM">Turkmenistan (+993)</option>
+									<option value="TC">Turks and Caicos Islands (+1)</option>
+									<option value="TV">Tuvalu (+688)</option>
+									<option value="UG">Uganda (+256)</option>
+									<option value="UA">Ukraine (+380)</option>
+									<option value="AE">United Arab Emirates (+971)</option>
+									<option value="GB">United Kingdom (+44)</option>
+									<option value="US" selected>United States (+1)</option>
+									<option value="UY">Uruguay (+598)</option>
+									<option value="UZ">Uzbekistan (+998)</option>
+									<option value="VU">Vanuatu (+678)</option>
+									<option value="VE">Venezuela, Bolivarian Republic of (+58)</option>
+									<option value="VN">Viet Nam (+84)</option>
+									<option value="VG">Virgin Islands, British (+1)</option>
+									<option value="VI">Virgin Islands, U.S. (+1)</option>
+									<option value="WF">Wallis and Futuna (+681)</option>
+									<option value="EH">Western Sahara (+212)</option>
+									<option value="YE">Yemen (+967)</option>
+									<option value="ZM">Zambia (+260)</option>
+									<option value="ZW">Zimbabwe (+263)</option>
+								</select><span class="arrow"></span></div>
+							</div>
+							<div class="4u">
+								<input id="phone_number" type="text" name="phone_number" placeholder="Your Phone Number" />
+							</div>
+							<div class="2u">
+								<input id="sms-send" type="submit" value="Send" class="button" />
+							</div>
+						</div>
+						<div id="sms-error" class="row">
+							<div class="4u">
+								Error: Invalid phone number.
+							</div>
+						</div>
+						<div class="row">
+							<div class="12u">
+								<a href="https://itunes.apple.com/ro/app/shotvibe/id721122774?mt=8" class="button ios">Download iOS App</a>
+								<a href="https://play.google.com/store/apps/details?id=com.shotvibe.shotvibe&amp;hl=en" class="button android">Download Android App</a>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div id="sms-throttle" class="container">
+					Error: Too many requests, please try again later.
+				</div>
+				<div id="sms-success" class="container">
+					<header>
+						<h2>Success!</h2>
+					</header>
+				</div>
+			</section>				
+			<section class="feature first seven last">
+				<div class="container">
+					<div class="row double">
+						<div class="12u">
+							<header>
+								<h2>Frequently Asked Questions</h2>
+							</header>
+							<section class="question">
+								<h3>What is Glance all about?</h3>
+								<p class="answer">Glance is the first mobile service that lets you create albums on your mobile device, selecting the friends that you want to share the album with, and all the rest of your friends on the album can add their photos as well– so that the album you created is a "living album" – in a way that all the relevant pictures are there. </p> 
+							</section>
+							<section class="question">
+								<h3>How do I register to Glance ? </h3>
+								<p class="answer">Glance  is the first albums mobile app ever that is fully based on your mobile phone number for registration. Once downloading the app – you'll sign up with your phone number. No email, password, Facebook, user name or anything else needed, as simple as that.</p> 
+							</section>
+							<section class="question">
+								<h3>Do I need to connect with a Facebook account, twitter account, Email address, password or username to register on Glance ?</h3> 
+								<p class="answer">No, you will only sign in at the first usage using with your phone number.</p> 
+							</section>
+							<section class="question">
+								<h3>Do I have to be always online/connected to view my albums on Glance ?</h3> 
+								<p class="answer">No – Glance is the first mobile service ever that will keep your photos for an offline view as well – wherever you are you'll have access to all of your album and all your photos. You can even create new albums and choose new friends to share the album with when you are offline and once your device gets a Wi-Fi or 3G/4G access it will upload the photos and videos to the cloud and share it with all your friends.</p> 
+							</section>
+							<section class="question">
+								<h3>Can I add many photos to an album at once or do I have to select one picture at a time?</h3> 
+								<p class="answer">Yes – Glance lets you select multiple photos to upload, you don't need to select t one picture at a time. We are concerned that you need a fast service and don't have spare time to waste for selecting one picture at a time – like the rest of the services. </p>
+							</section>
+							<section class="question">
+								<h3>Can I upload videos to Glance?</h3>
+								<p class="answer">Yes – Glance is your mobile media center for your pictures and videos – you can upload video to your album by choosing them from the phone gallery or you can shoot a video directly using the app – and the video will appear on your shared album.</p>
+							</section>
+							<section class="question">
+								<h3>Does Glance posts to Facebook or anywhere else on my behalf?</h3>
+								<p class="answer">Glance will never post any of your pictures or videos to Facebook – we are not a social and a cool service for sharing photos with the rest of the world. We are a usability tool for creating albums and sharing them using your mobile device.</p> 
+							</section>
+							<section class="question">
+								<h3>What is the contact list made of?</h3>
+								<p class="answer">When you'll try to add new friends to your album – we'll present you the phone contact list – but we'll present only mobile phone number and nothing else – no home, office number, no fax, no email or nothing else – just your friend's mobile phone number. We are doing it using our sophisticated recognition algorithm. We want to make the invitation process as easy as possible for you – and we understand that presenting you all the unnecessary phone numbers is a waste of time.</p> 
+							</section>
+							<section class="question">
+								<h3>How is it possible that the contact list is presenting only mobile phone numbers?</h3>
+								<p class="answer">We are doing it using our sophisticated recognition algorithm. We want to make the process as easy as possible for you – and we understand that presenting you all the unnecessary phone numbers it's a waste of time.</p> 
+							</section>
+							<section class="question">
+								<h3>What kind of invitation will the album member get once I have created an album?</h3>
+								<p class="answer">When you select the friends you want to invite to the album created – we will recognize which one of your friends invited is a Glance registered member and which one is not registered user. All the registered members of the service will instantly get a push notification alerting them about the new album you have just created. All the unregistered members will get an SMS from Glance Company with a link – this link will lead your invited friends to a mobile mini site where they'll be able to see the album you just created. If they're interested in adding pictures to that album as well – then all they need to do is to press a button at the end of the mini-site leading them to the Apple store or Google play store.</p> 
+							</section>
+							<section class="question">
+								<h3>How can I shoot pictures directly to an existing album?</h3>
+								<p class="answer">Once you have created an album, you can either add pictures from your mobile phone galleries or you can add pictures directly by shooting pictures from the album. Once you are inside an album – you press the "+camera" button and the camera screen will appear, all the pictures taken now will be kept on the album and will be instantly shared with the rest of the friends in the album.</p> 
+							</section>
+							<section class="question">
+								<h3>How do I create a new album on Glance ?</h3>
+								<p class="answer">You simply press the "New album" button once you are in the main page of the app. You don't even need to name it – we will name it for you according to the date. If you wish to change it – you can do that. That's is – the album is ready – you can start uploading photos and videos to the album, and you can add friends to the album – it's that simple.</p>  
+							</section>
+							<section class="question">
+								<h3>On which platforms Glance in working?</h3>
+								<p class="answer">Glance is currently working on iOS, Android and web. You can use it also with your iPad, we are currently working on our unique tablets app – and we'll soon be running on windows phone and directly on PC and Mac.</p>   
+							</section>
+							<section class="question">
+								<h3>How do I add friends to an album?</h3>
+								<p class="answer">Once you're inside the album – you just press the friend's icon at the top-right part of the screen – then you'll see the full list of friends that are already part of that album. If you want to add more friends inside the album – then you simply press the "Add friends" button and then you'll see your phone contact list – not you can select each and every one of your friends from the contact list.</p>  
+							</section>
+							<section class="question">
+								<h3>Where my photos are kept?</h3>
+								<p class="answer">All your photos are backed in our server – available for you from each and every device you'll use. In addition, we are keeping all your photos locally on your mobile phone, compressed – so you won't need to be connected/online to view them – they're always available for you.</p>   
+							</section>
+							<section class="question">
+								<h3>Will someone else except the album members see the album?</h3>
+								<p class="answer">No. simply no. never. Your album photos will not appear on Facebook, or anywhere else – unless one of the album members decided to post them on Facebook – we will never pot something for you.</p> 
+							</section>
+							<section class="question">
+								<h3>How can I invite a new friend to the app?</h3>
+								<p class="answer">Inviting new friends to use the app is possible only after creating an album – once you have created an album – you select the friends you want to invite and send them an invitation. We are doing it since we don't want you just to invite more and more friends – we want the invited people to be part of an existing album.</p> 
+							</section>
+							<section class="question">
+								<h3>Does Glance have a desktop application?</h3>
+								<p class="answer">Currently no, but we are working on it. Due to be ready really soon. We'll update you about it.</p>   
+							</section>
+							<section class="question">
+								<h3>How can I share my pictures from Glance on Facebook?</h3>
+								<p class="answer">You simply press the "Share" Button – once you are watching a picture -</p>
+							</section>
+							
+						</div>
+
+					</div>
+				</div>
+			</section>
+			<div id="alt-header">
+				<span class="logo"><a href="/">Glance</a></span>
+				<ul class="actions">
+					<li class="default"><a href="#download" class="button big download">Get the App</a></li>
+					<li class="ios"><a href="https://itunes.apple.com/ro/app/shotvibe/id721122774?mt=8" class="button ios">Download iOS App</a></li>
+					<li class="android"><a href="https://play.google.com/store/apps/details?id=com.shotvibe.shotvibe&amp;hl=en" class="button android">Download Android App</a></li>
+				</ul>
+			</div>
+			<div id="footer">
+				<div class="container">
+					<span class="logo"><a href="/">Glance</a></span>
+					<div class="inner">
+					
+						<a href="/login/" class="button secondary">Login</a>
+						
+						<ul class="actions2">
+							<li><a href="http://www.facebook.com/glancemobileapp" class="fa fa-facebook"><span>Facebook</span></a></li>
+							<li><a href="https://twitter.com/GlanceMobileApp" class="fa fa-twitter"><span>Twitter</span></a></li>
+							<li><a href="https://www.linkedin.com/company/glance-app" class="fa fa-linkedin"><span>LinkedIn</span></a></li>
+							<li><a href="http://glancemobileapp.tumblr.com/" class="fa fa-tumblr"><span>Tumblr</span></a></li>
+							<li><a href="https://www.youtube.com/channel/UCn0NmSU1F5xnNJDXFpaaFuQ" class="fa fa-youtube"><span>Youtube</span></a></li>
+							<li><a href="https://github.com/shotvibe" class="fa fa-github"><span>Github</span></a></li>
+							<li><a href="mailto:info@useglance.com" class="fa fa-envelope-o"><span>Email</span></a></li>
+						</ul>
+						
+						<ul class="likes">
+							<li>
+								<div class="fb-like" data-href="https://www.useglance.com" data-layout="button_count" data-action="like" data-show-faces="false" data-share="false"></div>
+								<div id="fb-root"></div>
+								<script>(function(d, s, id) {
+								  var js, fjs = d.getElementsByTagName(s)[0];
+								  if (d.getElementById(id)) return;
+								  js = d.createElement(s); js.id = id;
+								  js.src = "http://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+								  fjs.parentNode.insertBefore(js, fjs);
+								}(document, 'script', 'facebook-jssdk'));</script>							
+							</li>						
+							<li>
+								<a href="https://twitter.com/share" class="twitter-share-button" data-url="https://www.useglance.com">Tweet</a>
+								<script>
+									!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');
+								</script>
+								
+							</li>
+							<li><a href="https://mixpanel.com/f/partner"><img src="https://cdn.mxpnl.com/site_media/images/partner/badge_blue.png" alt="Mobile Analytics" /></a></li>
+						</ul>							
+						
+					</div>
+					<ul class="menu">
+						<li><a href="/about/">About</a></li>
+						<li><a href="/help/">Help/FAQ</a></li>
+						<li><a href="http://blog.useglance.com">Blog</a></li>
+						<li><a href="/policy/">Privacy policy</a></li>
+						<li><a href="/terms/">Terms of use</a></li>
+					</ul>
+					<p class="copyright">&copy; 2013 Pics On Air LTD.</p>
+				</div>
+			</div>
+
+		</div>
+		
+	</body>
+</html>

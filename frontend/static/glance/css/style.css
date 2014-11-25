@@ -147,6 +147,17 @@
 				margin-left: 0;
 			}
 
+		ul.actions3 {
+			cursor: default;
+			padding-top: 1em;
+
+		}
+
+			ul.actions3 li {
+				display: inline-block;
+				margin-left: 0em;
+			}
+
 	/* Form */
 
 		input[type="text"],
@@ -321,24 +332,45 @@
 				}
 				
 			.button.ios {
-				background: url('images/button-ios.svg') top center no-repeat;
-				background-size: contain;
+				background: url('images/iosstore.png') top center no-repeat;
+
 				padding: 0;
-				height: 5em;
+				height: 2.5em;
 				min-width: 12em;
 				text-indent: -200%;
 				overflow-x: hidden;
 			}
+
+				.button.ios.small {
+					background: url('images/iosstore.png') top center no-repeat;
+					background-size: contain;
+					padding: 0;
+					height: 2.5em;
+					min-width: 1em;
+					text-indent: -200%;
+					overflow-x: hidden;
+				}
+
 				
 			.button.android {
-				background: url('images/button-android.svg') top center no-repeat;
-				background-size: contain;
+				background: url('images/playstore.png') top center no-repeat;
+
 				padding: 0;
-				height: 5.5em;
+				height: 2.5em;
 				min-width: 12em;
 				text-indent: -200%;
 				overflow-x: hidden;
 			}
+
+				.button.android.small {
+					background: url('images/playstore.png') top center no-repeat;
+					background-size: contain;
+					padding: 0;
+					height: 2.5em;
+					min-width: 1em;
+					text-indent: -200%;
+					overflow-x: hidden;
+				}
 			
 	/* Icons */
 
@@ -380,7 +412,7 @@
 
 	#header {
 		position: relative;
-		padding: 1.5em 0 0 0;
+		padding: 1.5em 0;
 	}
 	
 		#logo {
@@ -392,6 +424,22 @@
 			background: url('images/logo1.png');
 			background-size: 100% 100%;
 		}
+
+			#logo a {
+				display: block;
+				width: 307px;
+				height: 94px;
+			}
+
+		#header .menu {
+			text-align: right;
+			line-height: 94px;
+		}
+
+			#header .menu a {
+				text-decoration: none;
+				color: #1077db;
+			}
 
 	#alt-header {
 		position: fixed;
@@ -428,6 +476,12 @@
 			top: 0.85em;
 			left: 1em;
 		}
+
+			#alt-header .logo a {
+				display: block;
+				width: 104px;
+				height: 32px;
+			}
 	
 		#alt-header .button {
 			position: absolute;
@@ -457,15 +511,45 @@
 	#banner {
 		position: relative;
 		padding: 3em 0 5.5em 0;
+		background-position: center;
+		background-size: cover;
+		background-attachment: fixed;
+		overflow: hidden;
+		text-align:center;
 	}
 	
+		#banner video {
+			position: absolute;
+			left: 0;
+			top: 0;
+			min-width: 100%;
+			min-height: 100%;
+			width: auto;
+			height: auto;
+			z-index: 1;
+		}
+
+
+		#banner .container {
+			z-index: 2;
+		}
+
+
 		#banner header {
 			margin-top: 1em;
+			text-align:Center;
 		}
 	
 		#banner h2 {
 			font-size: 2em;
 			letter-spacing: -2.5px;
+			text-align:center;
+			color: #FFF;
+		}
+
+		#banner p {
+			color: #fff;
+			color: rgba(255,255,255,0.65);
 		}
 
 		#banner:after {
@@ -475,9 +559,31 @@
 			bottom: 0px;
 			width: 100%;
 			height: 60px;
-			background: url('images/curve1.svg') center center no-repeat;
+			background-image: url('images/curve1.svg') center center no-repeat;
 			background-size: 100% 100%;
+			z-index: 2;
 		}
+
+		#banner:before {
+			content: '';
+			display: block;
+			position: absolute;
+			bottom: 0px;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0,0,0,0.65);
+
+			background-size: 100% 100%;
+			z-index: 2;
+		}
+
+		#banner.alt {
+			padding: 0 0 3.5em 0;
+		}
+
+			#banner.alt:before 	{
+				background: none;
+			}
 
 		#banner li.ios span,
 		#banner li.android span {
@@ -779,6 +885,30 @@
 				margin-top: 4em;
 			}
 
+		.feature.seven {
+			position: relative;
+			padding: 4em 0 6em 0;
+		}
+
+			.feature.seven header {
+				margin-top: 2em;
+			}
+
+			.feature.seven h3 {
+				margin: 1em 0;
+			}
+
+			.feature.seven p {
+				margin-bottom: 1em;
+			}
+
+			.feature.seven ul {
+			}
+
+				.feature.seven ul li {
+					margin-bottom: .5em;
+				}
+
 		.feature.last:after {
 			content: '';
 			display: block;
@@ -789,6 +919,18 @@
 			background: url('images/curve4.svg') 0 0 no-repeat;
 			background-size: 100% 100%;
 		}
+
+
+		#map {
+			position: relative;
+			display: block;
+			width: 100%;
+			height: 400px;
+			border-radius: 8px;
+		}
+
+
+
 			
 			
 /* Footer */
@@ -825,6 +967,12 @@
 			margin: 0 0 2em 0;
 		}
 
+			#footer .logo a {
+				display: block;
+				width: 226px;
+				height: 202px;
+			}
+
 		#footer ul.actions2 {
 			margin-top: 2em;
 		}
@@ -843,6 +991,33 @@
 				#footer ul.actions2 a:hover {
 					color: #fff;
 				}
+
+			#footer ul.likes {
+				margin: 0;
+				padding: 0;
+				display: table;
+				text-align: right;
+				width: 100%;
+			}
+
+				#footer ul.likes li {
+					display: table-cell;
+					line-height: 36px;
+					height: 36px;
+					vertical-align: middle;
+					padding-left: .5em;
+					text-align: right;
+				}
+
+.fb_iframe_widget {
+    display: inline-block;
+    line-height: 0.75em;
+    position: relative;
+}
+
+.twitter-share-button {
+   max-width:90px;
+}
 
 		#footer ul.menu a {
 			color: #ddd;

@@ -1,372 +1,45 @@
-/* Basic */
-
-	body {
-		min-width: 320px;
-	}
-
-	body, input, select, textarea {
-		font-size: 14pt;
-		line-height: 1.35em;
-		letter-spacing: -0.25px;
-	}
-	
-	h1,h2,h3,h4,h5,h6 {
-		text-align: center;
-	}
-	
-		h2 {
-			font-size: 1.5em;
-			letter-spacing: -1px;
-		}
 		
-	/* Button */
-
-		.button {
-			width: 100%;
-			padding: 0.75em 0 0.75em 0 !important;
-			text-align: center;
-			display: block;
-		}
-
-			.button.special {
-				padding: 1em 0 1em 0 !important;
-			}
-
-	/* Form */
-
-		input[type="text"],
-		input[type="password"],
-		select,
-		textarea {
-			padding: 0.75em 0.75em 0.75em 0.75em;
+		body {
+			min-width: 320px;
+			font-size: 1em;
 		}
 
 /* Header */
 
 	#header {
-		padding: 2em 0 0 0;
-		text-align: center;
+		position: relative;
+		padding: 1.5em 0;
 	}
 	
 		#logo {
-			display: inline-block;
-			width: 150px;
-			height: 47px;
-			margin-left: -30px;
-		}
-
-	#alt-header {
-		text-align: center;
-	}
-	
-		#alt-header .logo {
-			display: none;
-		}
-
-		#alt-header .button {
-			width: auto;
-			display: inline-block;
-			position: relative;
-			right: auto;
-			top: auto;
-		}
-		
-		#alt-header .actions {
-			margin: 0 !important;
-		}
-
-			#alt-header .actions li {
-				margin: 0 !important;
-			}
-
-		#alt-header .button {
-			padding-left: 2em !important;
-			padding-right: 2em !important;
-			top: 0.25em;
-		}
-
-		#alt-header .button.android {
-			right: auto;
-			top: 5px;
-			background-position: top center;
-		}
-
-		#alt-header .button.ios {
-			top: 3px;
-			right: auto;
-		}
-
-/* Banner */
-
-	#banner {
-		padding: 0 0 4em 0;
-	}
-
-		#banner h2 {
-			font-size: 1.75em;
-			letter-spacing: -1px;
-		}
-		
-		#banner p {
-			display: none;
-		}
-		
-		#banner .button.ios,
-		#banner .button.android {
-			width: 75%;
-			margin: 0 auto;
-		}
-		
-		#banner li.ios,
-		#banner li.android {
-			text-align: center;
-		}
-
-			#banner li.ios span,
-			#banner li.android span {
-				top: 0;
-				left: 0;
-			}
-
-		#banner .phone {
-			display: none;
-			top: 0
-			margin: 0 auto -1.5em auto !important;
-			width: 220px;
-		}
-
-			#banner .phone .screen {
-			}
-
-				#banner .phone .screen .reel {
-				}
-
-					#banner .phone .screen .reel .image {
-						width: 113.31px;
-					}
-
-					@-moz-keyframes banner-phone { 
-						0% { left: 0px; } 
-						15% { left: 0px; } 
-						
-						20% { left: -113.31px; } 
-						35% { left: -113.31px; } 
-						
-						40% { left: -226.62px; } 
-						55% { left: -226.62px; } 
-
-						60% { left: -339.93px; } 
-						75% { left: -339.93px; } 
-
-						80% { left: -453.24px; } 
-						95% { left: -453.24px; } 
-						
-						100% { left: 0px; }
-					}
-
-					@-webkit-keyframes banner-phone { 
-						0% { left: 0px; } 
-						15% { left: 0px; } 
-						
-						20% { left: -113.31px; } 
-						35% { left: -113.31px; } 
-						
-						40% { left: -226.62px; } 
-						55% { left: -226.62px; } 
-
-						60% { left: -339.93px; } 
-						75% { left: -339.93px; } 
-
-						80% { left: -453.24px; } 
-						95% { left: -453.24px; } 
-						
-						100% { left: 0px; }
-					}
-
-					@-o-keyframes banner-phone { 
-						0% { left: 0px; } 
-						15% { left: 0px; } 
-						
-						20% { left: -113.31px; } 
-						35% { left: -113.31px; } 
-						
-						40% { left: -226.62px; } 
-						55% { left: -226.62px; } 
-
-						60% { left: -339.93px; } 
-						75% { left: -339.93px; } 
-
-						80% { left: -453.24px; } 
-						95% { left: -453.24px; } 
-						
-						100% { left: 0px; }
-					}
-
-					@-ms-keyframes banner-phone { 
-						0% { left: 0px; } 
-						15% { left: 0px; } 
-						
-						20% { left: -113.31px; } 
-						35% { left: -113.31px; } 
-						
-						40% { left: -226.62px; } 
-						55% { left: -226.62px; } 
-
-						60% { left: -339.93px; } 
-						75% { left: -339.93px; } 
-
-						80% { left: -453.24px; } 
-						95% { left: -453.24px; } 
-						
-						100% { left: 0px; }
-					}
-
-					@keyframes banner-phone { 
-						0% { left: 0px; } 
-						15% { left: 0px; } 
-						
-						20% { left: -113.31px; } 
-						35% { left: -113.31px; } 
-						
-						40% { left: -226.62px; } 
-						55% { left: -226.62px; } 
-
-						60% { left: -339.93px; } 
-						75% { left: -339.93px; } 
-
-						80% { left: -453.24px; } 
-						95% { left: -453.24px; } 
-						
-						100% { left: 0px; }
-					}
-
-/* Download */
-
-	#download {
-		text-align: center;
-	}
-	
-		#download .container {
-			padding-top: 2em;
-		}
-	
-		#download .button.ios,
-		#download .button.android {
 			display: block;
-			margin: 1em auto 0 auto;
-			width: 75%;
+			width: 280px;
+			height: 86px;
+			text-indent: -200%;
+			overflow-x: hidden;
+			background: url('images/logo1.png');
+			background-size: 100% 100%;
 		}
-
-/* Features */
-
-	.feature {
-		padding: 2em 0 0 0 !important;
-	}
-
-		.feature header {
-			margin-top: 0 !important;
-			padding: 0 !important;
-			background: none !important;
-		}
-
-		.feature p {
-			text-align: center;
-			margin-bottom: 1em;
-		}
-		
-		.feature.zero {
-			padding: 0 0 6em 0 !important;
-		}
-
-			.feature.zero p {
-				margin-bottom: 0;
-			}
 			
-		.feature.four {
-			padding: 2em 0 6em 0 !important;
-		}
-
-			.feature.five p {
-				margin-bottom: 0;
+			#logo a {
+				display: block;
+				width: 280px;
+				height: 86px;
 			}
 		
-			.feature.four .image {
-				width: 175%;
-				position: relative;
-				right: 75%;
-				top: 0;
-				overflow: hidden;
-				height: 15em;
-			}
-
-				.feature.four .image:before {
-					content: '';
-					position: absolute;
-					display: block;
-					left: 0;
-					top: 0;
-					width: 75%;
-					height: 100%;
-					background-image: -moz-linear-gradient(left, #fff 60%, rgba(255,255,255,0) 68%);
-					background-image: -webkit-linear-gradient(left, #fff 60%, rgba(255,255,255,0) 68%);
-					background-image: -o-linear-gradient(left, #fff 60%, rgba(255,255,255,0) 68%);
-					background-image: -ms-linear-gradient(left, #fff 60%, rgba(255,255,255,0) 68%);
-					background-image: linear-gradient(left, #fff 60%, rgba(255,255,255,0) 68%);
-				}
+		#footer ul.menu li {
 			
-		.feature.five {
-			padding: 2em 0 4em 0 !important;
-		}
-
-			.feature.five p {
-				margin-bottom: 0;
-			}
-
-		.feature.six {
-			padding: 2em 0 6em 0 !important;
-		}
-
-/* Platform */
-
-	#platform {
-		padding: 2em 0 5em 0 !important;
-	}
-
-		#platform header {
-			margin-top: 0 !important;
-		}
-
-		#platform p {
-			text-align: center;
-			margin-bottom: 1em;
+			margin: 0 .25em;
 		}
 		
-/* Footer */
-
-	#footer {
-		padding: 0 0 5em 0 !important;
-		text-align: center;
-		overflow: hidden;
-	}
-	
-		#footer .container:before {
-			display: none;
-		}
+		#footer ul.actions2  {
 		
-		#footer .logo {
-			margin: 3em auto 3em auto;
-			width: 113px;
-			height: 101px;
 		}
 		
 		#footer .inner {
 			position: relative;
-			right: auto;
-			bottom: auto;
-			text-align: center;
-			margin: 0 0 2em 0;
-		}
-		
-		#footer .button {
-			font-size: 1.25em;
+			right: 0;
+			bottom: 0;
+			text-align: left;
+			margin-bottom: 1em;
 		}
