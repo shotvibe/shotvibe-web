@@ -105,6 +105,8 @@ class User(django.contrib.auth.models.AbstractBaseUser, django.contrib.auth.mode
     # TODO This doesn't seem to be used, probably should delete it
     is_registered = models.BooleanField(default=False)
 
+    inviting_user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True)
+
     is_staff = models.BooleanField(_('staff status'), default=False,
                                    help_text=_('Designates whether the user '
                                                'can log into this admin site.'))
@@ -387,6 +389,7 @@ class PhoneNumberLinkCodeManager(models.Manager):
                 return phone_number.user
         except PhoneNumber.DoesNotExist:
             new_user = User.objects.create_user(nickname=nickname)
+            new_user.inviting_user = inviter
             phone_number = PhoneNumber.objects.create(
                     phone_number = phone_number_str,
                     user = new_user,
