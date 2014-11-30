@@ -1139,7 +1139,7 @@ class ScheduledSMSTest(BaseTestCase):
         phone_number = PhoneNumber.objects.get(phone_number='+12127184000')
         link_code = PhoneNumberLinkCode.objects.get(phone_number=phone_number)
 
-        invite_url_prefix = 'https://useglance.com'
+        invite_url_prefix = 'https://i.useglance.com'
         link = link_code.get_invite_page(invite_url_prefix)
 
         self.assertEqual(send_sms.testing_outbox, [('+12127184000', 'Hi John Doe. amanda shared an album: cautioned whoa\n' + link, '+12127182002')])
@@ -1188,7 +1188,7 @@ class ScheduledSMSTest(BaseTestCase):
         phone_number = PhoneNumber.objects.get(phone_number='+12127184000')
         link_code = PhoneNumberLinkCode.objects.get(phone_number=phone_number)
 
-        invite_url_prefix = 'https://useglance.com'
+        invite_url_prefix = 'https://i.useglance.com'
         link = link_code.get_invite_page(invite_url_prefix)
 
         self.assertEqual(send_sms.testing_outbox, [('+12127184000', 'Hi John Doe. amanda shared an album: cautioned whoa\n' + link, '+12127182002')])

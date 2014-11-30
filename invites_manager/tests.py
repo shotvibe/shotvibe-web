@@ -53,7 +53,7 @@ class InviteTest(TestCase):
 
         link_code = invites_manager.send_invite(self.amanda, phone_number, the_time)
 
-        invite_url_prefix = 'https://useglance.com'
+        invite_url_prefix = 'https://i.useglance.com'
         link = link_code.get_invite_page(invite_url_prefix)
 
         self.assertEqual(send_sms.testing_outbox, [('+12127182003', u'Hi barney. amanda shared an album: Party\n' + link, '+12127182002')])
@@ -98,7 +98,7 @@ class InviteTest(TestCase):
 
         link_code = invites_manager.send_invite(self.amanda, phone_number, the_time)
 
-        invite_url_prefix = 'https://useglance.com'
+        invite_url_prefix = 'https://i.useglance.com'
         link = link_code.get_invite_page(invite_url_prefix)
 
         self.assertEqual(send_sms.testing_outbox, [('+12127182003', u'Hi barney. amanda shared an album: Party\n' + link, '+12127182002')])
