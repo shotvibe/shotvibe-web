@@ -60,10 +60,17 @@ def upp_status(request):
     if 'send_push_message' in request.POST:
         user_ids = request.POST.getlist('user_id')
         message = request.POST['message_text']
+        payload = {
+                'type': 'test_message',
+                'message': message
+            }
         rq = {
                 'user_ids' : user_ids,
                 'gcm' : {
                     'data' : {
+                        'd': json.dumps(payload),
+
+                        # Deprecated data:
                         'type' : 'test_message',
                         'message' : message
                         }
@@ -72,7 +79,8 @@ def upp_status(request):
                     'aps' : {
                         'alert' : 'Test Message: ' + message,
                         'sound': 'default'
-                        }
+                        },
+                    'd': payload
                     }
                 }
         r = requests.post(settings.UNIVERSAL_PUSH_PROVIDER_URL + '/send', data=json.dumps(rq))
@@ -116,12 +124,27 @@ def send_message_or_log_errors(msg):
         # TODO better logging
         print 'Error sending push notification: ' + str(e)
 
+#
+# Individual notification types:
+#
+
 def broadcast_photos_added_to_album(album_id, author_id, album_name, author_name, num_photos, user_ids):
+    payload = {
+            'type': 'photos_added',
+            'album_id': album_id,
+            'author': author_name,
+            'album_name': album_name,
+            'num_photos': num_photos
+        }
+
     # Send broadcast to all other users
     rq = {
             'user_ids' : [str(id) for id in user_ids if id != author_id],
             'gcm' : {
                 'data' : {
+                    'd': json.dumps(payload),
+
+                    # Deprecated data:
                     'type' : 'photos_added',
                     'album_id' : str(album_id),
                     'author' : author_name,
@@ -134,20 +157,27 @@ def broadcast_photos_added_to_album(album_id, author_id, album_name, author_name
                     'alert' : author_name + ' added ' + str(num_photos) + ' photos to the album ' + album_name,
                     'sound': 'default'
                     },
-
-                # TODO More Data needed
-
-                'album_id' : album_id
+                'd': payload
                 }
             }
     send_message_or_log_errors(rq)
 
 
 def broadcast_members_added_to_album(album_id, album_name, adder_name, user_ids):
+    payload = {
+            'type': 'added_to_album',
+            'album_id': album_id,
+            'adder': adder_name,
+            'album_name': album_name
+        }
+
     rq = {
             'user_ids': [str(id) for id in user_ids],
             'gcm': {
                 'data': {
+                    'd': json.dumps(payload),
+
+                    # Deprecated data:
                     'type': 'added_to_album',
                     'album_id': str(album_id),
                     'adder': adder_name,
@@ -159,15 +189,16 @@ def broadcast_members_added_to_album(album_id, album_name, adder_name, user_ids)
                     'alert': adder_name + ' added you to the album ' + album_name,
                     'sound': 'default'
                     },
-
-                # TODO More Data needed
-
-                'album_id': album_id
+                'd': payload
                 }
             }
     send_message_or_log_errors(rq)
 
 def broadcast_album_list_sync(user_ids):
+    payload = {
+            'type': 'album_list_sync',
+        }
+
     _user_ids = []
     if type(user_ids) in [tuple, list]:
         _user_ids = [str(id) for id in user_ids]
@@ -177,17 +208,25 @@ def broadcast_album_list_sync(user_ids):
             'user_ids': _user_ids,
             'gcm': {
                 'data': {
+                    'd': json.dumps(payload),
+
+                    # Deprecated data:
                     'type': 'album_list_sync'
                     }
                 },
             'apns': {
                 'aps': {},
-                'type': 'album_list_sync'
+                'd': payload
                 }
             }
     send_message_or_log_errors(rq)
 
 def broadcast_album_sync(user_ids, album_id):
+    payload = {
+            'type': 'album_sync',
+            'album_id': album_id,
+        }
+
     _user_ids = []
     if type(user_ids) in [tuple, list]:
         _user_ids = [str(id) for id in user_ids]
@@ -197,14 +236,16 @@ def broadcast_album_sync(user_ids, album_id):
     rq = { 'user_ids' : _user_ids,
             'gcm' : {
                 'data' : {
+                    'd': json.dumps(payload),
+
+                    # Deprecated data:
                     'type' : 'album_sync',
                     'album_id' : str(album_id)
                     }
                 },
             'apns' : {
                 'aps' : {},
-                'type': 'album_sync',
-                'album_id' : album_id
+                'd': payload
                 }
             }
     send_message_or_log_errors(rq)
