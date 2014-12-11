@@ -412,7 +412,7 @@ class PhoneNumberLinkCodeManager(models.Manager):
 
         message = sms_message_formatter(link_code_object)
 
-        invite_url_prefix = 'https://useglance.com'
+        invite_url_prefix = 'https://i.useglance.com'
         send_sms(phone_number.phone_number, message + '\n' + link_code_object.get_invite_page(invite_url_prefix), sender_phone)
 
         track_event(link_code_object.phone_number.user, sms_analytics_event_name, sms_analytics_event_properties)
