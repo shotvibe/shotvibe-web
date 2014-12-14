@@ -381,6 +381,9 @@ class Photo(models.Model):
         image_dimensions_calculator = image_uploads.image_sizes[image_size_str]
         return image_dimensions_calculator.get_image_dimensions(self.width, self.height)
 
+    def get_comments(self):
+        return self.photocomment_set.order_by('date_created')
+
     def get_glances(self):
         return self.photoglance_set.order_by('date_created')
 

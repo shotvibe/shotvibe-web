@@ -685,6 +685,25 @@ class PhotoCommentsTest(TestCase):
         self.assertEqual(photo_comment.comment_text, 'Hi, this is a test comment!')
         self.assertEqual(photo_comment.client_msg_id, 123000000000)
 
+    def test_comment_photo_view(self):
+        data = {
+                'comment': 'Hi, this is a test comment!'
+                }
+        self.client.put(
+                reverse('photo-comment', kwargs={
+                    'photo_id': 'test-photo-id-1',
+                    'client_msg_id': '123000000000' }),
+                data = json.dumps(data),
+                content_type = 'application/json')
+
+        response = self.client.get(reverse('album-detail', kwargs={'pk': self.party_album.id}))
+        response_json = json.loads(response.content)
+
+        photo_json = response_json['photos'][0]
+
+        self.assertEqual(photo_json['comments'][0]['author']['id'], self.arnold.id)
+        self.assertEqual(photo_json['comments'][0]['client_msg_id'], 123000000000)
+        self.assertEqual(photo_json['comments'][0]['comment'], 'Hi, this is a test comment!')
 
 class PhotoGlanceTest(TestCase):
     urls = 'photos_api.urls'
