@@ -40,7 +40,8 @@ import requests
 import phonenumbers
 
 from photos.image_uploads import process_file_upload
-from photos.models import Album, PendingPhoto, AlbumMember, Photo, PhotoGlance
+from photos.models import Album, PendingPhoto, AlbumMember, Photo, PhotoComment, \
+    PhotoGlance
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
     UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer, \
     QueryPhonesRequestSerializer, DeletePhotosSerializer, \
@@ -552,6 +553,17 @@ class PhotoCommentView(GenericAPIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        # TODO Also allow any admins to delete comments
+        if request.user != self.author:
+            return Response(status=403)
+
+        photo_comment = get_object_or_404(PhotoComment, photo=self.photo, author=self.author, client_msg_id=self.client_msg_id)
+        with self.photo.album.modify(timezone.now()) as m:
+            m.delete_photo_comment(photo_comment)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class PhotoGlanceView(GenericAPIView):

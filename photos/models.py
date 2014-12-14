@@ -159,6 +159,12 @@ class Album(models.Model):
 
             device_push.broadcast_photo_comment(comment_thread_author_ids, commenter.nickname, photo.album.id, photo.photo_id, photo.album.name)
 
+        def delete_photo_comment(self, photo_comment):
+            if photo_comment.photo.album != self.album:
+                raise ValueError('photo is not part of this album')
+
+            photo_comment.delete()
+
         def glance_photo(self, photo, glancer, emoticon_name):
             if photo.album != self.album:
                 raise ValueError('photo is not part of this album')
