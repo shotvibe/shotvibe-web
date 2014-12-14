@@ -40,13 +40,14 @@ import requests
 import phonenumbers
 
 from photos.image_uploads import process_file_upload
-from photos.models import Album, PendingPhoto, AlbumMember, Photo, PhotoGlance
+from photos.models import Album, PendingPhoto, AlbumMember, Photo, PhotoComment, \
+    PhotoGlance
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
     UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer, \
     QueryPhonesRequestSerializer, DeletePhotosSerializer, \
     AlbumMemberNameSerializer, AlbumMemberSerializer, AlbumViewSerializer, \
     AlbumNameChangeSerializer, AlbumMembersSerializer, \
-    PhotoGlanceSerializer
+    PhotoCommentSerializer, PhotoGlanceSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
 import invites_manager
@@ -527,6 +528,42 @@ class PhotoUpload(views.APIView):
     def put(self, request, photo_id, format=None):
         return self.process_upload_request(request, photo_id,
                                            request.DATA.chunks())
+
+
+class PhotoCommentView(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = PhotoCommentSerializer
+
+    def initial(self, request, photo_id, author_id, client_msg_id, *args, **kwargs):
+        self.photo = get_object_or_404(Photo, pk=photo_id)
+        self.author = get_object_or_404(User, pk=author_id)
+        self.client_msg_id = client_msg_id
+
+        return super(PhotoCommentView, self).initial(request, photo_id, author_id, client_msg_id, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        if request.user != self.author:
+            return Response(status=403)
+
+        serializer = self.get_serializer(data=request.DATA, files=request.FILES)
+        if serializer.is_valid():
+            with self.photo.album.modify(timezone.now()) as m:
+                m.comment_on_photo(self.photo, request.user, self.client_msg_id, serializer.object['comment'])
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        # TODO Also allow any admins to delete comments
+        if request.user != self.author:
+            return Response(status=403)
+
+        photo_comment = get_object_or_404(PhotoComment, photo=self.photo, author=self.author, client_msg_id=self.client_msg_id)
+        with self.photo.album.modify(timezone.now()) as m:
+            m.delete_photo_comment(photo_comment)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class PhotoGlanceView(GenericAPIView):

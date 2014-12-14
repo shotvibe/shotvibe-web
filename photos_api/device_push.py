@@ -251,6 +251,32 @@ def broadcast_album_sync(user_ids, album_id):
     send_message_or_log_errors(rq)
 
 
+def broadcast_photo_comment(comment_thread_author_ids, comment_author_nickname, album_id, photo_id, album_name):
+    payload = {
+            'type': 'photo_comment',
+            'album_id': album_id,
+            'photo_id': photo_id,
+            'album_name': album_name,
+            'comment_author_nickname': comment_author_nickname
+        }
+
+    rq = {
+            'user_ids': [str(id) for id in comment_thread_author_ids],
+            'gcm': {
+                'data': {
+                    'd': json.dumps(payload)
+                    }
+                },
+            'apns': {
+                'aps': {
+                    'alert': comment_author_nickname + ' commented on a photo in ' + album_name,
+                    'sound': 'default'
+                    }
+                }
+            }
+    send_message_or_log_errors(rq)
+
+
 def broadcast_photo_glance(author_id, glance_user_name, album_id, album_name):
     payload = {
             'type': 'photo_glance',

@@ -139,6 +139,32 @@ class Album(models.Model):
 
             return phone_number
 
+        def comment_on_photo(self, photo, commenter, client_msg_id, comment_text):
+            if photo.album != self.album:
+                raise ValueError('photo is not part of this album')
+
+            # TODO Detect duplicate client_msg_id and ignore
+
+            PhotoComment.objects.create(
+                    photo = photo,
+                    date_created = self.current_date,
+                    author = commenter,
+                    client_msg_id = client_msg_id,
+                    comment_text = comment_text
+                    )
+
+            comment_thread_author_ids = set()
+            for comment in PhotoComment.objects.filter(photo=photo).exclude(author=commenter).only('author'):
+                comment_thread_author_ids.add(comment.author.id)
+
+            device_push.broadcast_photo_comment(comment_thread_author_ids, commenter.nickname, photo.album.id, photo.photo_id, photo.album.name)
+
+        def delete_photo_comment(self, photo_comment):
+            if photo_comment.photo.album != self.album:
+                raise ValueError('photo is not part of this album')
+
+            photo_comment.delete()
+
         def glance_photo(self, photo, glancer, emoticon_name):
             if photo.album != self.album:
                 raise ValueError('photo is not part of this album')
@@ -361,6 +387,9 @@ class Photo(models.Model):
         image_dimensions_calculator = image_uploads.image_sizes[image_size_str]
         return image_dimensions_calculator.get_image_dimensions(self.width, self.height)
 
+    def get_comments(self):
+        return self.photocomment_set.order_by('date_created')
+
     def get_glances(self):
         return self.photoglance_set.order_by('date_created')
 
@@ -406,6 +435,19 @@ class PendingPhoto(models.Model):
 
     def is_processing_done(self):
         return not (self.processing_done_time is None)
+
+
+class PhotoComment(models.Model):
+    photo = models.ForeignKey(Photo)
+    date_created = models.DateTimeField(db_index=True)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL)
+    client_msg_id = models.BigIntegerField(db_index=True)
+    comment_text = models.TextField()
+
+    class Meta:
+        unique_together = ('photo', 'author', 'client_msg_id')
+
+    # TODO ...
 
 
 class PhotoGlance(models.Model):

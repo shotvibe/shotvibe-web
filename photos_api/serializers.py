@@ -2,7 +2,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib import auth
 from rest_framework import serializers
 
-from photos.models import Album, AlbumMember, Photo, PhotoGlance
+from photos.models import Album, AlbumMember, Photo, PhotoComment, PhotoGlance
 
 
 class ListField(serializers.WritableField):
@@ -45,6 +45,15 @@ class UserCompactSerializer(serializers.ModelSerializer):
     avatar_url = serializers.CharField(source='get_avatar_url')
 
 
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PhotoComment
+        fields = ('date_created', 'author', 'client_msg_id', 'comment')
+
+    comment = serializers.CharField(source='comment_text')
+    author = UserCompactSerializer(source='author')
+
+
 class GlanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = PhotoGlance
@@ -56,10 +65,11 @@ class GlanceSerializer(serializers.ModelSerializer):
 class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photo
-        fields = ('photo_id', 'photo_url', 'date_created', 'author', 'glances')
+        fields = ('photo_id', 'photo_url', 'date_created', 'author', 'comments', 'glances')
 
     photo_url = serializers.CharField(source='get_photo_url')
     author = UserSerializer(source='author')
+    comments = CommentSerializer(source='get_comments')
     glances = GlanceSerializer(source='get_glances')
 
 
@@ -251,6 +261,10 @@ class QueryPhonesRequestSerializer(serializers.Serializer):
 
 class PhotoUploadInitSerializer(serializers.Serializer):
     user_auth_token = serializers.CharField()
+
+
+class PhotoCommentSerializer(serializers.Serializer):
+    comment = serializers.CharField()
 
 
 class PhotoGlanceSerializer(serializers.Serializer):

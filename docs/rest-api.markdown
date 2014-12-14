@@ -73,6 +73,14 @@ Upload a single photo. Returns an empty response body.
 Alternative method for uploading a single photo. Returns an empty response
 body.
 
+### PUT /photos/{photo_id}/comments/{author_id}/{client_msg_id}/
+
+Add a comment to a photo.
+
+### DELETE /photos/{photo_id}/comments/{author_id}/{client_msg_id}/
+
+Delete a comment from a photo.
+
 ### PUT /photos/{photo_id}/glance/
 
 Add a glance emoticon to a photo.
@@ -666,6 +674,7 @@ Example response:
                     "nickname": "x",
                     "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
                 },
+                "comments": [],
                 "glances": []
             },
             {
@@ -678,6 +687,18 @@ Example response:
                     "nickname": "kevin",
                     "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
                 },
+                "comments": [
+                    {
+                        "author": {
+                            "id": 670666295,
+                            "nickname": "x",
+                            "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                        },
+                        "date_created": "2009-11-12T20:20:03Z",
+                        "client_msg_id": 1418582165811,
+                        "comment": "I love this photo!",
+                    }
+                ],
                 "glances": [
                     {
                         "author": {
@@ -699,6 +720,7 @@ Example response:
                     "nickname": "george",
                     "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
                 },
+                "comments": [],
                 "glances": []
             }
         ]
@@ -797,6 +819,52 @@ Example response:
     Vary: Accept
     Content-Type: application/json
     Allow: POST, OPTIONS
+
+### PUT /photos/{photo_id}/comments/{author_id}/{client_msg_id}/
+
+Add a comment to a photo.
+
+"client_msg_id" should be a 64 bit signed integer value, that is used as a
+unique identifier. It is recommended to use the current milliseconds since
+epoch (as measured by the user's device).
+
+Any user can add a comment to any photo.
+
+The request JSON should include an object with a field "comment" with a string
+value.
+
+The response will be 204 No Content.
+
+Example request:
+
+```
+PUT /photos/5a7e5e6afd698dc0ae2221469fd25b6f9b9941ddab20c90d95f6cba9efa57905/comments/8/1418582165811/
+Authorization: Token 01ba4719c80b6fe911b091a7c05124b64eeece96
+Content-Type: application/json
+Content-Length: 281
+
+{
+    "comment": "I love this photo!"
+}
+```
+
+### DELETE /photos/{photo_id}/comments/{author_id}/{client_msg_id}/
+
+Delete a comment from a photo.
+
+The request body should be empty.
+
+The response will be 204 No Content.
+
+Example request:
+
+```
+DELETE /photos/5a7e5e6afd698dc0ae2221469fd25b6f9b9941ddab20c90d95f6cba9efa57905/comments/8/1418582165811/
+Authorization: Token 01ba4719c80b6fe911b091a7c05124b64eeece96
+Content-Type: application/json
+Content-Length: 0
+
+```
 
 ### PUT /photos/{photo_id}/glance/
 
