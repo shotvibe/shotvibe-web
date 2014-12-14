@@ -19,7 +19,7 @@ from django.utils import timezone
 from phone_auth.models import AuthToken
 from phone_auth.models import PhoneNumber, PhoneContact, AnonymousPhoneNumber, PhoneNumberLinkCode
 from phone_auth.sms_send import send_sms, mark_sms_test_case
-from photos.models import Photo, PendingPhoto, Album, AlbumMember, PhotoGlance
+from photos.models import Photo, PendingPhoto, Album, AlbumMember, PhotoGlance, PhotoComment
 from photos_api import is_phone_number_mobile
 from invites_manager.models import SMSInviteMessage
 import invites_manager
@@ -649,6 +649,41 @@ class PhotoUpload(BaseTestCase):
         self.assertEqual(len(album_json['members']), 1)
         members_ids = [u['id'] for u in album_json['members']]
         self.assertIn(2, members_ids) # amanda
+
+
+class PhotoCommentsTest(TestCase):
+    urls = 'photos_api.urls'
+
+    def setUp(self):
+        self.arnold = User.objects.create_user('arnold', password='mypass')
+        self.party_album = Album.objects.create_album(self.arnold, 'Party', datetime.datetime(2000, 1, 1, tzinfo=timezone.utc))
+
+        Photo.objects.create(
+                photo_id = 'test-photo-id-1',
+                storage_id = 'test-storage-id-1',
+                subdomain = 'test-subdomain',
+                date_created = datetime.datetime(2000, 1, 2, tzinfo=timezone.utc),
+                author = self.arnold,
+                album = self.party_album,
+                album_index = 0)
+
+        self.client.login(username=str(self.arnold.id), password='mypass')
+
+    def test_comment_photo(self):
+        data = {
+                'comment': 'Hi, this is a test comment!'
+                }
+        response = self.client.put(
+                reverse('photo-comment', kwargs={
+                    'photo_id': 'test-photo-id-1',
+                    'client_msg_id': '123000000000' }),
+                data = json.dumps(data),
+                content_type = 'application/json')
+        self.assertEqual(response.status_code, 204)
+
+        photo_comment = PhotoComment.objects.get(photo__photo_id='test-photo-id-1', author=self.arnold)
+        self.assertEqual(photo_comment.comment_text, 'Hi, this is a test comment!')
+        self.assertEqual(photo_comment.client_msg_id, 123000000000)
 
 
 class PhotoGlanceTest(TestCase):

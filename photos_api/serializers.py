@@ -253,6 +253,10 @@ class PhotoUploadInitSerializer(serializers.Serializer):
     user_auth_token = serializers.CharField()
 
 
+class PhotoCommentSerializer(serializers.Serializer):
+    comment = serializers.CharField()
+
+
 class PhotoGlanceSerializer(serializers.Serializer):
     emoticon_name = serializers.CharField(max_length=255)
 

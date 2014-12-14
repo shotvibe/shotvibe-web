@@ -46,7 +46,7 @@ from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
     QueryPhonesRequestSerializer, DeletePhotosSerializer, \
     AlbumMemberNameSerializer, AlbumMemberSerializer, AlbumViewSerializer, \
     AlbumNameChangeSerializer, AlbumMembersSerializer, \
-    PhotoGlanceSerializer
+    PhotoCommentSerializer, PhotoGlanceSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
 import invites_manager
@@ -527,6 +527,27 @@ class PhotoUpload(views.APIView):
     def put(self, request, photo_id, format=None):
         return self.process_upload_request(request, photo_id,
                                            request.DATA.chunks())
+
+
+class PhotoCommentView(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = PhotoCommentSerializer
+
+    def initial(self, request, photo_id, client_msg_id, *args, **kwargs):
+        self.photo = get_object_or_404(Photo, pk=photo_id)
+        self.client_msg_id = client_msg_id
+
+        return super(PhotoCommentView, self).initial(request, client_msg_id, photo_id, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.DATA, files=request.FILES)
+        if serializer.is_valid():
+            with self.photo.album.modify(timezone.now()) as m:
+                m.comment_on_photo(self.photo, request.user, self.client_msg_id, serializer.object['comment'])
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PhotoGlanceView(GenericAPIView):
