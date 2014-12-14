@@ -676,6 +676,7 @@ class PhotoCommentsTest(TestCase):
         response = self.client.put(
                 reverse('photo-comment', kwargs={
                     'photo_id': 'test-photo-id-1',
+                    'author_id': self.arnold.id,
                     'client_msg_id': '123000000000' }),
                 data = json.dumps(data),
                 content_type = 'application/json')
@@ -692,6 +693,7 @@ class PhotoCommentsTest(TestCase):
         self.client.put(
                 reverse('photo-comment', kwargs={
                     'photo_id': 'test-photo-id-1',
+                    'author_id': self.arnold.id,
                     'client_msg_id': '123000000000' }),
                 data = json.dumps(data),
                 content_type = 'application/json')

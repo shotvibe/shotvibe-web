@@ -533,13 +533,17 @@ class PhotoCommentView(GenericAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = PhotoCommentSerializer
 
-    def initial(self, request, photo_id, client_msg_id, *args, **kwargs):
+    def initial(self, request, photo_id, author_id, client_msg_id, *args, **kwargs):
         self.photo = get_object_or_404(Photo, pk=photo_id)
+        self.author = get_object_or_404(User, pk=author_id)
         self.client_msg_id = client_msg_id
 
-        return super(PhotoCommentView, self).initial(request, client_msg_id, photo_id, *args, **kwargs)
+        return super(PhotoCommentView, self).initial(request, photo_id, author_id, client_msg_id, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
+        if request.user != self.author:
+            return Response(status=403)
+
         serializer = self.get_serializer(data=request.DATA, files=request.FILES)
         if serializer.is_valid():
             with self.photo.album.modify(timezone.now()) as m:
