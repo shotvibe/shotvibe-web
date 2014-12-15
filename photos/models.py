@@ -165,6 +165,24 @@ class Album(models.Model):
 
             photo_comment.delete()
 
+        def photo_tag_user(self, photo, author, tagged_user, tag_coord_x, tag_coord_y):
+            if photo.album != self.album:
+                raise ValueError('photo is not part of this album')
+
+            # TODO Detect existing tag for tagged_user on this photo and ignore
+
+            PhotoUserTag.objects.create(
+                    photo = photo,
+                    date_created = self.current_date,
+                    author = author,
+                    tagged_user = tagged_user,
+                    tag_coord_x = tag_coord_x,
+                    tag_coord_y = tag_coord_y)
+
+            # Notify the tagged user as (if he didn't tag himself)
+            if tagged_user != author:
+                device_push.broadcast_photo_user_tagged(tagged_user.id, photo.album.id, photo.photo_id, photo.album.name)
+
         def glance_photo(self, photo, glancer, emoticon_name):
             if photo.album != self.album:
                 raise ValueError('photo is not part of this album')
@@ -448,6 +466,18 @@ class PhotoComment(models.Model):
         unique_together = ('photo', 'author', 'client_msg_id')
 
     # TODO ...
+
+
+class PhotoUserTag(models.Model):
+    photo = models.ForeignKey(Photo)
+    date_created = models.DateTimeField(db_index=True)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='+')
+    tagged_user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    tag_coord_x = models.FloatField()
+    tag_coord_y = models.FloatField()
+
+    class Meta:
+        unique_together = ('photo', 'tagged_user')
 
 
 class PhotoGlance(models.Model):

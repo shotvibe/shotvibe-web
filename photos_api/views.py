@@ -47,7 +47,7 @@ from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
     QueryPhonesRequestSerializer, DeletePhotosSerializer, \
     AlbumMemberNameSerializer, AlbumMemberSerializer, AlbumViewSerializer, \
     AlbumNameChangeSerializer, AlbumMembersSerializer, \
-    PhotoCommentSerializer, PhotoGlanceSerializer
+    PhotoCommentSerializer, PhotoUserTagSerializer, PhotoGlanceSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
 import invites_manager
@@ -564,6 +564,27 @@ class PhotoCommentView(GenericAPIView):
             m.delete_photo_comment(photo_comment)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PhotoUserTagView(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = PhotoUserTagSerializer
+
+    def initial(self, request, photo_id, tagged_user_id, *args, **kwargs):
+        self.photo = get_object_or_404(Photo, pk=photo_id)
+        self.tagged_user = get_object_or_404(User, pk=tagged_user_id)
+
+        return super(PhotoUserTagView, self).initial(request, photo_id, tagged_user_id, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.DATA, files=request.FILES)
+        if serializer.is_valid():
+            with self.photo.album.modify(timezone.now()) as m:
+                m.photo_tag_user(self.photo, request.user, self.tagged_user, serializer.object['tag_coord_x'], serializer.object['tag_coord_y'])
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PhotoGlanceView(GenericAPIView):

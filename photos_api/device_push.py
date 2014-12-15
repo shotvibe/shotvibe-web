@@ -277,6 +277,31 @@ def broadcast_photo_comment(comment_thread_author_ids, comment_author_nickname, 
     send_message_or_log_errors(rq)
 
 
+def broadcast_photo_user_tagged(tagged_user_id, album_id, photo_id, album_name):
+    payload = {
+            'type': 'photo_user_tagged',
+            'album_id': album_id,
+            'photo_id': photo_id,
+            'album_name': album_name,
+        }
+
+    rq = {
+            'user_ids': [str(tagged_user_id)],
+            'gcm': {
+                'data': {
+                    'd': json.dumps(payload)
+                    }
+                },
+            'apns': {
+                'aps': {
+                    'alert': 'You have been tagged in a photo from ' + album_name,
+                    'sound': 'default'
+                    }
+                }
+            }
+    send_message_or_log_errors(rq)
+
+
 def broadcast_photo_glance(author_id, glance_user_name, album_id, album_name):
     payload = {
             'type': 'photo_glance',

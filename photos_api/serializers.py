@@ -267,6 +267,11 @@ class PhotoCommentSerializer(serializers.Serializer):
     comment = serializers.CharField()
 
 
+class PhotoUserTagSerializer(serializers.Serializer):
+    tag_coord_x = serializers.FloatField()
+    tag_coord_y = serializers.FloatField()
+
+
 class PhotoGlanceSerializer(serializers.Serializer):
     emoticon_name = serializers.CharField(max_length=255)
 
