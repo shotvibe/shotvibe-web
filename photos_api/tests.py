@@ -792,6 +792,31 @@ class PhotoUserTagTest(TestCase):
         self.assertEqual(photo_json['user_tags'][0]['tag_coord_x'], 0.62)
         self.assertEqual(photo_json['user_tags'][0]['tag_coord_y'], 0.54)
 
+    def test_delete_photo_user_tag(self):
+        data = {
+                'tag_coord_x': 0.62,
+                'tag_coord_y': 0.54
+                }
+        response = self.client.put(
+                reverse('photo-user-tag', kwargs={
+                    'photo_id': 'test-photo-id-1',
+                    'tagged_user_id': self.bart.id }),
+                data = json.dumps(data),
+                content_type = 'application/json')
+        self.assertEqual(response.status_code, 204)
+
+        photo_tag = PhotoUserTag.objects.get(photo__photo_id='test-photo-id-1', author=self.arnold)
+        self.assertEqual(photo_tag.tagged_user, self.bart)
+
+        response = self.client.delete(
+                reverse('photo-user-tag', kwargs={
+                    'photo_id': 'test-photo-id-1',
+                    'tagged_user_id': self.bart.id }))
+        self.assertEqual(response.status_code, 204)
+
+        self.assertEqual(len(Photo.objects.get(photo_id='test-photo-id-1').get_user_tags()), 0)
+
+
 
 class PhotoGlanceTest(TestCase):
     urls = 'photos_api.urls'

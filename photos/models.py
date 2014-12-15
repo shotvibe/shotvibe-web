@@ -183,6 +183,12 @@ class Album(models.Model):
             if tagged_user != author:
                 device_push.broadcast_photo_user_tagged(tagged_user.id, photo.album.id, photo.photo_id, photo.album.name)
 
+        def delete_photo_user_tag(self, photo_user_tag):
+            if photo_user_tag.photo.album != self.album:
+                raise ValueError('photo is not part of this album')
+
+            photo_user_tag.delete()
+
         def glance_photo(self, photo, glancer, emoticon_name):
             if photo.album != self.album:
                 raise ValueError('photo is not part of this album')

@@ -41,7 +41,7 @@ import phonenumbers
 
 from photos.image_uploads import process_file_upload
 from photos.models import Album, PendingPhoto, AlbumMember, Photo, PhotoComment, \
-    PhotoGlance
+    PhotoUserTag, PhotoGlance
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
     UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer, \
     QueryPhonesRequestSerializer, DeletePhotosSerializer, \
@@ -585,6 +585,18 @@ class PhotoUserTagView(GenericAPIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        photo_user_tag = get_object_or_404(PhotoUserTag, photo=self.photo, tagged_user=self.tagged_user)
+
+        # TODO Also allow any admins to delete user tags
+        if not (request.user == photo_user_tag.author or request.user == photo_user_tag.tagged_user):
+            return Response(status=403)
+
+        with self.photo.album.modify(timezone.now()) as m:
+            m.delete_photo_user_tag(photo_user_tag)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class PhotoGlanceView(GenericAPIView):
