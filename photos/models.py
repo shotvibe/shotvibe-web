@@ -408,6 +408,9 @@ class Photo(models.Model):
     def get_comments(self):
         return self.photocomment_set.order_by('date_created')
 
+    def get_user_tags(self):
+        return self.photousertag_set.order_by('date_created')
+
     def get_glances(self):
         return self.photoglance_set.order_by('date_created')
 

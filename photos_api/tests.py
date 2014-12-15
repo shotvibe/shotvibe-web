@@ -771,6 +771,27 @@ class PhotoUserTagTest(TestCase):
         self.assertEqual(photo_tag.tag_coord_x, 0.62)
         self.assertEqual(photo_tag.tag_coord_y, 0.54)
 
+    def test_tag_photo_view(self):
+        data = {
+                'tag_coord_x': 0.62,
+                'tag_coord_y': 0.54
+                }
+        self.client.put(
+                reverse('photo-user-tag', kwargs={
+                    'photo_id': 'test-photo-id-1',
+                    'tagged_user_id': self.bart.id }),
+                data = json.dumps(data),
+                content_type = 'application/json')
+
+        response = self.client.get(reverse('album-detail', kwargs={'pk': self.party_album.id}))
+        response_json = json.loads(response.content)
+
+        photo_json = response_json['photos'][0]
+
+        self.assertEqual(photo_json['user_tags'][0]['tagged_user']['id'], self.bart.id)
+        self.assertEqual(photo_json['user_tags'][0]['tag_coord_x'], 0.62)
+        self.assertEqual(photo_json['user_tags'][0]['tag_coord_y'], 0.54)
+
 
 class PhotoGlanceTest(TestCase):
     urls = 'photos_api.urls'

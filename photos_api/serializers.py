@@ -2,7 +2,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib import auth
 from rest_framework import serializers
 
-from photos.models import Album, AlbumMember, Photo, PhotoComment, PhotoGlance
+from photos.models import Album, AlbumMember, Photo, PhotoComment, PhotoUserTag, PhotoGlance
 
 
 class ListField(serializers.WritableField):
@@ -54,6 +54,14 @@ class CommentSerializer(serializers.ModelSerializer):
     author = UserCompactSerializer(source='author')
 
 
+class UserTagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PhotoUserTag
+        fields = ('tagged_user', 'tag_coord_x', 'tag_coord_y')
+
+    tagged_user = UserCompactSerializer(source='tagged_user')
+
+
 class GlanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = PhotoGlance
@@ -65,11 +73,12 @@ class GlanceSerializer(serializers.ModelSerializer):
 class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photo
-        fields = ('photo_id', 'photo_url', 'date_created', 'author', 'comments', 'glances')
+        fields = ('photo_id', 'photo_url', 'date_created', 'author', 'comments', 'user_tags', 'glances')
 
     photo_url = serializers.CharField(source='get_photo_url')
     author = UserSerializer(source='author')
     comments = CommentSerializer(source='get_comments')
+    user_tags = UserTagSerializer(source='get_user_tags')
     glances = GlanceSerializer(source='get_glances')
 
 
