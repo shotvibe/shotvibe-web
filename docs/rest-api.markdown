@@ -81,6 +81,14 @@ Add a comment to a photo.
 
 Delete a comment from a photo.
 
+### PUT /photos/{photo_id}/user_tags/{tagged_user_id}/
+
+Tag a user in a photo.
+
+### DELETE /photos/{photo_id}/user_tags/{tagged_user_id}/
+
+Delete a user tag from a photo.
+
 ### PUT /photos/{photo_id}/glance/
 
 Add a glance emoticon to a photo.
@@ -675,6 +683,7 @@ Example response:
                     "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
                 },
                 "comments": [],
+                "user_tags": [],
                 "glances": []
             },
             {
@@ -699,6 +708,17 @@ Example response:
                         "comment": "I love this photo!",
                     }
                 ],
+                "user_tags": [
+                    {
+                        "tagged_user": {
+                            "id": 670666295,
+                            "nickname": "x",
+                            "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                        },
+                        "tag_coord_x": 0.56,
+                        "tag_coord_y": 0.62
+                    }
+                ],
                 "glances": [
                     {
                         "author": {
@@ -721,6 +741,7 @@ Example response:
                     "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
                 },
                 "comments": [],
+                "user_tags": [],
                 "glances": []
             }
         ]
@@ -860,6 +881,48 @@ Example request:
 
 ```
 DELETE /photos/5a7e5e6afd698dc0ae2221469fd25b6f9b9941ddab20c90d95f6cba9efa57905/comments/8/1418582165811/
+Authorization: Token 01ba4719c80b6fe911b091a7c05124b64eeece96
+Content-Type: application/json
+Content-Length: 0
+
+```
+
+### PUT /photos/{photo_id}/user_tags/{tagged_user_id}/
+
+Tag a user in a photo.
+
+The request JSON should include an object with a fields "tag_coord_x" and
+"tag_coord_y" with numerical values between 0.0 and 1.0 representing the point
+in the image where the tag should be placed.
+
+The response will be 204 No Content.
+
+Example request:
+
+```
+PUT /photos/5a7e5e6afd698dc0ae2221469fd25b6f9b9941ddab20c90d95f6cba9efa57905/user_tags/8/
+Authorization: Token 01ba4719c80b6fe911b091a7c05124b64eeece96
+Content-Type: application/json
+Content-Length: 281
+
+{
+    "tag_coord_x": 0.56,
+    "tag_coord_y": 0.62
+}
+```
+
+### DELETE /photos/{photo_id}/user_tags/{tagged_user_id}/
+
+Delete a user tag from a photo.
+
+The request body should be empty.
+
+The response will be 204 No Content.
+
+Example request:
+
+```
+DELETE /photos/5a7e5e6afd698dc0ae2221469fd25b6f9b9941ddab20c90d95f6cba9efa57905/user_tags/8/
 Authorization: Token 01ba4719c80b6fe911b091a7c05124b64eeece96
 Content-Type: application/json
 Content-Length: 0
