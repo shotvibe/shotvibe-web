@@ -11,8 +11,8 @@ from photos.models import PhotoServer
 class PhotoAdminInline(admin.TabularInline):
     model = Photo
 
-    fields = ('photo_id', 'storage_id', 'subdomain', 'date_created', 'author', 'album', 'photo_thumbnail', 'glances')
-    readonly_fields = ('subdomain', 'date_created', 'author', 'album', 'photo_thumbnail', 'glances')
+    fields = ('photo_id', 'storage_id', 'subdomain', 'date_created', 'author', 'album', 'photo_thumbnail', 'comments', 'glances')
+    readonly_fields = ('subdomain', 'date_created', 'author', 'album', 'photo_thumbnail', 'comments', 'glances')
 
     ordering = ['album_index']
 
@@ -34,6 +34,20 @@ class PhotoAdminInline(admin.TabularInline):
 
     def photo_thumbnail(self, instance):
         return format_html(u'<img src="{0}" />', instance.get_photo_url_no_ext() + '_thumb75.jpg')
+
+    def comments(self, obj):
+        comments = obj.get_comments()
+        if not comments:
+            return None
+
+        html = u'<ul>'
+        for comment in comments:
+            html += format_html(u'<li>"{0}" <a href="{1}">{2}</a></li>',
+                    comment.comment_text,
+                    u'../../../{0}/{1}/{2}/'.format(comment.author._meta.app_label, comment.author._meta.module_name, comment.author.id),
+                    comment.author)
+        html += u'</ul>'
+        return mark_safe(html)
 
     def glances(self, obj):
         glances = obj.get_glances()
