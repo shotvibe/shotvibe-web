@@ -5,14 +5,14 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 from phone_auth.models import PhoneNumberLinkCode
-from photos.models import Album, AlbumMember, Photo, PendingPhoto, PhotoGlance
+from photos.models import Album, AlbumMember, Photo, PendingPhoto, PhotoComment, PhotoGlance
 from photos.models import PhotoServer
 
 class PhotoAdminInline(admin.TabularInline):
     model = Photo
 
-    fields = ('photo_id', 'storage_id', 'subdomain', 'date_created', 'author', 'album', 'photo_thumbnail', 'glances')
-    readonly_fields = ('subdomain', 'date_created', 'author', 'album', 'photo_thumbnail', 'glances')
+    fields = ('photo_id', 'storage_id', 'subdomain', 'date_created', 'author', 'album', 'photo_thumbnail', 'comments', 'glances')
+    readonly_fields = ('subdomain', 'date_created', 'author', 'album', 'photo_thumbnail', 'comments', 'glances')
 
     ordering = ['album_index']
 
@@ -34,6 +34,20 @@ class PhotoAdminInline(admin.TabularInline):
 
     def photo_thumbnail(self, instance):
         return format_html(u'<img src="{0}" />', instance.get_photo_url_no_ext() + '_thumb75.jpg')
+
+    def comments(self, obj):
+        comments = obj.get_comments()
+        if not comments:
+            return None
+
+        html = u'<ul>'
+        for comment in comments:
+            html += format_html(u'<li>"{0}" <a href="{1}">{2}</a></li>',
+                    comment.comment_text,
+                    u'../../../{0}/{1}/{2}/'.format(comment.author._meta.app_label, comment.author._meta.module_name, comment.author.id),
+                    comment.author)
+        html += u'</ul>'
+        return mark_safe(html)
 
     def glances(self, obj):
         glances = obj.get_glances()
@@ -143,6 +157,35 @@ class PendingPhotoAdmin(admin.ModelAdmin):
     pass
 
 
+class PhotoCommentAdmin(admin.ModelAdmin):
+    list_display = ('photo_icon', 'album_link', 'comment_text', 'date_created', 'author_link')
+    list_display_links = list_display
+
+    ordering = ('-date_created',)
+
+    def photo_icon(self, obj):
+        return format_html(u'<img src="{0}" width="35" height="35">', obj.photo.get_photo_url_no_ext() + '_crop140.jpg')
+    photo_icon.short_description = 'Photo'
+    photo_icon.admin_order_field = 'photo'
+
+    def album_link(self, obj):
+        return format_html(u'<a href="{0}">{1}</a>',
+                u'../../{0}/{1}/{2}/'.format(obj.photo.album._meta.app_label, obj.photo.album._meta.module_name, obj.photo.album.id),
+                obj.photo.album.name)
+    album_link.short_description = 'Album'
+    album_link.admin_order_field = 'album'
+
+    def comment_text(self, obj):
+        return obj.comment_text
+
+    def author_link(self, obj):
+        return format_html(u'<a href="{0}">{1}</a>',
+                u'../../{0}/{1}/{2}/'.format(obj.author._meta.app_label, obj.author._meta.module_name, obj.author.id),
+                obj.author)
+    author_link.short_description = 'Author'
+    author_link.admin_order_field = 'author'
+
+
 class PhotoGlanceAdmin(admin.ModelAdmin):
     list_display = ('photo_icon', 'album_link', 'emoticon_icon', 'date_created', 'author_link')
     list_display_links = list_display
@@ -180,5 +223,6 @@ class PhotoServerAdmin(admin.ModelAdmin):
 admin.site.register(Photo, PhotoAdmin)
 admin.site.register(PendingPhoto, PendingPhotoAdmin)
 admin.site.register(Album, AlbumAdmin)
+admin.site.register(PhotoComment, PhotoCommentAdmin)
 admin.site.register(PhotoGlance, PhotoGlanceAdmin)
 admin.site.register(PhotoServer, PhotoServerAdmin)
