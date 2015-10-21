@@ -271,7 +271,8 @@ def broadcast_photo_comment(comment_thread_author_ids, comment_author_nickname, 
                 'aps': {
                     'alert': comment_author_nickname + ' commented on a photo in ' + album_name,
                     'sound': 'default'
-                    }
+                    },
+                'd': payload
                 }
             }
     send_message_or_log_errors(rq)
