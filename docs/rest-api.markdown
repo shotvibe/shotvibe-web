@@ -995,7 +995,7 @@ Used to add photos or members to an album.
 
 The request JSON can include the following fields:
 
-*   `add_photo`: Add new photos to the album. All of the photos specified
+*   `add_photos`: Add new photos to the album. All of the photos specified
     should have already been uploaded.
 
 *   `add_members`: Deprecated, use /albums/{aid}/members/ endpoint.
