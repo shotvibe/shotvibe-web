@@ -156,7 +156,7 @@ class Album(models.Model):
             album_users = self.album.get_member_users()
             user_ids = [user.id for user in album_users if user.id != commenter.id]
 
-            device_push.broadcast_photo_comment(user_ids, commenter.nickname, photo.album.id, photo.photo_id, photo.album.name)
+            device_push.broadcast_photo_comment(user_ids, commenter.nickname, commenter.get_avatar_url(), photo.album.id, photo.photo_id, photo.album.name, comment_text)
 
         def delete_photo_comment(self, photo_comment):
             if photo_comment.photo.album != self.album:

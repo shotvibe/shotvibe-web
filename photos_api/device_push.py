@@ -251,13 +251,15 @@ def broadcast_album_sync(user_ids, album_id):
     send_message_or_log_errors(rq)
 
 
-def broadcast_photo_comment(comment_thread_author_ids, comment_author_nickname, album_id, photo_id, album_name):
+def broadcast_photo_comment(comment_thread_author_ids, comment_author_nickname, comment_author_avatar_url, album_id, photo_id, album_name, comment_text):
     payload = {
             'type': 'photo_comment',
             'album_id': album_id,
             'photo_id': photo_id,
             'album_name': album_name,
-            'comment_author_nickname': comment_author_nickname
+            'comment_author_nickname': comment_author_nickname,
+            'comment_author_avatar_url': comment_author_avatar_url,
+            'comment_text': comment_text
         }
 
     rq = {
