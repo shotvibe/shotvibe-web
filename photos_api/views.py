@@ -168,6 +168,15 @@ class AlbumDetail(generics.RetrieveAPIView):
                                        by_user=request.user,
                                        to_album=self.album)
 
+        if serializer.object.copy_photos:
+            photo_ids = serializer.object.copy_photos
+            photo_operations.copy_photos_to_album(request.user, photo_ids, self.album.id, now)
+
+            photos_added_to_album.send(sender=self,
+                                       photos=photo_ids,
+                                       by_user=request.user,
+                                       to_album=self.album)
+
         album_add_members(self.album, request.user, serializer.object.add_members, now)
 
         responseSerializer = (self.get_serializer_class())(self.get_object(), context={'request': request})

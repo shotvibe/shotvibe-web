@@ -375,6 +375,8 @@ class Photo(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL)
     album = models.ForeignKey(Album)
     album_index = models.PositiveIntegerField(db_index=True)
+    photo_glance_score = models.IntegerField(default=0)
+    copied_from_photo = models.ForeignKey('self', null=True, blank=True)
 
     objects = PhotoManager()
 
@@ -416,6 +418,34 @@ class Photo(models.Model):
 
     def get_user_tags(self):
         return self.photousertag_set.order_by('date_created')
+
+    def get_original_photo(self):
+        if self.copied_from_photo:
+            return self.copied_from_photo
+        else:
+            return self
+
+    def update_glance_score(self, score_delta):
+        """
+        score_delta should be 1 or -1 (but any other integer will also work)
+
+        After this method returns, the object's `photo_glance_score' will still
+        contain the old value. If the new value is needed, you should refresh
+        the object from the db.
+        """
+        Photo.objects.filter(pk=self.photo_id) \
+                .update(photo_glance_score=models.F('photo_glance_score') + score_delta)
+
+    def get_global_glance_score(self):
+        sum_excluding_original = Photo.objects.filter(copied_from_photo=self.get_original_photo()) \
+                .aggregate(models.Sum('photo_glance_score'))
+
+        # Force a refresh from the db to guarantee that we later read the
+        # most up-to-date value of photo_glance_score
+        original = Photo.objects.get(pk=self.get_original_photo().photo_id)
+
+        total_sum = sum_excluding_original['photo_glance_score__sum'] + original.photo_glance_score
+        return total_sum
 
     def get_glances(self):
         return self.photoglance_set.order_by('date_created')

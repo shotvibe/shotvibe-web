@@ -221,17 +221,23 @@ class AlbumMembersSerializer(serializers.Serializer):
 
 
 class AlbumUpdate(object):
-    def __init__(self, add_photos=None, add_members=None):
+    def __init__(self, add_photos=None, copy_photos=None, add_members=None):
         self.add_photos = add_photos or []
+        self.copy_photos = copy_photos or []
         self.add_members = add_members or []
 
 
 class AlbumUpdateSerializer(serializers.Serializer):
     add_photos = PhotoListField(required=False)
+    copy_photos = PhotoListField(required=False)
     add_members = ListField(MemberIdentifierSerializer, required=False)
 
     def restore_object(self, attrs, instance=None):
-        return AlbumUpdate(add_photos=attrs.get('add_photos'), add_members=attrs.get('add_members'))
+        return AlbumUpdate(
+                add_photos=attrs.get('add_photos'),
+                copy_photos=attrs.get('copy_photos'),
+                add_members=attrs.get('add_members'),
+                )
 
 
 class AlbumAdd(object):

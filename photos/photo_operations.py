@@ -283,6 +283,7 @@ class CopyPhotosToAlbumAction(ExThread):
                         author=self.author,
                         album=album,
                         album_index = next_album_index,
+                        copied_from_photo_id = photo.get_original_photo(),
                     )
                     if chosen_subdomain in added_photos:
                         added_photos[chosen_subdomain].append(p)
