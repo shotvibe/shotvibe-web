@@ -89,6 +89,10 @@ Tag a user in a photo.
 
 Delete a user tag from a photo.
 
+### PUT /photos/{photo_id}/glance_scores/{author_id}/
+
+Set a glance score of a photo.
+
 ### PUT /photos/{photo_id}/glance/
 
 Add a glance emoticon to a photo.
@@ -684,6 +688,8 @@ Example response:
                 },
                 "comments": [],
                 "user_tags": [],
+                "global_glance_score": 0,
+                "my_glance_score_delta": 0,
                 "glances": []
             },
             {
@@ -719,6 +725,8 @@ Example response:
                         "tag_coord_y": 0.62
                     }
                 ],
+                "global_glance_score": 6,
+                "my_glance_score_delta": 1,
                 "glances": [
                     {
                         "author": {
@@ -742,6 +750,8 @@ Example response:
                 },
                 "comments": [],
                 "user_tags": [],
+                "global_glance_score": 0,
+                "my_glance_score_delta": 0,
                 "glances": []
             }
         ]
@@ -927,6 +937,28 @@ Authorization: Token 01ba4719c80b6fe911b091a7c05124b64eeece96
 Content-Type: application/json
 Content-Length: 0
 
+```
+
+### PUT /photos/{photo_id}/glance_scores/{author_id}/
+
+Set a glance score of a photo.
+
+The request JSON should include an object with a field "score_delta" with a
+number value of either 1, 0 or -1.
+
+The response will be 204 No Content.
+
+Example request:
+
+```
+PUT /photos/5a7e5e6afd698dc0ae2221469fd25b6f9b9941ddab20c90d95f6cba9efa57905/glance_scores/1418582165811/
+Authorization: Token 01ba4719c80b6fe911b091a7c05124b64eeece96
+Content-Type: application/json
+Content-Length: 281
+
+{
+    "score_delta": 1
+}
 ```
 
 ### PUT /photos/{photo_id}/glance/
