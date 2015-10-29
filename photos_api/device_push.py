@@ -269,8 +269,8 @@ def broadcast_photo_comment(comment_thread_author_ids, comment_author_nickname, 
                 },
             'apns': {
                 'aps': {
-                    'alert': comment_author_nickname + ' commented on a photo in ' + album_name,
-                    'sound': 'default'
+                    'alert': comment_author_nickname + ' commented on a photo @ ' + album_name,
+                    'sound': 'push.mp3'
                     },
                 'd': payload
                 }
