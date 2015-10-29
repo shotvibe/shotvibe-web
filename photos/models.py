@@ -437,14 +437,17 @@ class Photo(models.Model):
                 .update(photo_glance_score=models.F('photo_glance_score') + score_delta)
 
     def get_global_glance_score(self):
-        sum_excluding_original = Photo.objects.filter(copied_from_photo=self.get_original_photo()) \
+        query_result = Photo.objects.filter(copied_from_photo=self.get_original_photo()) \
                 .aggregate(models.Sum('photo_glance_score'))
+        sum_excluding_original = query_result['photo_glance_score__sum']
+        if sum_excluding_original is None:
+            sum_excluding_original = 0
 
         # Force a refresh from the db to guarantee that we later read the
         # most up-to-date value of photo_glance_score
         original = Photo.objects.get(pk=self.get_original_photo().photo_id)
 
-        total_sum = sum_excluding_original['photo_glance_score__sum'] + original.photo_glance_score
+        total_sum = sum_excluding_original + original.photo_glance_score
         return total_sum
 
     def get_glances(self):
