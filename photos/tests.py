@@ -10,7 +10,7 @@ from django.test.utils import override_settings
 
 import phonenumbers
 
-from photos.models import Album, Photo, PendingPhoto, AlbumMember
+from photos.models import Album, Photo, PendingPhoto, AlbumMember, PhotoGlanceScoreDelta
 from photos import image_uploads
 from photos import photo_operations
 from phone_auth.models import User, PhoneNumber
@@ -238,6 +238,44 @@ class ModelTest(TestCase):
         self.assertEqual(photo.get_global_glance_score(), 3)
         self.assertEqual(photo2.get_global_glance_score(), 3)
         self.assertEqual(photo3.get_global_glance_score(), 3)
+
+    def test_set_photo_user_glance_score_delta(self):
+        date1 = datetime.datetime(2010, 1, 1, tzinfo=utc)
+        album1 = Album.objects.create_album(self.amanda, 'Album 1', date1)
+        pending_photo = Photo.objects.upload_request(author=self.amanda)
+        with open('photos/test_photos/death-valley-sand-dunes.jpg') as f:
+            image_uploads.process_file_upload(pending_photo, read_in_chunks(f))
+
+        photo_operations.add_pending_photos_to_album([pending_photo.photo_id], album1.id, date1)
+
+        photo = Photo.objects.get(pk=pending_photo.photo_id)
+
+        PhotoGlanceScoreDelta.objects.set_photo_user_glance_score_delta(self.amanda, photo, 1, date1)
+
+        self.assertEqual(photo.get_global_glance_score(), 1)
+
+    def test_set_photo_user_glance_score_delta_multiple(self):
+        date1 = datetime.datetime(2010, 1, 1, tzinfo=utc)
+        album1 = Album.objects.create_album(self.amanda, 'Album 1', date1)
+        pending_photo = Photo.objects.upload_request(author=self.amanda)
+        with open('photos/test_photos/death-valley-sand-dunes.jpg') as f:
+            image_uploads.process_file_upload(pending_photo, read_in_chunks(f))
+
+        photo_operations.add_pending_photos_to_album([pending_photo.photo_id], album1.id, date1)
+
+        photo = Photo.objects.get(pk=pending_photo.photo_id)
+
+        PhotoGlanceScoreDelta.objects.set_photo_user_glance_score_delta(self.amanda, photo, 1, date1)
+        self.assertEqual(photo.get_global_glance_score(), 1)
+
+        PhotoGlanceScoreDelta.objects.set_photo_user_glance_score_delta(self.amanda, photo, -1, date1)
+        self.assertEqual(photo.get_global_glance_score(), -1)
+
+        PhotoGlanceScoreDelta.objects.set_photo_user_glance_score_delta(self.amanda, photo, 1, date1)
+        self.assertEqual(photo.get_global_glance_score(), 1)
+
+        PhotoGlanceScoreDelta.objects.set_photo_user_glance_score_delta(self.amanda, photo, 0, date1)
+        self.assertEqual(photo.get_global_glance_score(), 0)
 
 
 class AlbumTest(TestCase):

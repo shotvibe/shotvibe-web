@@ -863,6 +863,84 @@ class PhotoUserTagTest(TestCase):
 
         self.assertEqual(len(Photo.objects.get(photo_id='test-photo-id-1').get_user_tags()), 0)
 
+class PhotoGlanceScoresTest(TestCase):
+    urls = 'photos_api.urls'
+
+    def setUp(self):
+        self.arnold = User.objects.create_user('arnold', password='mypass')
+        self.party_album = Album.objects.create_album(self.arnold, 'Party', datetime.datetime(2000, 1, 1, tzinfo=timezone.utc))
+
+        Photo.objects.create(
+                photo_id = 'test-photo-id-1',
+                storage_id = 'test-storage-id-1',
+                subdomain = 'test-subdomain',
+                date_created = datetime.datetime(2000, 1, 2, tzinfo=timezone.utc),
+                author = self.arnold,
+                album = self.party_album,
+                album_index = 0)
+
+        self.client.login(username=str(self.arnold.id), password='mypass')
+
+    def test_set_photo_score_view(self):
+        data = {
+                'score_delta': 1,
+                }
+        response = self.client.put(
+                reverse('photo-glance-score', kwargs={
+                    'photo_id': 'test-photo-id-1',
+                    'author_id': self.arnold.id }),
+                data = json.dumps(data),
+                content_type = 'application/json')
+        self.assertEqual(response.status_code, 204)
+
+        self.assertEqual(Photo.objects.get(pk='test-photo-id-1').get_global_glance_score(), 1)
+
+    def test_set_photo_score_view_multiple(self):
+        self.assertEqual(Photo.objects.get(pk='test-photo-id-1').get_global_glance_score(), 0)
+
+        data = {
+                'score_delta': 1,
+                }
+        response = self.client.put(
+                reverse('photo-glance-score', kwargs={
+                    'photo_id': 'test-photo-id-1',
+                    'author_id': self.arnold.id }),
+                data = json.dumps(data),
+                content_type = 'application/json')
+        self.assertEqual(response.status_code, 204)
+
+        self.assertEqual(Photo.objects.get(pk='test-photo-id-1').get_global_glance_score(), 1)
+
+        data = {
+                'score_delta': -1,
+                }
+        response = self.client.put(
+                reverse('photo-glance-score', kwargs={
+                    'photo_id': 'test-photo-id-1',
+                    'author_id': self.arnold.id }),
+                data = json.dumps(data),
+                content_type = 'application/json')
+        self.assertEqual(response.status_code, 204)
+
+        self.assertEqual(Photo.objects.get(pk='test-photo-id-1').get_global_glance_score(), -1)
+
+    def test_photo_view_score(self):
+        data = {
+                'score_delta': -1,
+                }
+        self.client.put(
+                reverse('photo-glance-score', kwargs={
+                    'photo_id': 'test-photo-id-1',
+                    'author_id': self.arnold.id }),
+                data = json.dumps(data),
+                content_type = 'application/json')
+
+        response = self.client.get(reverse('album-detail', kwargs={'pk': self.party_album.id}))
+        response_json = json.loads(response.content)
+
+        photo_json = response_json['photos'][0]
+        self.assertEqual(photo_json['my_glance_score_delta'], -1)
+        self.assertEqual(photo_json['global_glance_score'], -1)
 
 
 class PhotoGlanceTest(TestCase):

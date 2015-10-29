@@ -26,6 +26,7 @@ urlpatterns = patterns('',
     url(r'^photos/(?P<photo_id>[\w-]+)/glance/$', views.PhotoGlanceView.as_view(), name='photo-glance'),
     url(r'^photos/(?P<photo_id>[\w-]+)/comments/(?P<author_id>\d+)/(?P<client_msg_id>\d+)/$', views.PhotoCommentView.as_view(), name='photo-comment'),
     url(r'^photos/(?P<photo_id>[\w-]+)/user_tags/(?P<tagged_user_id>\d+)/$', views.PhotoUserTagView.as_view(), name='photo-user-tag'),
+    url(r'^photos/(?P<photo_id>[\w-]+)/glance_scores/(?P<author_id>\d+)/', views.PhotoGlanceScoreView.as_view(), name='photo-glance-score'),
     url(r'^query_phone_numbers/$', views.QueryPhoneNumbers.as_view(),
         name='query-phone-numbers')
 )

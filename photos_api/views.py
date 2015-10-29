@@ -47,7 +47,8 @@ from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
     QueryPhonesRequestSerializer, DeletePhotosSerializer, \
     AlbumMemberNameSerializer, AlbumMemberSerializer, AlbumViewSerializer, \
     AlbumNameChangeSerializer, AlbumMembersSerializer, \
-    PhotoCommentSerializer, PhotoUserTagSerializer, PhotoGlanceSerializer
+    PhotoCommentSerializer, PhotoUserTagSerializer, PhotoGlanceScoreSerializer, \
+    PhotoGlanceSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
 import invites_manager
@@ -606,6 +607,30 @@ class PhotoUserTagView(GenericAPIView):
             m.delete_photo_user_tag(photo_user_tag)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PhotoGlanceScoreView(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = PhotoGlanceScoreSerializer
+
+    def initial(self, request, photo_id, author_id, *args, **kwargs):
+        self.photo = get_object_or_404(Photo, pk=photo_id)
+        self.author = get_object_or_404(User, pk=author_id)
+
+        return super(PhotoGlanceScoreView, self).initial(request, photo_id, author_id, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        if request.user != self.author:
+            return Response(status=403)
+
+        serializer = self.get_serializer(data=request.DATA, files=request.FILES)
+        if serializer.is_valid():
+            with self.photo.album.modify(timezone.now()) as m:
+                m.set_photo_user_glance_score_delta(request.user, self.photo, serializer.object['score_delta'])
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PhotoGlanceView(GenericAPIView):

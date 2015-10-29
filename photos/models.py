@@ -189,6 +189,9 @@ class Album(models.Model):
 
             photo_user_tag.delete()
 
+        def set_photo_user_glance_score_delta(self, user, photo, score_delta):
+            PhotoGlanceScoreDelta.objects.set_photo_user_glance_score_delta(user, photo, score_delta, self.current_date)
+
         def glance_photo(self, photo, glancer, emoticon_name):
             if photo.album != self.album:
                 raise ValueError('photo is not part of this album')
@@ -520,6 +523,51 @@ class PhotoUserTag(models.Model):
 
     class Meta:
         unique_together = ('photo', 'tagged_user')
+
+
+class PhotoGlanceScoreDeltaManager(models.Manager):
+    def get_photo_user_glance_score_delta(self, user, photo):
+        try:
+            photo_glance_score_delta = self.get(author=user, photo=photo)
+            return photo_glance_score_delta.score_delta
+        except PhotoGlanceScoreDelta.DoesNotExist:
+            return 0
+
+    def set_photo_user_glance_score_delta(self, user, photo, score_delta, now):
+        """
+        Returns True if the score was different from the previous score set by
+        the user.  Returns False if the score did not change.
+        """
+        photo_glance_score_delta, created = self.get_or_create(photo=photo, author=user,
+                defaults={
+                    'date_created': now,
+                    'score_delta': score_delta
+                })
+        if created:
+            changed = (score_delta != 0)
+            if changed:
+                photo.update_glance_score(score_delta)
+        if not created:
+            old_score_delta = photo_glance_score_delta.score_delta
+            changed = (old_score_delta != score_delta)
+            if changed:
+                photo_glance_score_delta.score_delta = score_delta
+                photo_glance_score_delta.date_created = now
+                photo_glance_score_delta.save(update_fields=['score_delta', 'date_created'])
+                photo.update_glance_score(score_delta - old_score_delta)
+
+        return changed
+
+class PhotoGlanceScoreDelta(models.Model):
+    photo = models.ForeignKey(Photo)
+    date_created = models.DateTimeField(db_index=True)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL)
+    score_delta = models.IntegerField()
+
+    objects = PhotoGlanceScoreDeltaManager()
+
+    class Meta:
+        unique_together = ('photo', 'author')
 
 
 class PhotoGlance(models.Model):

@@ -2,7 +2,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib import auth
 from rest_framework import serializers
 
-from photos.models import Album, AlbumMember, Photo, PhotoComment, PhotoUserTag, PhotoGlance
+from photos.models import Album, AlbumMember, Photo, PhotoComment, PhotoUserTag, PhotoGlanceScoreDelta, PhotoGlance
 
 
 class ListField(serializers.WritableField):
@@ -73,13 +73,25 @@ class GlanceSerializer(serializers.ModelSerializer):
 class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photo
-        fields = ('photo_id', 'photo_url', 'date_created', 'author', 'comments', 'user_tags', 'glances')
+        fields = ('photo_id', 'photo_url', 'date_created', 'author', 'comments', 'user_tags', 'global_glance_score', 'my_glance_score_delta', 'glances')
+
+    def __init__(self, request_user=None, *args, **kwargs):
+        self.request_user = request_user
+        super(PhotoSerializer, self).__init__(*args, **kwargs)
 
     photo_url = serializers.CharField(source='get_photo_url')
     author = UserSerializer(source='author')
+    global_glance_score = serializers.IntegerField(source='get_global_glance_score')
+    my_glance_score_delta = serializers.SerializerMethodField('get_global_glance_score')
     comments = CommentSerializer(source='get_comments')
     user_tags = UserTagSerializer(source='get_user_tags')
     glances = GlanceSerializer(source='get_glances')
+
+    def get_global_glance_score(self, photo):
+        if not self.request_user:
+            return 0
+
+        return PhotoGlanceScoreDelta.objects.get_photo_user_glance_score_delta(self.request_user, photo)
 
 
 class StaticField(serializers.Field):
@@ -116,6 +128,11 @@ class AlbumMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = AlbumMember
         fields = ('id', 'name', 'creator', 'date_created', 'last_updated', 'members', 'photos', 'num_new_photos', 'last_access')
+
+    def __init__(self, *args, **kwargs):
+        super(AlbumMemberSerializer, self).__init__(*args, **kwargs)
+        request_user = kwargs['context']['request'].user
+        self.fields['photos'] = PhotoSerializer(request_user, source='album.get_photos')
 
     id = serializers.IntegerField(source='album.id')
     name = serializers.Field(source='album.name')
@@ -285,6 +302,10 @@ class PhotoCommentSerializer(serializers.Serializer):
 class PhotoUserTagSerializer(serializers.Serializer):
     tag_coord_x = serializers.FloatField()
     tag_coord_y = serializers.FloatField()
+
+
+class PhotoGlanceScoreSerializer(serializers.Serializer):
+    score_delta = serializers.IntegerField()
 
 
 class PhotoGlanceSerializer(serializers.Serializer):
