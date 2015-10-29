@@ -602,6 +602,51 @@ class PhotoUpload(BaseTestCase):
         all_album_photos = [x['photo_id'] for x in album_json['photos']]
         self.assertIn(photo_id, all_album_photos)
 
+    def test_copy_to_album(self):
+        upload_request_response = self.client.post('/photos/upload_request/')
+        self.assertEqual(upload_request_response.status_code, 200)
+        upload_request_json = json.loads(upload_request_response.content)
+
+        photo_id = upload_request_json[0]['photo_id']
+        upload_url = upload_request_json[0]['upload_url']
+
+        test_photo_path = 'photos/test_photos/death-valley-sand-dunes.jpg'
+
+        with open(test_photo_path, 'rb') as f:
+            upload_response = self.client.post(upload_url, { 'photo': f })
+        self.assertEqual(upload_response.status_code, 200)
+
+        num_photos_before = len(json.loads(self.client.get('/albums/8/').content)['photos'])
+
+        photo_list = { 'add_photos': [ { 'photo_id': photo_id } ] }
+        add_response = self.client.post('/albums/8/', content_type='application/json', data=json.dumps(photo_list))
+        self.assertEqual(add_response.status_code, 200)
+
+        album_json = json.loads(self.client.get('/albums/8/').content)
+        num_photos_after = len(album_json['photos'])
+        self.assertEqual(num_photos_after, num_photos_before + 1)
+
+        all_album_photos = [x['photo_id'] for x in album_json['photos']]
+        self.assertIn(photo_id, all_album_photos)
+
+        num_photos_before2 = len(json.loads(self.client.get('/albums/9/').content)['photos'])
+        copy_photos_json = { 'copy_photos': [ { 'photo_id': photo_id } ] }
+        copy_response = self.client.post('/albums/9/', content_type='application/json', data=json.dumps(copy_photos_json))
+        self.assertEqual(copy_response.status_code, 200)
+
+        album2_json = json.loads(self.client.get('/albums/9/').content)
+        num_photos_after2 = len(album2_json['photos'])
+        self.assertEqual(num_photos_after2, num_photos_before2 + 1)
+
+        new_photo = None
+        for p in album2_json['photos']:
+            photo = Photo.objects.get(pk=p['photo_id'])
+            if photo.copied_from_photo and photo.copied_from_photo.photo_id == photo_id:
+                new_photo = photo
+
+        self.assertIsNotNone(new_photo)
+        self.assertEqual(new_photo.storage_id, Photo.objects.get(pk=photo_id).storage_id)
+
     def test_create_album(self):
         upload_request_response = self.client.post('/photos/upload_request/')
         self.assertEqual(upload_request_response.status_code, 200)

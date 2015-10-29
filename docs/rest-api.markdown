@@ -998,6 +998,9 @@ The request JSON can include the following fields:
 *   `add_photos`: Add new photos to the album. All of the photos specified
     should have already been uploaded.
 
+*   `copy_photos` Copy existing photos into this album. All of the photos
+*   specified should already exist in some album.
+
 *   `add_members`: Deprecated, use /albums/{aid}/members/ endpoint.
 
 Example request:
@@ -1017,6 +1020,14 @@ Example request:
             },
             {
                 "photo_id": "19191da2a395424c0abfa9ebfbfdda53cf77eb384125e18d587c63d732baf1be"
+            }
+        ],
+        "copy_photos": [
+            {
+                "photo_id": "3a2ee431e71f2455a3d495d9b8a14d7002a2cf07647ecccc8529b3d28ebb8f0c"
+            },
+            {
+                "photo_id": "4f58cadd39b13b4e5bd1f1939bc1c4533f3919fbc971dc7a0a3e01f50a980578"
             }
         ]
     }

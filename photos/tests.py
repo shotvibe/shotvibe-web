@@ -104,6 +104,50 @@ class ModelTest(TestCase):
         self.assertEqual(len(album2_photos), 1)
         self.assertEqual(album2_photos[0].storage_id, Photo.objects.get(pk=pending_photo.photo_id).storage_id)
 
+    def test_copy_photo_to_album_copied_from(self):
+        date1 = datetime.datetime(2010, 1, 1, tzinfo=utc)
+        album1 = Album.objects.create_album(self.amanda, 'Album 1', date1)
+        pending_photo = Photo.objects.upload_request(author=self.amanda)
+        with open('photos/test_photos/death-valley-sand-dunes.jpg') as f:
+            image_uploads.process_file_upload(pending_photo, read_in_chunks(f))
+
+        photo_operations.add_pending_photos_to_album([pending_photo.photo_id], album1.id, date1)
+
+        date2 = datetime.datetime(2010, 1, 2, tzinfo=utc)
+        album2 = Album.objects.create_album(self.barney, 'Album 2', date2)
+        photo_operations.copy_photos_to_album(self.barney, [pending_photo.photo_id], album2.id, date2)
+
+        album2_photos = album2.get_photos()
+
+        self.assertEqual(len(album2_photos), 1)
+        self.assertEqual(album2_photos[0].storage_id, Photo.objects.get(pk=pending_photo.photo_id).storage_id)
+        self.assertEqual(album2_photos[0].copied_from_photo, Photo.objects.get(pk=pending_photo.photo_id))
+
+    def test_copy_photo_to_album_copied_from_transitive(self):
+        date1 = datetime.datetime(2010, 1, 1, tzinfo=utc)
+        album1 = Album.objects.create_album(self.amanda, 'Album 1', date1)
+        pending_photo = Photo.objects.upload_request(author=self.amanda)
+        with open('photos/test_photos/death-valley-sand-dunes.jpg') as f:
+            image_uploads.process_file_upload(pending_photo, read_in_chunks(f))
+
+        photo_operations.add_pending_photos_to_album([pending_photo.photo_id], album1.id, date1)
+
+        date2 = datetime.datetime(2010, 1, 2, tzinfo=utc)
+        album2 = Album.objects.create_album(self.barney, 'Album 2', date2)
+        photo_operations.copy_photos_to_album(self.barney, [pending_photo.photo_id], album2.id, date2)
+
+        album2_photos = album2.get_photos()
+
+        date3 = datetime.datetime(2010, 1, 3, tzinfo=utc)
+        album3 = Album.objects.create_album(self.amanda, 'Album 3', date3)
+        photo_operations.copy_photos_to_album(self.amanda, [album2_photos[0].photo_id], album3.id, date3)
+
+        album3_photos = album3.get_photos()
+
+        self.assertEqual(len(album3_photos), 1)
+        self.assertEqual(album3_photos[0].storage_id, Photo.objects.get(pk=pending_photo.photo_id).storage_id)
+        self.assertEqual(album3_photos[0].copied_from_photo, Photo.objects.get(pk=pending_photo.photo_id))
+
     def test_copy_photo_to_album_twice(self):
         date1 = datetime.datetime(2010, 1, 1, tzinfo=utc)
         album1 = Album.objects.create_album(self.amanda, 'Album 1', date1)
@@ -141,6 +185,59 @@ class ModelTest(TestCase):
         self.assertEqual(len(album2_photos), 2)
         self.assertEqual(album2_photos[0].storage_id, Photo.objects.get(pk=pending_photo.photo_id).storage_id)
         self.assertEqual(album2_photos[1].storage_id, Photo.objects.get(pk=pending_photo.photo_id).storage_id)
+
+    def test_photo_update_glance_score(self):
+        date1 = datetime.datetime(2010, 1, 1, tzinfo=utc)
+        album1 = Album.objects.create_album(self.amanda, 'Album 1', date1)
+        pending_photo = Photo.objects.upload_request(author=self.amanda)
+        with open('photos/test_photos/death-valley-sand-dunes.jpg') as f:
+            image_uploads.process_file_upload(pending_photo, read_in_chunks(f))
+
+        photo_operations.add_pending_photos_to_album([pending_photo.photo_id], album1.id, date1)
+
+        photo = Photo.objects.get(pk=pending_photo.photo_id)
+
+        photo.update_glance_score(1)
+        photo = Photo.objects.get(pk=photo.photo_id)
+        self.assertEqual(photo.photo_glance_score, 1)
+
+        photo.update_glance_score(1)
+        photo = Photo.objects.get(pk=photo.photo_id)
+        self.assertEqual(photo.photo_glance_score, 2)
+
+        photo.update_glance_score(-1)
+        photo = Photo.objects.get(pk=photo.photo_id)
+        self.assertEqual(photo.photo_glance_score, 1)
+
+    def test_photo_global_glance_score(self):
+        date1 = datetime.datetime(2010, 1, 1, tzinfo=utc)
+        album1 = Album.objects.create_album(self.amanda, 'Album 1', date1)
+        pending_photo = Photo.objects.upload_request(author=self.amanda)
+        with open('photos/test_photos/death-valley-sand-dunes.jpg') as f:
+            image_uploads.process_file_upload(pending_photo, read_in_chunks(f))
+
+        photo_operations.add_pending_photos_to_album([pending_photo.photo_id], album1.id, date1)
+
+        photo = Photo.objects.get(pk=pending_photo.photo_id)
+        photo.update_glance_score(1)
+
+        date2 = datetime.datetime(2010, 1, 2, tzinfo=utc)
+        album2 = Album.objects.create_album(self.barney, 'Album 2', date2)
+        photo_operations.copy_photos_to_album(self.barney, [pending_photo.photo_id], album2.id, date2)
+        album2_photos = album2.get_photos()
+        photo2 = Photo.objects.get(pk=album2_photos[0].photo_id)
+        photo2.update_glance_score(1)
+
+        date3 = datetime.datetime(2010, 1, 3, tzinfo=utc)
+        album3 = Album.objects.create_album(self.amanda, 'Album 3', date3)
+        photo_operations.copy_photos_to_album(self.amanda, [album2_photos[0].photo_id], album3.id, date3)
+        album3_photos = album3.get_photos()
+        photo3 = Photo.objects.get(pk=album3_photos[0].photo_id)
+        photo3.update_glance_score(1)
+
+        self.assertEqual(photo.get_global_glance_score(), 3)
+        self.assertEqual(photo2.get_global_glance_score(), 3)
+        self.assertEqual(photo3.get_global_glance_score(), 3)
 
 
 class AlbumTest(TestCase):
