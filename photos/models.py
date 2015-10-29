@@ -153,11 +153,10 @@ class Album(models.Model):
                     comment_text = comment_text
                     )
 
-            comment_thread_author_ids = set()
-            for comment in PhotoComment.objects.filter(photo=photo).exclude(author=commenter).only('author'):
-                comment_thread_author_ids.add(comment.author.id)
+            album_users = self.album.get_member_users()
+            user_ids = [user.id for user in album_users if user.id != commenter.id]
 
-            device_push.broadcast_photo_comment(comment_thread_author_ids, commenter.nickname, photo.album.id, photo.photo_id, photo.album.name)
+            device_push.broadcast_photo_comment(user_ids, commenter.nickname, photo.album.id, photo.photo_id, photo.album.name)
 
         def delete_photo_comment(self, photo_comment):
             if photo_comment.photo.album != self.album:
