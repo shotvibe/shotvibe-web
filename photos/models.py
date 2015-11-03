@@ -348,6 +348,10 @@ class AlbumMember(models.Model):
             self.last_access = timestamp
             self.save(update_fields=['last_access'])
 
+    def get_other_members(self):
+        all_users = self.album.get_member_users()
+        return [user for user in all_users if user.id != self.user.id]
+
 
 class PhotoManager(models.Manager):
     def upload_request(self, author):

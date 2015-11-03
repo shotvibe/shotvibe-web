@@ -103,6 +103,15 @@ class StaticField(serializers.Field):
         return self.to_native(self.value)
 
 
+def album_name_or_members(album_member):
+    if album_member.album.name:
+        return album_member.album.name
+    else:
+        other_users = album_member.get_other_members()
+        other_users.sort(key=lambda u: u.id)
+        return ", ".join([u.nickname for u in other_users])
+
+
 class AlbumSerializer(serializers.ModelSerializer):
     class Meta:
         model = Album
@@ -135,7 +144,7 @@ class AlbumMemberSerializer(serializers.ModelSerializer):
         self.fields['photos'] = PhotoSerializer(request_user, source='album.get_photos')
 
     id = serializers.IntegerField(source='album.id')
-    name = serializers.Field(source='album.name')
+    name = serializers.SerializerMethodField('get_album_name')
     creator = UserSerializer(source='album.creator')
     date_created = serializers.Field(source='album.date_created')
     last_updated = serializers.Field(source='album.last_updated')
@@ -145,6 +154,8 @@ class AlbumMemberSerializer(serializers.ModelSerializer):
 
     id.read_only = True
 
+    def get_album_name(self, album_member):
+        return album_name_or_members(album_member)
 
 class AlbumNameSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -169,7 +180,7 @@ class AlbumMemberNameSerializer(serializers.HyperlinkedModelSerializer):
 
     id = serializers.IntegerField(source='album.id')
     url = serializers.HyperlinkedRelatedField(view_name='album-detail', source='album')
-    name = serializers.Field(source='album.name')
+    name = serializers.SerializerMethodField('get_album_name')
     creator = UserSerializer(source='album.creator')
     date_created = serializers.Field(source='album.date_created')
     last_updated = serializers.Field(source='album.last_updated')
@@ -179,6 +190,8 @@ class AlbumMemberNameSerializer(serializers.HyperlinkedModelSerializer):
 
     id.read_only = True
 
+    def get_album_name(self, album_member):
+        return album_name_or_members(album_member)
 
 class PhotoListField(serializers.WritableField):
     def from_native(self, data):
@@ -264,7 +277,7 @@ class AlbumAdd(object):
 
 
 class AlbumAddSerializer(serializers.Serializer):
-    album_name = serializers.CharField()
+    album_name = serializers.CharField(required=False)
     members = ListField(MemberIdentifierSerializer, required=False)
 
     def restore_object(self, attrs, instance=None):
