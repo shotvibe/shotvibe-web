@@ -191,8 +191,9 @@ class Album(models.Model):
         def set_photo_user_glance_score_delta(self, user, photo, score_delta):
             changed = PhotoGlanceScoreDelta.objects.set_photo_user_glance_score_delta(user, photo, score_delta, self.current_date)
             if changed:
-                user_ids = [photo.author.id]
-                device_push.broadcast_photo_glance_score_delta(user_ids, user.nickname, user.get_avatar_url(), photo.album.id, photo.photo_id, photo.album.name, score_delta)
+                if photo.author.id != user.id:
+                    user_ids = [photo.author.id]
+                    device_push.broadcast_photo_glance_score_delta(user_ids, user.nickname, user.get_avatar_url(), photo.album.id, photo.photo_id, photo.album.name, score_delta)
 
                 album_users = self.album.get_member_users()
                 user_ids = [u.id for u in album_users if u.id != photo.author.id and u.id != user.id]
