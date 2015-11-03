@@ -155,7 +155,8 @@ def broadcast_photos_added_to_album(album_id, author_id, album_name, author_name
             'apns' : {
                 'aps' : {
                     'alert' : author_name + ' added ' + str(num_photos) + ' photos to the album ' + album_name,
-                    'sound': 'push.mp3'
+                    'sound': 'push.mp3',
+                    'badge': 1
                     },
                 'd': payload
                 }
@@ -187,7 +188,8 @@ def broadcast_members_added_to_album(album_id, album_name, adder_name, user_ids)
             'apns': {
                 'aps': {
                     'alert': adder_name + ' added you to the album ' + album_name,
-                    'sound': 'push.mp3'
+                    'sound': 'push.mp3',
+                    'badge': 1
                     },
                 'd': payload
                 }
@@ -272,7 +274,8 @@ def broadcast_photo_comment(comment_thread_author_ids, comment_author_nickname, 
             'apns': {
                 'aps': {
                     'alert': comment_author_nickname + ' commented on a photo @ ' + album_name,
-                    'sound': 'push.mp3'
+                    'sound': 'push.mp3',
+                    'badge': 1
                     },
                 'd': payload
                 }
@@ -305,7 +308,8 @@ def broadcast_photo_glance_score_delta(user_ids, glance_author_nickname, glance_
             'apns': {
                 'aps': {
                     'alert': alert_text,
-                    'sound': 'push.mp3'
+                    'sound': 'push.mp3',
+                    'badge': 1
                     },
                 'd': payload
                 }
