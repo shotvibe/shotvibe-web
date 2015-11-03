@@ -114,6 +114,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 1, 
+        "album_admin": false,
         "added_by_user": 10, 
         "datetime_added": "2009-09-16T23:09:19Z", 
         "user": 11
@@ -124,6 +125,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 1, 
+        "album_admin": true,
         "added_by_user": 10, 
         "datetime_added": "2009-09-16T23:09:19Z", 
         "user": 10
@@ -134,6 +136,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 1, 
+        "album_admin": false,
         "added_by_user": 10, 
         "datetime_added": "2009-09-16T23:09:19Z", 
         "user": 13
@@ -144,6 +147,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 1, 
+        "album_admin": false,
         "added_by_user": 10, 
         "datetime_added": "2009-09-16T23:09:19Z", 
         "user": 12
@@ -154,6 +158,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 1, 
+        "album_admin": false,
         "added_by_user": 10, 
         "datetime_added": "2009-09-16T23:09:19Z", 
         "user": 15
@@ -164,6 +169,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 1, 
+        "album_admin": false,
         "added_by_user": 10, 
         "datetime_added": "2009-09-16T23:09:19Z", 
         "user": 14
@@ -174,6 +180,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 1, 
+        "album_admin": false,
         "added_by_user": 10, 
         "datetime_added": "2009-09-16T23:09:19Z", 
         "user": 16
@@ -184,6 +191,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 1, 
+        "album_admin": false,
         "added_by_user": 10, 
         "datetime_added": "2009-09-16T23:09:19Z", 
         "user": 1
@@ -194,6 +202,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 1, 
+        "album_admin": false,
         "added_by_user": 10, 
         "datetime_added": "2009-09-16T23:09:19Z", 
         "user": 5
@@ -204,6 +213,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 1, 
+        "album_admin": false,
         "added_by_user": 10, 
         "datetime_added": "2009-09-16T23:09:19Z", 
         "user": 4
@@ -214,6 +224,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 1, 
+        "album_admin": false,
         "added_by_user": 10, 
         "datetime_added": "2009-09-16T23:09:19Z", 
         "user": 7
@@ -224,6 +235,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 1, 
+        "album_admin": false,
         "added_by_user": 10, 
         "datetime_added": "2009-09-16T23:09:19Z", 
         "user": 6
@@ -234,6 +246,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 1, 
+        "album_admin": false,
         "added_by_user": 10, 
         "datetime_added": "2009-09-16T23:09:19Z", 
         "user": 9
@@ -244,6 +257,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 1, 
+        "album_admin": false,
         "added_by_user": 10, 
         "datetime_added": "2009-09-16T23:09:19Z", 
         "user": 8
@@ -254,6 +268,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 2, 
+        "album_admin": false,
         "added_by_user": 8, 
         "datetime_added": "2009-01-22T10:07:57Z", 
         "user": 11
@@ -264,6 +279,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 2, 
+        "album_admin": false,
         "added_by_user": 8, 
         "datetime_added": "2009-01-22T10:07:57Z", 
         "user": 10
@@ -274,6 +290,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 2, 
+        "album_admin": false,
         "added_by_user": 8, 
         "datetime_added": "2009-01-22T10:07:57Z", 
         "user": 13
@@ -284,6 +301,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 2, 
+        "album_admin": false,
         "added_by_user": 8, 
         "datetime_added": "2009-01-22T10:07:57Z", 
         "user": 12
@@ -294,6 +312,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 2, 
+        "album_admin": false,
         "added_by_user": 8, 
         "datetime_added": "2009-01-22T10:07:57Z", 
         "user": 15
@@ -304,6 +323,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 2, 
+        "album_admin": false,
         "added_by_user": 8, 
         "datetime_added": "2009-01-22T10:07:57Z", 
         "user": 14
@@ -314,6 +334,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 2, 
+        "album_admin": false,
         "added_by_user": 8, 
         "datetime_added": "2009-01-22T10:07:57Z", 
         "user": 17
@@ -324,6 +345,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 2, 
+        "album_admin": false,
         "added_by_user": 8, 
         "datetime_added": "2009-01-22T10:07:57Z", 
         "user": 1
@@ -334,6 +356,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 2, 
+        "album_admin": false,
         "added_by_user": 8, 
         "datetime_added": "2009-01-22T10:07:57Z", 
         "user": 3
@@ -344,6 +367,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 2, 
+        "album_admin": false,
         "added_by_user": 8, 
         "datetime_added": "2009-01-22T10:07:57Z", 
         "user": 5
@@ -354,6 +378,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 2, 
+        "album_admin": false,
         "added_by_user": 8, 
         "datetime_added": "2009-01-22T10:07:57Z", 
         "user": 7
@@ -364,6 +389,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 2, 
+        "album_admin": false,
         "added_by_user": 8, 
         "datetime_added": "2009-01-22T10:07:57Z", 
         "user": 6
@@ -374,6 +400,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 2, 
+        "album_admin": false,
         "added_by_user": 8, 
         "datetime_added": "2009-01-22T10:07:57Z", 
         "user": 9
@@ -384,6 +411,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 2, 
+        "album_admin": true,
         "added_by_user": 8, 
         "datetime_added": "2009-01-22T10:07:57Z", 
         "user": 8
@@ -394,6 +422,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 3, 
+        "album_admin": true,
         "added_by_user": 11, 
         "datetime_added": "2009-11-16T12:34:52Z", 
         "user": 11
@@ -404,6 +433,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 3, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-11-16T12:34:52Z", 
         "user": 13
@@ -414,6 +444,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 3, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-11-16T12:34:52Z", 
         "user": 14
@@ -424,6 +455,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 3, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-11-16T12:34:52Z", 
         "user": 17
@@ -434,6 +466,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 3, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-11-16T12:34:52Z", 
         "user": 1
@@ -444,6 +477,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 3, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-11-16T12:34:52Z", 
         "user": 3
@@ -454,6 +488,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 3, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-11-16T12:34:52Z", 
         "user": 5
@@ -464,6 +499,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 3, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-11-16T12:34:52Z", 
         "user": 4
@@ -474,6 +510,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 3, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-11-16T12:34:52Z", 
         "user": 9
@@ -484,6 +521,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 3, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-11-16T12:34:52Z", 
         "user": 8
@@ -494,6 +532,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 4, 
+        "album_admin": true,
         "added_by_user": 11, 
         "datetime_added": "2009-09-23T05:55:44Z", 
         "user": 11
@@ -504,6 +543,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 4, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-09-23T05:55:44Z", 
         "user": 10
@@ -514,6 +554,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 4, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-09-23T05:55:44Z", 
         "user": 13
@@ -524,6 +565,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 4, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-09-23T05:55:44Z", 
         "user": 12
@@ -534,6 +576,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 4, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-09-23T05:55:44Z", 
         "user": 15
@@ -544,6 +587,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 4, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-09-23T05:55:44Z", 
         "user": 14
@@ -554,6 +598,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 4, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-09-23T05:55:44Z", 
         "user": 17
@@ -564,6 +609,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 4, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-09-23T05:55:44Z", 
         "user": 16
@@ -574,6 +620,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 4, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-09-23T05:55:44Z", 
         "user": 1
@@ -584,6 +631,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 4, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-09-23T05:55:44Z", 
         "user": 3
@@ -594,6 +642,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 4, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-09-23T05:55:44Z", 
         "user": 2
@@ -604,6 +653,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 4, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-09-23T05:55:44Z", 
         "user": 5
@@ -614,6 +664,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 4, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-09-23T05:55:44Z", 
         "user": 4
@@ -624,6 +675,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 4, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-09-23T05:55:44Z", 
         "user": 7
@@ -634,6 +686,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 4, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-09-23T05:55:44Z", 
         "user": 6
@@ -644,6 +697,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 4, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-09-23T05:55:44Z", 
         "user": 9
@@ -654,6 +708,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 4, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-09-23T05:55:44Z", 
         "user": 8
@@ -664,6 +719,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 5, 
+        "album_admin": false,
         "added_by_user": 12, 
         "datetime_added": "2009-02-12T01:31:26Z", 
         "user": 11
@@ -674,6 +730,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 5, 
+        "album_admin": false,
         "added_by_user": 12, 
         "datetime_added": "2009-02-12T01:31:26Z", 
         "user": 10
@@ -684,6 +741,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 5, 
+        "album_admin": false,
         "added_by_user": 12, 
         "datetime_added": "2009-02-12T01:31:26Z", 
         "user": 13
@@ -694,6 +752,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 5, 
+        "album_admin": true,
         "added_by_user": 12, 
         "datetime_added": "2009-02-12T01:31:26Z", 
         "user": 12
@@ -704,6 +763,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 5, 
+        "album_admin": false,
         "added_by_user": 12, 
         "datetime_added": "2009-02-12T01:31:26Z", 
         "user": 17
@@ -714,6 +774,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 5, 
+        "album_admin": false,
         "added_by_user": 12, 
         "datetime_added": "2009-02-12T01:31:26Z", 
         "user": 16
@@ -724,6 +785,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 5, 
+        "album_admin": false,
         "added_by_user": 12, 
         "datetime_added": "2009-02-12T01:31:26Z", 
         "user": 1
@@ -734,6 +796,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 5, 
+        "album_admin": false,
         "added_by_user": 12, 
         "datetime_added": "2009-02-12T01:31:26Z", 
         "user": 3
@@ -744,6 +807,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 5, 
+        "album_admin": false,
         "added_by_user": 12, 
         "datetime_added": "2009-02-12T01:31:26Z", 
         "user": 2
@@ -754,6 +818,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 5, 
+        "album_admin": false,
         "added_by_user": 12, 
         "datetime_added": "2009-02-12T01:31:26Z", 
         "user": 5
@@ -764,6 +829,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 5, 
+        "album_admin": false,
         "added_by_user": 12, 
         "datetime_added": "2009-02-12T01:31:26Z", 
         "user": 6
@@ -774,6 +840,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 5, 
+        "album_admin": false,
         "added_by_user": 12, 
         "datetime_added": "2009-02-12T01:31:26Z", 
         "user": 9
@@ -784,6 +851,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 6, 
+        "album_admin": false,
         "added_by_user": 17, 
         "datetime_added": "2009-07-26T04:20:07Z", 
         "user": 10
@@ -794,6 +862,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 6, 
+        "album_admin": false,
         "added_by_user": 17, 
         "datetime_added": "2009-07-26T04:20:07Z", 
         "user": 13
@@ -804,6 +873,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 6, 
+        "album_admin": false,
         "added_by_user": 17, 
         "datetime_added": "2009-07-26T04:20:07Z", 
         "user": 12
@@ -814,6 +884,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 6, 
+        "album_admin": true,
         "added_by_user": 17, 
         "datetime_added": "2009-07-26T04:20:07Z", 
         "user": 17
@@ -824,6 +895,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 6, 
+        "album_admin": false,
         "added_by_user": 17, 
         "datetime_added": "2009-07-26T04:20:07Z", 
         "user": 1
@@ -834,6 +906,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 6, 
+        "album_admin": false,
         "added_by_user": 17, 
         "datetime_added": "2009-07-26T04:20:07Z", 
         "user": 3
@@ -844,6 +917,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 6, 
+        "album_admin": false,
         "added_by_user": 17, 
         "datetime_added": "2009-07-26T04:20:07Z", 
         "user": 2
@@ -854,6 +928,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 6, 
+        "album_admin": false,
         "added_by_user": 17, 
         "datetime_added": "2009-07-26T04:20:07Z", 
         "user": 5
@@ -864,6 +939,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 6, 
+        "album_admin": false,
         "added_by_user": 17, 
         "datetime_added": "2009-07-26T04:20:07Z", 
         "user": 4
@@ -874,6 +950,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 6, 
+        "album_admin": false,
         "added_by_user": 17, 
         "datetime_added": "2009-07-26T04:20:07Z", 
         "user": 9
@@ -884,6 +961,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 6, 
+        "album_admin": false,
         "added_by_user": 17, 
         "datetime_added": "2009-07-26T04:20:07Z", 
         "user": 8
@@ -894,6 +972,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 7, 
+        "album_admin": false,
         "added_by_user": 3, 
         "datetime_added": "2009-12-28T09:18:18Z", 
         "user": 11
@@ -904,6 +983,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 7, 
+        "album_admin": false,
         "added_by_user": 3, 
         "datetime_added": "2009-12-28T09:18:18Z", 
         "user": 10
@@ -914,6 +994,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 7, 
+        "album_admin": false,
         "added_by_user": 3, 
         "datetime_added": "2009-12-28T09:18:18Z", 
         "user": 15
@@ -924,6 +1005,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 7, 
+        "album_admin": false,
         "added_by_user": 3, 
         "datetime_added": "2009-12-28T09:18:18Z", 
         "user": 14
@@ -934,6 +1016,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 7, 
+        "album_admin": true,
         "added_by_user": 3, 
         "datetime_added": "2009-12-28T09:18:18Z", 
         "user": 3
@@ -944,6 +1027,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 7, 
+        "album_admin": false,
         "added_by_user": 3, 
         "datetime_added": "2009-12-28T09:18:18Z", 
         "user": 5
@@ -954,6 +1038,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 8, 
+        "album_admin": false,
         "added_by_user": 15, 
         "datetime_added": "2009-05-20T18:51:46Z", 
         "user": 10
@@ -964,6 +1049,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 8, 
+        "album_admin": false,
         "added_by_user": 15, 
         "datetime_added": "2009-05-20T18:51:46Z", 
         "user": 13
@@ -974,6 +1060,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 8, 
+        "album_admin": true,
         "added_by_user": 15, 
         "datetime_added": "2009-05-20T18:51:46Z", 
         "user": 15
@@ -984,6 +1071,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 8, 
+        "album_admin": false,
         "added_by_user": 15, 
         "datetime_added": "2009-05-20T18:51:46Z", 
         "user": 14
@@ -994,6 +1082,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 8, 
+        "album_admin": false,
         "added_by_user": 15, 
         "datetime_added": "2009-05-20T18:51:46Z", 
         "user": 17
@@ -1004,6 +1093,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 8, 
+        "album_admin": false,
         "added_by_user": 15, 
         "datetime_added": "2009-05-20T18:51:46Z", 
         "user": 1
@@ -1014,6 +1104,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 8, 
+        "album_admin": false,
         "added_by_user": 15, 
         "datetime_added": "2009-05-20T18:51:46Z", 
         "user": 3
@@ -1024,6 +1115,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 8, 
+        "album_admin": false,
         "added_by_user": 15, 
         "datetime_added": "2009-05-20T18:51:46Z", 
         "user": 2
@@ -1034,6 +1126,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 8, 
+        "album_admin": false,
         "added_by_user": 15, 
         "datetime_added": "2009-05-20T18:51:46Z", 
         "user": 4
@@ -1044,6 +1137,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 8, 
+        "album_admin": false,
         "added_by_user": 15, 
         "datetime_added": "2009-05-20T18:51:46Z", 
         "user": 6
@@ -1054,6 +1148,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 8, 
+        "album_admin": false,
         "added_by_user": 15, 
         "datetime_added": "2009-05-20T18:51:46Z", 
         "user": 9
@@ -1064,6 +1159,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 9, 
+        "album_admin": true,
         "added_by_user": 11, 
         "datetime_added": "2009-05-30T16:04:23Z", 
         "user": 11
@@ -1074,6 +1170,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 9, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-05-30T16:04:23Z", 
         "user": 13
@@ -1084,6 +1181,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 9, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-05-30T16:04:23Z", 
         "user": 15
@@ -1094,6 +1192,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 9, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-05-30T16:04:23Z", 
         "user": 14
@@ -1104,6 +1203,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 9, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-05-30T16:04:23Z", 
         "user": 16
@@ -1114,6 +1214,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 9, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-05-30T16:04:23Z", 
         "user": 2
@@ -1124,6 +1225,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 9, 
+        "album_admin": false,
         "added_by_user": 11, 
         "datetime_added": "2009-05-30T16:04:23Z", 
         "user": 5
@@ -1134,6 +1236,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 10, 
+        "album_admin": true,
         "added_by_user": 6, 
         "datetime_added": "2009-09-10T15:00:26Z", 
         "user": 6

@@ -49,7 +49,8 @@ class InviteTest(TestCase):
                 user = new_user,
                 album = self.party_album,
                 added_by_user = self.amanda,
-                datetime_added = the_time)
+                datetime_added = the_time,
+                album_admin = False)
 
         link_code = invites_manager.send_invite(self.amanda, phone_number, the_time)
 
@@ -94,7 +95,8 @@ class InviteTest(TestCase):
                 user = new_user,
                 album = self.party_album,
                 added_by_user = self.amanda,
-                datetime_added = the_time)
+                datetime_added = the_time,
+                album_admin = False)
 
         link_code = invites_manager.send_invite(self.amanda, phone_number, the_time)
 
