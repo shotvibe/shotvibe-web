@@ -189,7 +189,10 @@ class Album(models.Model):
             photo_user_tag.delete()
 
         def set_photo_user_glance_score_delta(self, user, photo, score_delta):
-            PhotoGlanceScoreDelta.objects.set_photo_user_glance_score_delta(user, photo, score_delta, self.current_date)
+            changed = PhotoGlanceScoreDelta.objects.set_photo_user_glance_score_delta(user, photo, score_delta, self.current_date)
+            if changed:
+                user_ids = [photo.author.id]
+                device_push.broadcast_photo_glance_score_delta(user_ids, user.nickname, user.get_avatar_url(), photo.album.id, photo.photo_id, photo.album.name, score_delta)
 
         def glance_photo(self, photo, glancer, emoticon_name):
             if photo.album != self.album:
