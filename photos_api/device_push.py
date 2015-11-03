@@ -155,7 +155,7 @@ def broadcast_photos_added_to_album(album_id, author_id, album_name, author_name
             'apns' : {
                 'aps' : {
                     'alert' : author_name + ' added ' + str(num_photos) + ' photos to the album ' + album_name,
-                    'sound': 'default'
+                    'sound': 'push.mp3'
                     },
                 'd': payload
                 }
@@ -187,7 +187,7 @@ def broadcast_members_added_to_album(album_id, album_name, adder_name, user_ids)
             'apns': {
                 'aps': {
                     'alert': adder_name + ' added you to the album ' + album_name,
-                    'sound': 'default'
+                    'sound': 'push.mp3'
                     },
                 'd': payload
                 }
