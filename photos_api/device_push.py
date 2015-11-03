@@ -280,6 +280,39 @@ def broadcast_photo_comment(comment_thread_author_ids, comment_author_nickname, 
     send_message_or_log_errors(rq)
 
 
+def broadcast_photo_glance_score_delta(user_ids, glance_author_nickname, glance_author_avatar_url, album_id, photo_id, album_name, score_delta):
+    payload = {
+            'type': 'photo_glance_score_delta',
+            'album_id': album_id,
+            'photo_id': photo_id,
+            'album_name': album_name,
+            'glance_author_nickname': glance_author_nickname,
+            'glance_author_avatar_url': glance_author_avatar_url,
+            'score_delta': score_delta
+        }
+
+    if score_delta >= 0:
+        alert_text = glance_author_nickname + ' glanced your image. You just won 3 points to your score. Keep glancing'
+    else:
+        alert_text = glance_author_nickname + ' unglanced your image. You just lost 3 points to your score. Better glancing next time'
+    rq = {
+            'user_ids': [str(id) for id in user_ids],
+            'gcm': {
+                'data': {
+                    'd': json.dumps(payload)
+                    }
+                },
+            'apns': {
+                'aps': {
+                    'alert': alert_text,
+                    'sound': 'push.mp3'
+                    },
+                'd': payload
+                }
+            }
+    send_message_or_log_errors(rq)
+
+
 def broadcast_photo_user_tagged(tagged_user_id, album_id, photo_id, album_name):
     payload = {
             'type': 'photo_user_tagged',
