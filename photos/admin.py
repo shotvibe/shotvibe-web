@@ -11,8 +11,8 @@ from photos.models import PhotoServer
 class PhotoAdminInline(admin.TabularInline):
     model = Photo
 
-    fields = ('photo_id', 'storage_id', 'subdomain', 'date_created', 'author', 'album', 'photo_thumbnail', 'comments', 'glances')
-    readonly_fields = ('subdomain', 'date_created', 'author', 'album', 'photo_thumbnail', 'comments', 'glances')
+    fields = ('photo_id', 'storage_id', 'subdomain', 'date_created', 'author', 'album', 'photo_thumbnail', 'comments')
+    readonly_fields = ('subdomain', 'date_created', 'author', 'album', 'photo_thumbnail', 'comments')
 
     ordering = ['album_index']
 
@@ -49,19 +49,6 @@ class PhotoAdminInline(admin.TabularInline):
         html += u'</ul>'
         return mark_safe(html)
 
-    def glances(self, obj):
-        glances = obj.get_glances()
-        if not glances:
-            return None
-
-        html = u'<ul>'
-        for glance in glances:
-            html += format_html(u'<li><img src="{0}"> <a href="{1}">{2}</a></li>',
-                    PhotoGlance.GLANCE_EMOTICONS_BASE_URL + glance.emoticon_name,
-                    u'../../../{0}/{1}/{2}/'.format(glance.author._meta.app_label, glance.author._meta.module_name, glance.author.id),
-                    glance.author)
-        html += u'</ul>'
-        return mark_safe(html)
 
 class AlbumMemberInline(admin.TabularInline):
     model = AlbumMember
