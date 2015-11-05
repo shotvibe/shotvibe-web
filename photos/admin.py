@@ -5,14 +5,14 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 from phone_auth.models import PhoneNumberLinkCode
-from photos.models import Album, AlbumMember, Photo, PendingPhoto, PhotoComment, PhotoGlance
+from photos.models import Album, AlbumMember, Photo, PendingPhoto, PhotoComment, PhotoGlance, PhotoGlanceScoreDelta
 from photos.models import PhotoServer
 
 class PhotoAdminInline(admin.TabularInline):
     model = Photo
 
-    fields = ('photo_id', 'storage_id', 'subdomain', 'date_created', 'author', 'album', 'photo_thumbnail', 'comments')
-    readonly_fields = ('subdomain', 'date_created', 'author', 'album', 'photo_thumbnail', 'comments')
+    fields = ('photo_id', 'storage_id', 'subdomain', 'date_created', 'author', 'album', 'photo_thumbnail', 'comments', 'photo_glance_score', 'photo_glance_votes')
+    readonly_fields = ('subdomain', 'date_created', 'author', 'album', 'photo_thumbnail', 'comments', 'photo_glance_score', 'photo_glance_votes')
 
     ordering = ['album_index']
 
@@ -46,6 +46,20 @@ class PhotoAdminInline(admin.TabularInline):
                     comment.comment_text,
                     u'../../../{0}/{1}/{2}/'.format(comment.author._meta.app_label, comment.author._meta.module_name, comment.author.id),
                     comment.author)
+        html += u'</ul>'
+        return mark_safe(html)
+
+    def photo_glance_votes(self, obj):
+        votes = PhotoGlanceScoreDelta.objects.filter(photo=obj).order_by('date_created')
+        if not votes:
+            return None
+
+        html = u'<ul>'
+        for vote in votes:
+            html += format_html(u'<li><a href="{0}">{1}</a>: {2}</li>',
+                    u'../../../{0}/{1}/{2}/'.format(vote.author._meta.app_label, vote.author._meta.module_name, vote.author.id),
+                    vote.author,
+                    vote.score_delta)
         html += u'</ul>'
         return mark_safe(html)
 
