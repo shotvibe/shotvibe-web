@@ -24,6 +24,7 @@ from photos_api.parsers import PhotoUploadParser
 from photos_api import device_push, is_phone_number_mobile
 from phone_auth.models import AnonymousPhoneNumber, random_default_avatar_file_data, User, PhoneContact, PhoneNumber
 from photos_api.signals import photos_added_to_album, member_leave_album
+from photos_api import optimized_views
 
 from rest_framework import generics, serializers, mixins
 from rest_framework.decorators import api_view, permission_classes
@@ -146,6 +147,10 @@ class AlbumDetail(generics.RetrieveAPIView):
 
     def get_etag(self, request, pk):
         return self.album.get_etag()
+
+    def get(self, request, pk):
+        payload = optimized_views.get_album_detail_payload(request.user, self.album)
+        return Response(payload, content_type='application/json')
 
     def post(self, request, pk):
         serializer = AlbumUpdateSerializer(data=request.DATA)

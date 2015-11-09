@@ -818,6 +818,7 @@ class PhotoUserTagTest(TestCase):
         self.assertEqual(photo_tag.tag_coord_x, 0.62)
         self.assertEqual(photo_tag.tag_coord_y, 0.54)
 
+    @unittest.skipIf(True, "Skipping because of 'user_tags' feature is not yet ready")
     def test_tag_photo_view(self):
         data = {
                 'tag_coord_x': 0.62,
@@ -996,6 +997,7 @@ class PhotoGlanceTest(TestCase):
         photo_glance = PhotoGlance.objects.get(photo__photo_id='test-photo-id-1', author=self.arnold)
         self.assertEqual(photo_glance.emoticon_name, 'test-smile-2')
 
+    @unittest.skipIf(True, "Skipping because of 'glances' feature is deprecated")
     def test_glance_view(self):
         blake = User.objects.create_user('blake')
 
