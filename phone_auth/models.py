@@ -120,6 +120,8 @@ class User(django.contrib.auth.models.AbstractBaseUser, django.contrib.auth.mode
                                    validators=[validate_avatar_file_data],
                                    default=random_default_avatar_file_data)
 
+    user_glance_score = models.IntegerField(default=25)
+
     objects = UserManager()
 
     USERNAME_FIELD = 'id'

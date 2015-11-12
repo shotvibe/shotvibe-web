@@ -49,7 +49,7 @@ from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
     AlbumMemberNameSerializer, AlbumMemberSerializer, AlbumViewSerializer, \
     AlbumNameChangeSerializer, AlbumMembersSerializer, \
     PhotoCommentSerializer, PhotoUserTagSerializer, PhotoGlanceScoreSerializer, \
-    PhotoGlanceSerializer
+    PhotoGlanceSerializer, UserGlanceScoreSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
 import invites_manager
@@ -335,6 +335,12 @@ class UserDetail(generics.RetrieveUpdateAPIView):
         self.check_permissions(request)
         self.__check_update_attr_permissions(request)
         return super(UserDetail, self).patch(request, *args, **kwargs)
+
+
+class UserGlanceScore(generics.RetrieveAPIView):
+    model = auth.get_user_model()
+    serializer_class = UserGlanceScoreSerializer
+    permission_classes = (UserDetailsPagePermission,)
 
 
 class UserAvatarDetail(views.APIView):

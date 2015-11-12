@@ -266,6 +266,16 @@ class UserTest(BaseTestCase):
         self.assertEqual(phone_numbers[0]['user_id'], fred.id)
         self.assertEqual(phone_numbers[0]['avatar_url'], initial_avatar)
 
+    def test_user_glance_score(self):
+        logged_in_user_id = 2
+        url = reverse('user-glance-score', kwargs={'pk': logged_in_user_id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, httplib.OK)
+
+        response_json = json.loads(response.content)
+        self.assertEqual(response_json['user_glance_score'], 25)
+
+
 class NotModifiedTest(BaseTestCase):
     def setUp(self):
         self.client.login(username='2', password='amanda')

@@ -43,6 +43,10 @@ Used to completely delete the user's account and all associated data.
 
 Used to get the user profile data.
 
+### GET /users/{uid}/glance_score/
+
+Used to get the user's glance score
+
 ### PATCH /users/{uid}/
 
 Used to set the user profile data.
@@ -255,6 +259,24 @@ Allow: HEAD, GET, PATCH, PUT, OPTIONS
     "url": "https://api.shotvibe.com/users/2/",
     "nickname": "amanda",
     "avatar_url": "https://shotvibe-avatars-01.s3.amazonaws.com/default-avatar-0064.jpg"
+}
+```
+
+### GET /users/{uid}/glance_score/
+
+Used to get the user's glance score
+
+Example response:
+
+```
+HTTP/1.1 200 OK
+Date: Mon, 26 Aug 2013 22:51:34 GMT
+Vary: Accept, Host
+Content-Type: application/json
+Allow: HEAD, GET, OPTIONS
+
+{
+    "user_glance_score": 25
 }
 ```
 
