@@ -153,6 +153,10 @@ class Album(models.Model):
                     comment_text = comment_text
                     )
 
+            if photo.author.id != commenter.id:
+                photo.author.increment_user_glance_score(5)
+                commenter.increment_user_glance_score(5)
+
             album_users = self.album.get_member_users()
             user_ids = [user.id for user in album_users if user.id != commenter.id]
 
