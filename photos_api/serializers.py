@@ -36,6 +36,12 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     invite_status = serializers.CharField(source='get_invite_status')
 
 
+class UserGlanceScoreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = auth.get_user_model()
+        fields = ('user_glance_score',)
+
+
 class UserCompactSerializer(serializers.ModelSerializer):
     class Meta:
         model = auth.get_user_model()

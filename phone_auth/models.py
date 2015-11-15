@@ -120,6 +120,8 @@ class User(django.contrib.auth.models.AbstractBaseUser, django.contrib.auth.mode
                                    validators=[validate_avatar_file_data],
                                    default=random_default_avatar_file_data)
 
+    user_glance_score = models.IntegerField(default=25)
+
     objects = UserManager()
 
     USERNAME_FIELD = 'id'
@@ -182,6 +184,9 @@ class User(django.contrib.auth.models.AbstractBaseUser, django.contrib.auth.mode
             self.avatar_file = apn.avatar_file
             if save:
                 self.save()
+
+    def increment_user_glance_score(self, delta):
+        User.objects.filter(id=self.id).update(user_glance_score=models.F('user_glance_score') + delta)
 
 
 class UserEmail(models.Model):

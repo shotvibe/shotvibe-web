@@ -153,6 +153,10 @@ class Album(models.Model):
                     comment_text = comment_text
                     )
 
+            if photo.author.id != commenter.id:
+                photo.author.increment_user_glance_score(5)
+                commenter.increment_user_glance_score(5)
+
             album_users = self.album.get_member_users()
             user_ids = [user.id for user in album_users if user.id != commenter.id]
 
@@ -192,6 +196,8 @@ class Album(models.Model):
             changed = PhotoGlanceScoreDelta.objects.set_photo_user_glance_score_delta(user, photo, score_delta, self.current_date)
             if changed:
                 if photo.author.id != user.id:
+                    photo.author.increment_user_glance_score(3 * score_delta)
+
                     user_ids = [photo.author.id]
                     device_push.broadcast_photo_glance_score_delta(user_ids, user.nickname, user.get_avatar_url(), photo.album.id, photo.photo_id, photo.album.name, score_delta)
 
