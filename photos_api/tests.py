@@ -380,6 +380,20 @@ class NotModifiedTest(BaseTestCase):
         fourth_response_json = json.loads(fourth_response.content)
         self.assertEqual(1, fourth_response_json['num_new_photos'])
 
+    def test_add_photo_user_glance_score(self):
+        # Add a new photo to the album
+        self.add_new_photo('3', 'barney')
+
+        logged_in_user_id = 3
+        url = reverse('user-glance-score', kwargs={'pk': logged_in_user_id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        response_json = json.loads(response.content)
+
+        initial_user_glance_score = 25
+        self.assertEqual(response_json['user_glance_score'], initial_user_glance_score + 3)
+
     def add_new_photo(self, username, password):
         self.client.login(username=username, password=password)
 

@@ -185,6 +185,9 @@ class User(django.contrib.auth.models.AbstractBaseUser, django.contrib.auth.mode
             if save:
                 self.save()
 
+    def increment_user_glance_score(self, delta):
+        User.objects.filter(id=self.id).update(user_glance_score=models.F('user_glance_score') + delta)
+
 
 class UserEmail(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, db_index=True)

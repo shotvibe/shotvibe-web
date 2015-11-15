@@ -24,7 +24,16 @@ def send_push_on_photos_added_to_album(sender, **kwargs):
     # #70 3)
     device_push.broadcast_album_sync(user.id, album.id)
 
+def adjust_glance_score_on_photos_added_to_album(sender, **kwargs):
+    photos = kwargs.get('photos')
+    user = kwargs.get('by_user')
+
+    num_photos = len(photos)
+
+    user.increment_user_glance_score(3 * num_photos)
+
 signals.photos_added_to_album.connect(send_push_on_photos_added_to_album)
+signals.photos_added_to_album.connect(adjust_glance_score_on_photos_added_to_album)
 
 
 def send_push_on_photo_removed_from_album(sender, **kwargs):
