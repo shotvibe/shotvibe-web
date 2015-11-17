@@ -35,7 +35,8 @@ class AlbumManager(models.Manager):
             user = creator,
             album = album,
             datetime_added = date_created,
-            added_by_user = creator
+            added_by_user = creator,
+            album_admin = True
         )
         album_created.send(sender=self, album=album)
 
@@ -97,7 +98,8 @@ class Album(models.Model):
 
             _, created = AlbumMember.objects.get_or_create(user=added_user, album=self.album, defaults={
                 'added_by_user': inviter,
-                'datetime_added': self.current_date
+                'datetime_added': self.current_date,
+                'album_admin': False
                 })
 
             if created:
@@ -127,7 +129,8 @@ class Album(models.Model):
 
             _, member_created = AlbumMember.objects.get_or_create(user=phone_number.user, album=self.album, defaults={
                 'added_by_user': inviter,
-                'datetime_added': self.current_date
+                'datetime_added': self.current_date,
+                'album_admin': False
                 })
 
             if phone_number.verified:
@@ -279,7 +282,8 @@ class Album(models.Model):
         for new_user in new_users:
             defaults = {
                 'added_by_user': inviter,
-                'datetime_added': date_added
+                'datetime_added': date_added,
+                'album_admin': False
             }
             AlbumMember.objects.get_or_create(user=new_user, album=self, defaults=defaults)
 
@@ -335,6 +339,8 @@ class AlbumMember(models.Model):
 
     added_by_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="created_album_memberships")
     datetime_added = models.DateTimeField()
+
+    album_admin = models.BooleanField()
 
     last_access = models.DateTimeField(null=True, blank=True)
 
