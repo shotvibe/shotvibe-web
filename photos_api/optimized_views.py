@@ -13,6 +13,7 @@ def get_album_members_payload(album_id):
         SELECT user_id0,
                user_nickname0,
                user_avatar_file0,
+               member_album_admin0,
                user_phone_verified0,
                user_phone_link_visited0
         FROM (SELECT u.id as user_id0,
@@ -29,7 +30,8 @@ def get_album_members_payload(album_id):
                       WHERE phone_auth_phonenumber.user_id = u.id AND
                             phone_auth_phonenumberlinkcode.was_visited) as user_phone_link_visited0
               FROM phone_auth_user u) as T1,
-             (SELECT user_id as user_id1
+             (SELECT user_id as user_id1,
+                     album_admin as member_album_admin0
               FROM photos_album_members
               WHERE album_id=%s) as T2
         WHERE user_id0=user_id1
@@ -38,9 +40,9 @@ def get_album_members_payload(album_id):
 
     members = []
     for row in cursor.fetchall():
-        if row[3] > 0:
+        if row[4] > 0:
             invite_status = User.STATUS_JOINED
-        elif row[4] > 0:
+        elif row[5] > 0:
             invite_status = User.STATUS_INVITATION_VIEWED
         else:
             invite_status = User.STATUS_SMS_SENT
@@ -49,6 +51,7 @@ def get_album_members_payload(album_id):
             'id': row[0],
             'nickname': row[1],
             'avatar_url': avatar_url_from_avatar_file_data(row[2]),
+            'album_admin': row[3],
             'invite_status': invite_status
         })
 
