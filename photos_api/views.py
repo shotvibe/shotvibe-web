@@ -270,6 +270,29 @@ class LeaveAlbum(generics.DestroyAPIView):
         return obj
 
 
+class AlbumMemberUser(generics.DestroyAPIView):
+    model = AlbumMember
+    permission_classes = (IsAuthenticated, IsUserInAlbum)
+
+    def get_object(self, queryset=None):
+        if queryset is None:
+            queryset = self.get_queryset()
+
+        # pk from URL points to the album, not AlbumMember
+        album_pk = self.kwargs.get(self.pk_url_kwarg, None)
+        if album_pk is None:
+            raise AttributeError("Missing Album pk")
+
+        user_id = self.kwargs['user_id']
+
+        try:
+            obj = queryset.get(user__id=user_id, album__pk=album_pk)
+        except self.model.DoesNotExist:
+            # This should never happen since we already checked if this records exists by checking permissions
+            raise Http404(_(u"Album not found"))
+        return obj
+
+
 class ViewAlbum(GenericAPIView):
     permission_classes = (IsAuthenticated, IsUserInAlbum)
     serializer_class = AlbumViewSerializer
