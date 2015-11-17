@@ -185,8 +185,8 @@ class AlbumDetail(generics.RetrieveAPIView):
 
         album_add_members(self.album, request.user, serializer.object.add_members, now)
 
-        responseSerializer = (self.get_serializer_class())(self.get_object(), context={'request': request})
-        return Response(responseSerializer.data)
+        payload = optimized_views.get_album_detail_payload(request.user, self.album)
+        return Response(payload, content_type='application/json')
 
 
 class AlbumNameView(GenericAPIView):
@@ -456,8 +456,8 @@ class Albums(generics.ListAPIView):
         album = Album.objects.create_album(self.request.user, serializer.object.album_name)
         album_add_members(album, request.user, serializer.object.members, now)
 
-        responseSerializer = AlbumSerializer(album, context={'request': request})
-        return Response(responseSerializer.data)
+        payload = optimized_views.get_album_detail_payload(request.user, album)
+        return Response(payload, content_type='application/json')
 
 
 class DeletePhotosView(mixins.DestroyModelMixin, generics.MultipleObjectAPIView):
