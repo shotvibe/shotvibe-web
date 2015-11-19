@@ -125,6 +125,10 @@ Used to mark an album as viewed.
 
 Used to add members to an album.
 
+### GET /albums/{aid}/members/{uid}/phone_number/
+
+Used to get the phone number of an invited member of an album.
+
 ### POST /albums/
 
 Used to create a new album.
@@ -1237,6 +1241,31 @@ Example response:
         }
     ]
 
+### GET /albums/{aid}/members/{uid}/phone_number/
+
+Used to get the phone number of an invited member of an album.
+
+Only the user who invited the member into the album is allowed access.
+
+Example response:
+
+```
+HTTP/1.1 200 OK
+Date: Mon, 26 Aug 2013 22:51:34 GMT
+Vary: Accept, Host
+Content-Type: application/json
+Allow: HEAD, GET, OPTIONS
+
+{
+    "user": {
+        "id": 2,
+        "url": "https://api.shotvibe.com/users/2/",
+        "nickname": "amanda",
+        "avatar_url": "https://shotvibe-avatars-01.s3.amazonaws.com/default-avatar-0064.jpg"
+    }
+    "phone_number": "+12127181111"
+}
+```
 
 ## POST /albums/
 

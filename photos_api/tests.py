@@ -1392,6 +1392,15 @@ class MembersTests(BaseTestCase):
         self.assertEqual(m_amanda['added_by_user_id'], 11)
         self.assertEqual(m_jackie['added_by_user_id'], 11)
 
+    def test_member_phonenumber(self):
+        response = self.client.get(reverse('album-member-phonenumber', kwargs={'pk':9, 'user_id':2}))
+        response_json = json.loads(response.content)
+        self.assertEqual(response_json['user']['id'], 2)
+        self.assertEqual(response_json['user']['nickname'], 'amanda')
+
+        # The test fixture users don't have phone numbers :(
+        self.assertEqual(response_json['phone_number'], '')
+
     def test_leave_album(self):
         # Currently logged in user is amanda, she will be removed from the album
 
