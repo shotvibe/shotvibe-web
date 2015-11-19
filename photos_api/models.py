@@ -18,6 +18,7 @@ def send_push_on_photos_added_to_album(sender, **kwargs):
         author_id=user.id,
         album_name=album.name,
         author_name=user.nickname,
+        author_avatar_url=user.get_avatar_url(),
         num_photos=len(photos),
         user_ids=[membership.user.id for membership in membership_query])
 
