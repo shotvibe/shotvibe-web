@@ -1384,6 +1384,14 @@ class MembersTests(BaseTestCase):
         self.assertEqual(m_amanda['album_admin'], False)
         self.assertEqual(m_jackie['album_admin'], True)
 
+    def test_added_by_user(self):
+        response = self.client.get(reverse('album-detail', kwargs={'pk':9}))
+        members = json.loads(response.content)['members']
+        m_amanda = next(m for m in members if m['id'] == 2)
+        m_jackie = next(m for m in members if m['id'] == 11)
+        self.assertEqual(m_amanda['added_by_user_id'], 11)
+        self.assertEqual(m_jackie['added_by_user_id'], 11)
+
     def test_leave_album(self):
         # Currently logged in user is amanda, she will be removed from the album
 

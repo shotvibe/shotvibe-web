@@ -583,6 +583,7 @@ Example response:
                 "nickname": "admin",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": true,
+                "added_by_user_id": 1,
                 "invite_status": "joined"
             },
             {
@@ -591,6 +592,7 @@ Example response:
                 "nickname": "amanda",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
+                "added_by_user_id": 1,
                 "invite_status": "joined"
             },
             {
@@ -599,6 +601,7 @@ Example response:
                 "nickname": "daniel",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
+                "added_by_user_id": 1,
                 "invite_status": "joined"
             },
             {
@@ -607,6 +610,7 @@ Example response:
                 "nickname": "emma",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
+                "added_by_user_id": 1,
                 "invite_status": "joined"
             },
             {
@@ -615,6 +619,7 @@ Example response:
                 "nickname": "helen",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
+                "added_by_user_id": 1,
                 "invite_status": "joined"
             },
             {
@@ -623,6 +628,7 @@ Example response:
                 "nickname": "jackie",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
+                "added_by_user_id": 1,
                 "invite_status": "joined"
             },
             {
@@ -631,6 +637,7 @@ Example response:
                 "nickname": "kevin",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
+                "added_by_user_id": 1,
                 "invite_status": "joined"
             },
             {
@@ -639,6 +646,7 @@ Example response:
                 "nickname": "lauren",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
+                "added_by_user_id": 1,
                 "invite_status": "joined"
             },
             {
@@ -647,6 +655,7 @@ Example response:
                 "nickname": "mark",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
+                "added_by_user_id": 1,
                 "invite_status": "joined"
             },
             {
@@ -655,6 +664,7 @@ Example response:
                 "nickname": "nancy",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
+                "added_by_user_id": 1,
                 "invite_status": "joined"
             },
             {
@@ -663,6 +673,7 @@ Example response:
                 "nickname": "paula",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
+                "added_by_user_id": 1,
                 "invite_status": "joined"
             },
             {
@@ -671,6 +682,7 @@ Example response:
                 "nickname": "x",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
+                "added_by_user_id": 1,
                 "invite_status": "sms_sent"
             },
             {
@@ -679,6 +691,7 @@ Example response:
                 "nickname": "x",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
+                "added_by_user_id": 1,
                 "invite_status": "sms_sent"
             },
             {
@@ -687,6 +700,7 @@ Example response:
                 "nickname": "x",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
+                "added_by_user_id": 1,
                 "invite_status": "invitation_viewed"
             },
             {
@@ -695,6 +709,7 @@ Example response:
                 "nickname": "x",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
+                "added_by_user_id": 1,
                 "invite_status": "sms_sent"
             },
             {
@@ -703,6 +718,7 @@ Example response:
                 "nickname": "testuser",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
+                "added_by_user_id": 1,
                 "invite_status": "invitation_viewed"
             },
             {
@@ -711,6 +727,7 @@ Example response:
                 "nickname": "benny",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
+                "added_by_user_id": 1,
                 "invite_status": "sms_sent"
             }
         ],
