@@ -49,7 +49,8 @@ from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
     AlbumMemberNameSerializer, AlbumMemberSerializer, AlbumViewSerializer, \
     AlbumNameChangeSerializer, AlbumMembersSerializer, \
     PhotoCommentSerializer, PhotoUserTagSerializer, PhotoGlanceScoreSerializer, \
-    PhotoGlanceSerializer, UserGlanceScoreSerializer
+    PhotoGlanceSerializer, UserGlanceScoreSerializer, \
+    AlbumMemberPhoneNumberSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
 import invites_manager
@@ -235,6 +236,30 @@ class AlbumMembersView(generics.CreateAPIView):
             return Response(result, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# TODO Must add proper permission to only allow user that added the member to
+# access this view
+class AlbumMemberPhoneNumberView(GenericAPIView):
+    serializer_class = AlbumMemberPhoneNumberSerializer
+
+    def initial(self, request, pk, user_id):
+        self.album = get_object_or_404(Album, pk=pk)
+        self.user = get_object_or_404(User, pk=user_id)
+
+    def get(self, request, pk, user_id):
+        phone_number = self.user.get_primary_phone_number()
+        if phone_number:
+            phone_number_str = phone_number.phone_number
+        else:
+            phone_number_str = ''
+        responseSerializer = (self.get_serializer_class())(
+                {
+                    'user': self.user,
+                    'phone_number': phone_number_str
+                },
+                context={'request': request})
+        return Response(responseSerializer.data)
 
 
 class LeaveAlbum(generics.DestroyAPIView):

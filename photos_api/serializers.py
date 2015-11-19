@@ -163,6 +163,12 @@ class AlbumMemberSerializer(serializers.ModelSerializer):
     def get_album_name(self, album_member):
         return album_name_or_members(album_member)
 
+
+class AlbumMemberPhoneNumberSerializer(serializers.Serializer):
+    user = UserSerializer()
+    phone_number = serializers.CharField()
+
+
 class AlbumNameSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Album
