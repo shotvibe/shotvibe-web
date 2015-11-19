@@ -60,6 +60,7 @@ def send_push_on_album_created(sender, **kwargs):
     # device_push.broadcast_members_added_to_album(album.id,
     #                                              album.name,
     #                                              album.creator.nickname,
+    #                                              album.creator.get_avatar_url(),
     #                                              [album.creator.id])
     device_push.broadcast_album_list_sync([album.creator.id])
 
@@ -84,6 +85,7 @@ def send_push_on_members_added_to_album(sender, **kwargs):
     device_push.broadcast_members_added_to_album(album.id,
                                                  album.name,
                                                  user.nickname,
+                                                 user.get_avatar_url(),
                                                  [nu.id for nu in member_users])
 
 signals.members_added_to_album.connect(send_push_on_members_added_to_album)

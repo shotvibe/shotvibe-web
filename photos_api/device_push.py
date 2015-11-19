@@ -165,11 +165,12 @@ def broadcast_photos_added_to_album(album_id, author_id, album_name, author_name
     send_message_or_log_errors(rq)
 
 
-def broadcast_members_added_to_album(album_id, album_name, adder_name, user_ids):
+def broadcast_members_added_to_album(album_id, album_name, adder_name, adder_avatar_url, user_ids):
     payload = {
             'type': 'added_to_album',
             'album_id': album_id,
             'adder': adder_name,
+            'adder_avatar_url': adder_avatar_url,
             'album_name': album_name
         }
 
