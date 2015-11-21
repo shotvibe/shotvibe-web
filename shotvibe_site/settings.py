@@ -100,6 +100,9 @@ ALL_PHOTO_SUBDOMAINS = (
     'photos04',
 )
 
+# This should be set to the album that will be used as the global "Public Feed"
+PUBLIC_ALBUM_ID = 1000
+
 ROOT_URLCONF = 'shotvibe_site.urls'
 
 SUBDOMAIN_URLCONFS = {

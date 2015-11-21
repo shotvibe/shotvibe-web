@@ -64,6 +64,10 @@ Retrieves all the albums that the user is a member of.
 Retrieves all of the photos that are in an album, and all of the users who are
 members of the album.
 
+### GET /albums/public/
+
+Retrieves the id of the public album available to the user.
+
 ### POST /photos/upload_request/?num_photos={n}
 
 The user would like to upload `n` photos.
@@ -826,6 +830,22 @@ Another example request:
 The response:
 
     HTTP 304 Not Modified
+
+### GET /albums/public/
+
+Retrieves the id of the public album available to the user.
+
+Example response:
+
+    HTTP 200 OK
+    Vary: Accept
+    Content-Type: application/json
+    Allow: GET, OPTIONS
+
+    {
+        "album_id": 5112
+    }
+
 
 ## POST /photos/upload_request/?num_photos={n}
 

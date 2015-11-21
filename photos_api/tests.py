@@ -722,6 +722,33 @@ class PhotoUpload(BaseTestCase):
         self.assertIn(2, members_ids) # amanda
 
 
+@override_settings(PUBLIC_ALBUM_ID=1000)
+class PublicAlbumTest(TestCase):
+    urls = 'photos_api.urls'
+
+    def setUp(self):
+        self.arnold = User.objects.create_user('arnold', password='mypass')
+        self.party_album = Album.objects.create_album(self.arnold, 'Party', datetime.datetime(2000, 1, 1, tzinfo=timezone.utc))
+
+        Photo.objects.create(
+                photo_id = 'test-photo-id-1',
+                storage_id = 'test-storage-id-1',
+                subdomain = 'test-subdomain',
+                date_created = datetime.datetime(2000, 1, 2, tzinfo=timezone.utc),
+                author = self.arnold,
+                album = self.party_album,
+                album_index = 0)
+
+        self.client.login(username=str(self.arnold.id), password='mypass')
+
+    def test_get_public_album(self):
+        response = self.client.get(reverse('public-album'))
+        self.assertEqual(response.status_code, 200)
+        response_json = json.loads(response.content)
+
+        self.assertEqual(response_json['album_id'], settings.PUBLIC_ALBUM_ID)
+
+
 class PhotoCommentsTest(TestCase):
     urls = 'photos_api.urls'
 

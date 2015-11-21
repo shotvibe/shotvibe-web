@@ -690,6 +690,17 @@ class PhotoGlanceView(GenericAPIView):
         PhotoGlance.objects.get_or_create()
 
 
+class PublicAlbum(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        public_album_id = settings.PUBLIC_ALBUM_ID
+        payload = {
+                'album_id': public_album_id
+            }
+        return Response(payload, content_type='application/json')
+
+
 class QueryPhoneNumbers(GenericAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = QueryPhonesRequestSerializer
