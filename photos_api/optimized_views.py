@@ -168,7 +168,7 @@ def get_album_photos_payload(user_id, album_id):
     return photos.values()
 
 def get_album_detail_payload(user, album):
-    album_member = AlbumMember.objects.filter(user=user, album=album).get()
+    album_member = AlbumMember.objects.filter(user=user, album=album).first()
 
     members = get_album_members_payload(album.id)
 
@@ -180,14 +180,23 @@ def get_album_detail_payload(user, album):
         'avatar_url': album.creator.get_avatar_url()
     }
 
+    if album_member:
+        name = album_name_or_members(album_member)
+        last_access = album_member.last_access
+        num_new_photos = album_member.get_num_new_photos()
+    else:
+        name = album.name
+        last_access = None
+        num_new_photos = 0
+
     payload = {
         'id': album.id,
-        'name': album_name_or_members(album_member),
+        'name': name,
         'creator': creator,
         'date_created': album.date_created,
         'last_updated': album.last_updated,
-        'last_access': album_member.last_access,
-        'num_new_photos': album_member.get_num_new_photos(),
+        'last_access': last_access,
+        'num_new_photos': num_new_photos,
         'members': members,
         'photos': photos
     }

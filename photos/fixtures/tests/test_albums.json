@@ -110,6 +110,18 @@
     }
 },
 {
+    "pk": 11, 
+    "model": "photos.album", 
+    "fields": {
+        "public": true,
+        "date_created": "2009-09-10T15:00:26Z", 
+        "last_updated": "2009-10-24T06:27:04Z", 
+        "name": "Public Feed", 
+        "revision_number": 1, 
+        "creator": 1
+    }
+},
+{
     "pk": 1, 
     "model": "photos.albummember", 
     "fields": {
