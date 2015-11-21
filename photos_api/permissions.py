@@ -24,7 +24,7 @@ class IsUserInAlbum(BasePermission):
             return True
         album_id = int(view.kwargs['pk'])
         album = get_object_or_404(Album, pk=album_id)
-        return album.is_user_member(request.user.id)
+        return album.public or album.is_user_member(request.user.id)
 
 
 class UserDetailsPagePermission(BasePermission):

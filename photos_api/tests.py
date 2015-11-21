@@ -57,7 +57,7 @@ class AnonymousTest(BaseTestCase):
         self.verify_401('/albums/2/')
         self.verify_401('/albums/3/')
 
-        status = self.client.get('/albums/11/').status_code
+        status = self.client.get('/albums/12/').status_code
         self.assertEqual(status, 404)
 
 class UserTest(BaseTestCase):
@@ -720,6 +720,27 @@ class PhotoUpload(BaseTestCase):
         self.assertEqual(len(album_json['members']), 1)
         members_ids = [u['id'] for u in album_json['members']]
         self.assertIn(2, members_ids) # amanda
+
+
+@override_settings(PUBLIC_ALBUM_ID=11)
+class PublicAlbumTest(BaseTestCase):
+    urls = 'photos_api.urls'
+
+    def setUp(self):
+        self.client.login(username='2', password='amanda')
+
+    def test_get_public_album(self):
+        response = self.client.get(reverse('public-album'))
+        self.assertEqual(response.status_code, 200)
+        response_json = json.loads(response.content)
+
+        self.assertEqual(response_json['album_id'], settings.PUBLIC_ALBUM_ID)
+
+        album_response = self.client.get(reverse('album-detail', kwargs={'pk': response_json['album_id']}))
+        self.assertEqual(album_response.status_code, 200)
+
+        album_response_json = json.loads(album_response.content)
+        self.assertEqual(album_response_json['name'], 'Public Feed')
 
 
 class PhotoCommentsTest(TestCase):

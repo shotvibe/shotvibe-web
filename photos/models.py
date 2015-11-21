@@ -47,6 +47,7 @@ class AlbumManager(models.Manager):
 
 
 class Album(models.Model):
+    public = models.BooleanField(default=False)
     date_created = models.DateTimeField()
     name = models.CharField(max_length=255)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='+')

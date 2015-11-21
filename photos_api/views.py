@@ -116,35 +116,13 @@ def album_add_members(album, inviter, member_identifiers, date_added):
     return result
 
 @supports_etag
-class AlbumDetail(generics.RetrieveAPIView):
-    model = Album
-    serializer_class = AlbumSerializer
+class AlbumDetail(GenericAPIView):
     permission_classes = (IsUserInAlbum,)
 
     def initial(self, request, pk, *args, **kwargs):
         self.album = get_object_or_404(Album, pk=pk)
 
-        if request.user.is_staff:
-            self.is_staff = True
-        elif request.user.is_authenticated():
-            self.is_staff = False
-
         return super(AlbumDetail, self).initial(request, pk, *args, **kwargs)
-
-    def get_object(self):
-        if self.is_staff:
-            return self.album
-        else:
-            return AlbumMember.objects\
-                .get_user_memberships(self.request.user.id)\
-                .filter(album=self.album)\
-                .get()
-
-    def get_serializer_class(self):
-        if self.is_staff:
-            return AlbumSerializer
-        else:
-            return AlbumMemberSerializer
 
     def get_etag(self, request, pk):
         return self.album.get_etag()
@@ -688,6 +666,17 @@ class PhotoGlanceView(GenericAPIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         PhotoGlance.objects.get_or_create()
+
+
+class PublicAlbum(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        public_album_id = settings.PUBLIC_ALBUM_ID
+        payload = {
+                'album_id': public_album_id
+            }
+        return Response(payload, content_type='application/json')
 
 
 class QueryPhoneNumbers(GenericAPIView):
