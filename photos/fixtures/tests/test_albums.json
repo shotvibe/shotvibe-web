@@ -1291,11 +1291,11 @@
     "pk": "12c2433c-2eea-4b6b-9527-04ae8a47ec24", 
     "model": "photos.photo", 
     "fields": {
-        "album": 6, 
+        "album": 4, 
         "author": 14, 
         "subdomain": "photos02", 
-        "date_created": "2009-08-09T23:45:03Z", 
-        "album_index": 0
+        "date_created": "2009-10-09T23:45:03Z", 
+        "album_index": 1 
     }
 },
 {
@@ -1472,6 +1472,39 @@
         "subdomain": "photos03", 
         "date_created": "2009-10-15T18:22:50Z", 
         "album_index": 0
+    }
+},
+{
+    "pk": 1, 
+    "model": "photos.photocomment", 
+    "fields": {
+        "photo": "086b9e9e-5c3e-49b8-8dd1-bcaaf0cb5a09", 
+        "date_created": "2009-09-23T05:55:44Z", 
+        "author": 17, 
+        "client_msg_id": 200000, 
+        "comment_text": "Test Comment1" 
+    }
+},
+{
+    "pk": 2, 
+    "model": "photos.photocomment", 
+    "fields": {
+        "photo": "086b9e9e-5c3e-49b8-8dd1-bcaaf0cb5a09", 
+        "date_created": "2009-09-24T05:55:44Z", 
+        "author": 17, 
+        "client_msg_id": 200001, 
+        "comment_text": "Test Comment2" 
+    }
+},
+{
+    "pk": 3, 
+    "model": "photos.photocomment", 
+    "fields": {
+        "photo": "12c2433c-2eea-4b6b-9527-04ae8a47ec24", 
+        "date_created": "2009-09-25T05:55:44Z", 
+        "author": 17, 
+        "client_msg_id": 200002, 
+        "comment_text": "Test Comment3" 
     }
 }
 ]

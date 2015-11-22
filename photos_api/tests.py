@@ -77,6 +77,9 @@ class UserTest(BaseTestCase):
         first_album_response = self.client.get(first_album_url)
         self.assertEqual(first_album_response.status_code, 200)
 
+        self.assertEqual(all_albums[0]['latest_comment']['comment'], 'Test Comment3')
+        self.assertIsNone(all_albums[1]['latest_comment'])
+
     @unittest.skipIf(True, "Skipping because of hassles with managing AWS keys")
     def test_avatar_upload(self):
         # ===================================

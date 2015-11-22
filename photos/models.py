@@ -308,6 +308,9 @@ class Album(models.Model):
     def get_invite_page_photos(self):
         return self.photo_set.order_by('-album_index')[:4]
 
+    def get_latest_comment(self):
+        return PhotoComment.objects.filter(photo__album=self).order_by('-date_created').first()
+
     def is_user_member(self, user_id):
         return AlbumMember.objects.filter(album=self, user__pk=user_id).exists()
 
