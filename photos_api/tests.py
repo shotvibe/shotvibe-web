@@ -752,6 +752,7 @@ class PhotoCommentsTest(TestCase):
 
         Photo.objects.create(
                 photo_id = 'test-photo-id-1',
+                media_type = Photo.MEDIA_TYPE_PHOTO,
                 storage_id = 'test-storage-id-1',
                 subdomain = 'test-subdomain',
                 date_created = datetime.datetime(2000, 1, 2, tzinfo=timezone.utc),
@@ -836,6 +837,7 @@ class PhotoUserTagTest(TestCase):
 
         Photo.objects.create(
                 photo_id = 'test-photo-id-1',
+                media_type = Photo.MEDIA_TYPE_PHOTO,
                 storage_id = 'test-storage-id-1',
                 subdomain = 'test-subdomain',
                 date_created = datetime.datetime(2000, 1, 2, tzinfo=timezone.utc),
@@ -918,6 +920,7 @@ class PhotoGlanceScoresTest(TestCase):
 
         Photo.objects.create(
                 photo_id = 'test-photo-id-1',
+                media_type = Photo.MEDIA_TYPE_PHOTO,
                 storage_id = 'test-storage-id-1',
                 subdomain = 'test-subdomain',
                 date_created = datetime.datetime(2000, 1, 2, tzinfo=timezone.utc),
@@ -998,6 +1001,7 @@ class PhotoGlanceTest(TestCase):
 
         Photo.objects.create(
                 photo_id = 'test-photo-id-1',
+                media_type = Photo.MEDIA_TYPE_PHOTO,
                 storage_id = 'test-storage-id-1',
                 subdomain = 'test-subdomain',
                 date_created = datetime.datetime(2000, 1, 2, tzinfo=timezone.utc),

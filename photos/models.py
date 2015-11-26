@@ -6,6 +6,8 @@ import datetime
 
 from django.conf import settings
 from django.db import models
+from django.db import transaction
+from django.db import IntegrityError
 from django.utils import timezone
 
 import phonenumbers
@@ -395,7 +397,20 @@ class PhotoManager(models.Manager):
 
 
 class Photo(models.Model):
+    """
+    This model actually represents a "Media" object, which can be a photo or a
+    video.
+    """
+
+    MEDIA_TYPE_PHOTO = 1
+    MEDIA_TYPE_VIDEO = 2
+    MEDIA_TYPE_CHOICES = (
+        (MEDIA_TYPE_PHOTO, 'photo'),
+        (MEDIA_TYPE_VIDEO, 'video'),
+    )
+
     photo_id = models.CharField(primary_key=True, max_length=128)
+    media_type = models.IntegerField(choices=MEDIA_TYPE_CHOICES)
     storage_id = models.CharField(max_length=128, db_index=True)
     subdomain = models.CharField(max_length=64)
     date_created = models.DateTimeField(db_index=True)
@@ -522,6 +537,85 @@ class PendingPhoto(models.Model):
 
     def is_processing_done(self):
         return not (self.processing_done_time is None)
+
+
+class VideoManager(models.Manager):
+    def set_processing(self, storage_id, author, album, now):
+        def get_next_album_index(album):
+            album_index_q = Photo.objects.filter(album=album).aggregate(models.Max('album_index'))
+
+            max_album_index = album_index_q['album_index__max']
+            if max_album_index is None:
+                return 0
+            else:
+                return max_album_index + 1
+
+        success = False
+        while not success:
+            try:
+                with transaction.atomic():
+                    next_album_index = get_next_album_index(album)
+                    p, created = Photo.objects.get_or_create(
+                        storage_id=storage_id,
+                        defaults={
+                            'photo_id': Photo.generate_photo_id(),
+                            'media_type': Photo.MEDIA_TYPE_VIDEO,
+                            'date_created': now,
+                            'author': author,
+                            'album': album,
+                            'album_index': next_album_index
+                        })
+            except IntegrityError:
+                # This will happen if there is a collision with a duplicate
+                # 'album_index' from a concurrent request
+                success = False
+            else:
+                success = True
+        if created:
+            Video.objects.create(
+                storage_id = storage_id,
+                status = Video.STATUS_PROCESSING,
+                duration = 0)
+            album.save_revision(now)
+
+    def set_invalid(self, storage_id, author, album, now):
+        self.set_processing(storage_id, author, album, now)
+        video = Video.objects.get(storage_id=storage_id)
+        if video.status == Video.STATUS_PROCESSING:
+            video.status = Video.STATUS_INVALID
+            video.save(update_fields=['status'])
+            album.save_revision(now)
+        elif video.status != Video.STATUS_INVALID:
+            raise RuntimeError('Invalid transition from status: ' + video.status)
+
+    def set_ready(self, storage_id, author, album, duration, now):
+        self.set_processing(storage_id, author, album, now)
+        video = Video.objects.get(storage_id=storage_id)
+        if video.status == Video.STATUS_PROCESSING:
+            video.status = Video.STATUS_READY
+            video.duration = duration
+            video.save(update_fields=['status', 'duration'])
+            album.save_revision(now)
+        elif video.status != Video.STATUS_READY:
+            raise RuntimeError('Invalid transition from status: ' + video.status)
+
+
+class Video(models.Model):
+    STATUS_PROCESSING = 1
+    STATUS_READY = 2
+    STATUS_INVALID = 3
+
+    STATUS_CHOICES = (
+        (STATUS_PROCESSING, 'processing'),
+        (STATUS_READY, 'ready'),
+        (STATUS_INVALID, 'invalid'),
+    )
+
+    storage_id = models.CharField(primary_key=True, max_length=128)
+    status = models.IntegerField(choices=STATUS_CHOICES)
+    duration = models.IntegerField()
+
+    objects = VideoManager()
 
 
 class PhotoComment(models.Model):
