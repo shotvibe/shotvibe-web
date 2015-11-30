@@ -17,6 +17,7 @@ from photos import image_uploads
 from photos import photo_operations
 from photos_api.serializers import MemberIdentifier
 from photos_api.signals import photos_added_to_album
+from phone_auth import aws_sts
 
 
 def index(request):
@@ -108,12 +109,15 @@ def album(request, pk):
                                        by_user=request.user,
                                        to_album=album)
 
+    aws_token = aws_sts.get_s3_upload_token(request.user)
+
     data = {
             'album': album,
             'photos': album.get_photos(),
             'members': album.get_member_users(),
             'num_photos_added': num_photos_added,
-            'num_photos_failed': num_photos_failed
+            'num_photos_failed': num_photos_failed,
+            'aws_token': aws_token
             }
     return render_to_response('frontend/album.html', data, context_instance=RequestContext(request))
 

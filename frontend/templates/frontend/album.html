@@ -28,7 +28,17 @@
       {% for photo in photos %}
       <li>
       <a href="{% url "frontend.views.photo" album.id photo.photo_id %}" class="thumbnail">
-        <img src="{{ photo.get_photo_url_no_ext }}_crop140.jpg" width="140" height="140" alt="">
+        {% if photo.is_photo %}
+          <img src="{{ photo.get_photo_url_no_ext }}_crop140.jpg" width="140" height="140" alt="">
+        {% elif photo.is_video %}
+          {% if photo.is_video_processing %}
+            <img src="https://upload.wikimedia.org/wikipedia/commons/d/de/Ajax-loader.gif" width="140" height="140" alt="">
+          {% elif photo.is_video_invalid %}
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Counter_Vandalism_Unit.svg/64px-Counter_Vandalism_Unit.svg.png" width="140" height="140" alt="">
+          {% elif photo.is_video_ready %}
+            <video src="{{ photo.get_video_url }}" width="140" height="140" controls>
+          {% endif %}
+        {% endif %}
       </a>
       </li>
       {% endfor %}
@@ -53,6 +63,73 @@
         </div>
       </div>
     </form>
+
+<!--
+See:
+  http://docs.aws.amazon.com/AWSJavaScriptSDK/guide/browser-examples.html
+-->
+<input type="file" id="file-chooser" />
+<button id="upload-button">Upload to S3</button>
+<div id="results"></div>
+
+<script type="text/javascript">
+  AWS.config.update({
+    accessKeyId: '{{ aws_token.credentials.access_key }}',
+    secretAccessKey: '{{ aws_token.credentials.secret_key }}',
+    sessionToken: '{{ aws_token.credentials.session_token }}'
+  });
+
+  var bucket = new AWS.S3({params: {Bucket: 'glance-uploads'}});
+
+  var fileChooser = document.getElementById('file-chooser');
+  var button = document.getElementById('upload-button');
+  var results = document.getElementById('results');
+  button.addEventListener('click', function() {
+    var file = fileChooser.files[0];
+    if (file) {
+      results.innerHTML = 'Uploading...';
+
+      var uniqueName = getUniqueName();
+      var key = 'videos/' + {{ user.id }} + '/' + {{ album.id }} + '/' + uniqueName + '.mp4';
+
+      var params = {Key: key, ContentType: file.type, Body: file};
+      bucket.upload(params, function (err, data) {
+        results.innerHTML = err ? 'ERROR!' : 'UPLOADED.';
+        console.log(err);
+      });
+    } else {
+      results.innerHTML = 'Nothing to upload.';
+    }
+  }, false);
+
+  // From:
+  //   http://stackoverflow.com/a/10073788
+  function pad(n, width, z) {
+    z = z || '0';
+    n = n + '';
+    return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+  }
+
+  function getUniqueName() {
+    var d = new Date();
+    var dateStr =
+      d.getUTCFullYear() + '-' +
+      pad(d.getUTCMonth() + 1, 2) + '-' +
+      pad(d.getUTCDate(), 2) + 'T' +
+      pad(d.getUTCHours(), 2) + ':' +
+      pad(d.getUTCMinutes(), 2) + ':' +
+      pad(d.getUTCSeconds(), 2) + '.' +
+      d.getUTCMilliseconds() + 'Z';
+
+    // From:
+    //   http://stackoverflow.com/a/19964557
+    var randomLen = 16;
+    var randomStr = (Math.random().toString(36)+'00000000000000000').slice(2, randomLen+2);
+
+    return dateStr + '$' + randomStr;
+  }
+</script>
+
 
   </div>
   <div class="span3">

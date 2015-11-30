@@ -435,6 +435,12 @@ class Photo(models.Model):
         key_bitsize = 256
         return ''.join(["{0:02x}".format(ord(c)) for c in os.urandom(key_bitsize / 8)])
 
+    def is_photo(self):
+        return self.media_type == Photo.MEDIA_TYPE_PHOTO
+
+    def is_video(self):
+        return self.media_type == Photo.MEDIA_TYPE_VIDEO
+
     def get_photo_url(self):
         if settings.USING_LOCAL_PHOTOS:
             return '/photos/' + self.subdomain + '/' + self.photo_id + '.jpg'
@@ -466,6 +472,27 @@ class Photo(models.Model):
             return self.copied_from_photo
         else:
             return self
+
+    def get_video(self):
+        return Video.objects.get(storage_id=self.storage_id)
+
+    def is_video_processing(self):
+        return self.get_video().status == Video.STATUS_PROCESSING
+
+    def is_video_ready(self):
+        return self.get_video().status == Video.STATUS_READY
+
+    def is_video_invalid(self):
+        return self.get_video().status == Video.STATUS_INVALID
+
+    def get_video_url(self):
+        return 'https://test-videos1.s3.amazonaws.com/' + self.get_video().storage_id + '.mp4'
+
+    def get_video_thumbnail_url(self):
+        return 'https://test-videos1.s3.amazonaws.com/' + self.get_video().storage_id + '-00001.png'
+
+    def get_video_duration(self):
+        return self.get_video().duration
 
     def update_glance_score(self, score_delta):
         """
