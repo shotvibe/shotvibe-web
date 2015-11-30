@@ -1,3 +1,5 @@
+import datetime
+
 from django.conf import settings
 from django.contrib.gis.geoip import GeoIP, GeoIPException
 from django.http import HttpResponseNotFound, HttpResponse
@@ -14,9 +16,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from phone_auth.serializers import AuthorizePhoneNumberSerializer, ConfirmSMSCodeSerializer
+from phone_auth.serializers import AuthorizePhoneNumberSerializer, ConfirmSMSCodeSerializer, AwsTokenSerializer
 from phone_auth.models import AuthToken, PhoneNumber, PhoneNumberLinkCode
 from phone_auth.sms_send import send_sms
+from phone_auth import aws_sts
 
 from affiliates.models import Event
 
@@ -93,6 +96,22 @@ def delete_account(request):
     request.user.delete()
 
     return Response()
+
+
+@api_view(['POST'])
+@permission_classes((IsAuthenticated,))
+def aws_token(request):
+    seconds = 60 * 60 * 24
+    token = aws_sts.get_s3_upload_token(request.user, seconds)
+    serializer = AwsTokenSerializer(data={
+        'aws_access_key': token.credentials.access_key,
+        'aws_secret_key': token.credentials.secret_key,
+        'aws_session_token': token.credentials.session_token,
+        'expires': timezone.now() + datetime.timedelta(seconds=seconds)
+    })
+    if not serializer.is_valid():
+        raise RuntimeError(serializer.errors)
+    return Response(serializer.data)
 
 
 # This view is called from the mobile app, after it has been installed, and is

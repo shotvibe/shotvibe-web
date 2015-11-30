@@ -230,6 +230,18 @@ class ViewTests(TestCase):
 
         self.assertFalse(auth.get_user_model().objects.filter(id=2).exists())
 
+    def test_aws_token(self):
+        self.client.login(username='2', password='amanda')
+
+        response = self.client.post('/aws_token/')
+        self.assertEqual(response.status_code, 200)
+
+        response_json = json.loads(response.content)
+        self.assertIsNotNone(response_json['aws_access_key'])
+        self.assertIsNotNone(response_json['aws_secret_key'])
+        self.assertIsNotNone(response_json['aws_session_token'])
+        self.assertIsNotNone(response_json['expires'])
+
 
 class InviteTests(TestCase):
     def setUp(self):

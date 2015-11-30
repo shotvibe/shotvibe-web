@@ -39,6 +39,11 @@ Used to complete the authorization procedure and obtain an Authorization Token.
 
 Used to completely delete the user's account and all associated data.
 
+### POST /auth/aws_token/
+
+Used to get AWS security credentials that should be used to upload user media
+to an AWS S3 bucket.
+
 ### GET /users/{uid}/
 
 Used to get the user profile data.
@@ -248,6 +253,30 @@ It will delete the user account and all associated data, including:
 Request body should be empty.
 
 Will return an empty response on success.
+
+### POST /auth/aws_token/
+
+Used to get AWS security credentials that should be used to upload user media
+to an AWS S3 bucket.
+
+Request body should be empty.
+
+Example response:
+
+```
+HTTP/1.1 200 OK
+Date: Mon, 26 Aug 2013 22:51:34 GMT
+Vary: Accept, Host
+Content-Type: application/json
+Allow: HEAD, GET, PATCH, PUT, OPTIONS
+
+{
+    "aws_access_key": "ASIAIC3HBWLQBOUSQR7Q",
+    "aws_secret_key": "JD1+XIDwLeqJI/Aq86NZgsIOKZxJ8vkbiGoVwVMa",
+    "aws_session_token": "AQoDYXdzEMH//////////wEasAJXFLRFnCp+6n5NN2qrH28utSorSLHuhJhzrOmWaGKtM9nNxqg/+JSsgFko+F/tOTn5X",
+    "expires": "2009-10-26T20:53:49Z"
+}
+```
 
 ## GET /users/{uid}/
 
