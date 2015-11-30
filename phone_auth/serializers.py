@@ -24,3 +24,10 @@ class AuthorizePhoneNumberSerializer(serializers.Serializer):
 class ConfirmSMSCodeSerializer(serializers.Serializer):
     confirmation_code = serializers.CharField()
     device_description = serializers.CharField()
+
+
+class AwsTokenSerializer(serializers.Serializer):
+    aws_access_key = serializers.CharField()
+    aws_secret_key = serializers.CharField()
+    aws_session_token = serializers.CharField()
+    expires = serializers.DateTimeField()
