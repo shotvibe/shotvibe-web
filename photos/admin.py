@@ -5,7 +5,7 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 from phone_auth.models import PhoneNumberLinkCode
-from photos.models import Album, AlbumMember, Photo, PendingPhoto, PhotoComment, PhotoGlance, PhotoGlanceScoreDelta
+from photos.models import Album, AlbumMember, Photo, PendingPhoto, Video, PhotoComment, PhotoGlance, PhotoGlanceScoreDelta
 from photos.models import PhotoServer
 
 class PhotoAdminInline(admin.TabularInline):
@@ -33,7 +33,15 @@ class PhotoAdminInline(admin.TabularInline):
     max_num = 0
 
     def photo_thumbnail(self, instance):
-        return format_html(u'<img src="{0}" />', instance.get_photo_url_no_ext() + '_thumb75.jpg')
+        if instance.media_type == Photo.MEDIA_TYPE_PHOTO:
+            return format_html(u'<img src="{0}" />', instance.get_photo_url_no_ext() + '_thumb75.jpg')
+        elif instance.media_type == Photo.MEDIA_TYPE_VIDEO:
+            if instance.is_video_processing():
+                return 'processing...'
+            elif instance.is_video_invalid():
+                return 'invalid'
+            else:
+                return format_html(u'<a href="{0}"><img src="{1}" /></a>', instance.get_video_url(), instance.get_video_thumbnail_url())
 
     def comments(self, obj):
         comments = obj.get_comments()
@@ -158,6 +166,10 @@ class PendingPhotoAdmin(admin.ModelAdmin):
     pass
 
 
+class VideoAdmin(admin.ModelAdmin):
+    pass
+
+
 class PhotoCommentAdmin(admin.ModelAdmin):
     list_display = ('photo_icon', 'album_link', 'comment_text', 'date_created', 'author_link')
     list_display_links = list_display
@@ -223,6 +235,7 @@ class PhotoServerAdmin(admin.ModelAdmin):
 
 admin.site.register(Photo, PhotoAdmin)
 admin.site.register(PendingPhoto, PendingPhotoAdmin)
+admin.site.register(Video, VideoAdmin)
 admin.site.register(Album, AlbumAdmin)
 admin.site.register(PhotoComment, PhotoCommentAdmin)
 admin.site.register(PhotoGlance, PhotoGlanceAdmin)
