@@ -1258,6 +1258,7 @@
     "pk": "0458d938-743f-49d9-8294-a0c361369ec4", 
     "model": "photos.photo", 
     "fields": {
+        "media_type": 1, 
         "album": 1, 
         "author": 14, 
         "subdomain": "photos02", 
@@ -1269,6 +1270,7 @@
     "pk": "0765d516-7861-4274-91f5-2c5d4e3f048e", 
     "model": "photos.photo", 
     "fields": {
+        "media_type": 1, 
         "album": 7, 
         "author": 8, 
         "subdomain": "photos04", 
@@ -1280,6 +1282,7 @@
     "pk": "086b9e9e-5c3e-49b8-8dd1-bcaaf0cb5a09", 
     "model": "photos.photo", 
     "fields": {
+        "media_type": 1, 
         "album": 4, 
         "author": 9, 
         "subdomain": "photos01", 
@@ -1291,6 +1294,7 @@
     "pk": "12c2433c-2eea-4b6b-9527-04ae8a47ec24", 
     "model": "photos.photo", 
     "fields": {
+        "media_type": 1, 
         "album": 6, 
         "author": 14, 
         "subdomain": "photos02", 
@@ -1302,6 +1306,7 @@
     "pk": "1e3d3ec8-c386-4317-86e8-794b190841ce", 
     "model": "photos.photo", 
     "fields": {
+        "media_type": 1, 
         "album": 7, 
         "author": 3, 
         "subdomain": "photos01", 
@@ -1313,6 +1318,7 @@
     "pk": "20daf150-6dc8-4267-89b9-c7f754d6b7e0", 
     "model": "photos.photo", 
     "fields": {
+        "media_type": 1, 
         "album": 7, 
         "author": 13, 
         "subdomain": "photos04", 
@@ -1324,6 +1330,7 @@
     "pk": "2d7e82e0-fc92-4f1d-9deb-df1cef6c5c11", 
     "model": "photos.photo", 
     "fields": {
+        "media_type": 1, 
         "album": 5, 
         "author": 5, 
         "subdomain": "photos03", 
@@ -1335,6 +1342,7 @@
     "pk": "34349f5a-0c21-405a-b475-18170af7ba31", 
     "model": "photos.photo", 
     "fields": {
+        "media_type": 1, 
         "album": 10, 
         "author": 10, 
         "subdomain": "photos04", 
@@ -1346,6 +1354,7 @@
     "pk": "43c74de2-042d-4c83-af54-27b3233cc80b", 
     "model": "photos.photo", 
     "fields": {
+        "media_type": 1, 
         "album": 9, 
         "author": 6, 
         "subdomain": "photos04", 
@@ -1357,6 +1366,7 @@
     "pk": "7f0cee2c-76f3-4cdb-907e-4182c49b2c4b", 
     "model": "photos.photo", 
     "fields": {
+        "media_type": 1, 
         "album": 2, 
         "author": 14, 
         "subdomain": "photos03", 
@@ -1368,6 +1378,7 @@
     "pk": "8c58a894-a131-4842-b4f3-cf64fb760457", 
     "model": "photos.photo", 
     "fields": {
+        "media_type": 1, 
         "album": 10, 
         "author": 9, 
         "subdomain": "photos02", 
@@ -1379,6 +1390,7 @@
     "pk": "8d116832-d725-4160-9a08-8b3ddbc27b20", 
     "model": "photos.photo", 
     "fields": {
+        "media_type": 1, 
         "album": 8, 
         "author": 1, 
         "subdomain": "photos02", 
@@ -1390,6 +1402,7 @@
     "pk": "b520031d-e0ba-4c4e-a0ab-038ee22ffc2c", 
     "model": "photos.photo", 
     "fields": {
+        "media_type": 1, 
         "album": 3, 
         "author": 11, 
         "subdomain": "photos01", 
@@ -1401,6 +1414,7 @@
     "pk": "c0843edd-c2a6-438b-b03b-8ad2babc318d", 
     "model": "photos.photo", 
     "fields": {
+        "media_type": 1, 
         "album": 10, 
         "author": 11, 
         "subdomain": "photos04", 
@@ -1412,6 +1426,7 @@
     "pk": "c87eae23-b461-407f-a411-52ccb838673d", 
     "model": "photos.photo", 
     "fields": {
+        "media_type": 1, 
         "album": 8, 
         "author": 17, 
         "subdomain": "photos01", 
@@ -1423,6 +1438,7 @@
     "pk": "cb102ef4-a285-42f4-916e-f33957eeb830", 
     "model": "photos.photo", 
     "fields": {
+        "media_type": 1, 
         "album": 8, 
         "author": 5, 
         "subdomain": "photos04", 
@@ -1434,6 +1450,7 @@
     "pk": "cb9e8bc9-fa66-48a1-a808-e318069ee5fe", 
     "model": "photos.photo", 
     "fields": {
+        "media_type": 1, 
         "album": 1, 
         "author": 15, 
         "subdomain": "photos04", 
@@ -1445,6 +1462,7 @@
     "pk": "e0e65b5b-00a7-4a0b-b86d-1ad84e06df17", 
     "model": "photos.photo", 
     "fields": {
+        "media_type": 1, 
         "album": 7, 
         "author": 4, 
         "subdomain": "photos03", 
@@ -1456,6 +1474,7 @@
     "pk": "eba0dc16-0535-4c7e-9e10-88696eb227e9", 
     "model": "photos.photo", 
     "fields": {
+        "media_type": 1, 
         "album": 5, 
         "author": 11, 
         "subdomain": "photos01", 
@@ -1467,6 +1486,7 @@
     "pk": "fe234f28-8299-4296-b85d-d1d2d31b690a", 
     "model": "photos.photo", 
     "fields": {
+        "media_type": 1, 
         "album": 1, 
         "author": 17, 
         "subdomain": "photos03", 

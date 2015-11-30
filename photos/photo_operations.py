@@ -143,6 +143,7 @@ class AddPendingPhotosToAlbumAction(ExThread):
                         chosen_subdomain = choose_random_subdomain()
                         p = Photo.objects.create(
                             photo_id=photo_id,
+                            media_type = Photo.MEDIA_TYPE_PHOTO,
                             storage_id = pending_photo.storage_id,
                             subdomain = chosen_subdomain,
                             date_created = self.date_created,
@@ -277,6 +278,7 @@ class CopyPhotosToAlbumAction(ExThread):
                     chosen_subdomain = choose_random_subdomain()
                     p = Photo.objects.create(
                         photo_id=Photo.generate_photo_id(),
+                        media_type = photo.media_type,
                         storage_id = photo.storage_id,
                         subdomain = chosen_subdomain,
                         date_created = self.date_created,

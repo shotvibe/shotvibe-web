@@ -20,7 +20,7 @@ from django.utils import timezone
 from phone_auth.models import AuthToken
 from phone_auth.models import PhoneNumber, PhoneContact, AnonymousPhoneNumber, PhoneNumberLinkCode
 from phone_auth.sms_send import send_sms, mark_sms_test_case
-from photos.models import Photo, PendingPhoto, Album, AlbumMember, PhotoGlance, PhotoComment, PhotoUserTag
+from photos.models import Photo, PendingPhoto, Album, AlbumMember, PhotoGlance, PhotoComment, PhotoUserTag, Video
 from photos_api import is_phone_number_mobile
 from invites_manager.models import SMSInviteMessage
 import invites_manager
@@ -752,6 +752,7 @@ class PhotoCommentsTest(TestCase):
 
         Photo.objects.create(
                 photo_id = 'test-photo-id-1',
+                media_type = Photo.MEDIA_TYPE_PHOTO,
                 storage_id = 'test-storage-id-1',
                 subdomain = 'test-subdomain',
                 date_created = datetime.datetime(2000, 1, 2, tzinfo=timezone.utc),
@@ -836,6 +837,7 @@ class PhotoUserTagTest(TestCase):
 
         Photo.objects.create(
                 photo_id = 'test-photo-id-1',
+                media_type = Photo.MEDIA_TYPE_PHOTO,
                 storage_id = 'test-storage-id-1',
                 subdomain = 'test-subdomain',
                 date_created = datetime.datetime(2000, 1, 2, tzinfo=timezone.utc),
@@ -918,6 +920,7 @@ class PhotoGlanceScoresTest(TestCase):
 
         Photo.objects.create(
                 photo_id = 'test-photo-id-1',
+                media_type = Photo.MEDIA_TYPE_PHOTO,
                 storage_id = 'test-storage-id-1',
                 subdomain = 'test-subdomain',
                 date_created = datetime.datetime(2000, 1, 2, tzinfo=timezone.utc),
@@ -998,6 +1001,7 @@ class PhotoGlanceTest(TestCase):
 
         Photo.objects.create(
                 photo_id = 'test-photo-id-1',
+                media_type = Photo.MEDIA_TYPE_PHOTO,
                 storage_id = 'test-storage-id-1',
                 subdomain = 'test-subdomain',
                 date_created = datetime.datetime(2000, 1, 2, tzinfo=timezone.utc),
@@ -1692,3 +1696,74 @@ class PrivateApiTestCase(BaseTestCase):
         # Refresh pending_photo to get latest data from DB
         pending_photo = PendingPhoto.objects.get(photo_id=pending_photo.photo_id)
         self.assertTrue(pending_photo.is_processing_done())
+
+    def test_video_new_upload(self):
+        amanda = User.objects.get(nickname='amanda')
+        album = Album.objects.get(pk=8)
+
+        body = {
+            'author_id': amanda.id,
+            'album_id': album.id,
+            'status': 'processing'
+        }
+        storage_id = 'test-storage-5534'
+
+        response = self.client.put(reverse('video-object', kwargs={'storage_id':storage_id}),
+                HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY,
+                data=json.dumps(body),
+                content_type="application/json")
+
+        self.assertEqual(response.status_code, 204)
+
+        last_photo = album.get_photos().last()
+        self.assertEqual(last_photo.storage_id, storage_id)
+        self.assertEqual(last_photo.media_type, Photo.MEDIA_TYPE_VIDEO)
+        self.assertEqual(Video.objects.get(storage_id=last_photo.storage_id).status, Video.STATUS_PROCESSING)
+
+    def test_video_upload_invalid(self):
+        amanda = User.objects.get(nickname='amanda')
+        album = Album.objects.get(pk=8)
+
+        body = {
+            'author_id': amanda.id,
+            'album_id': album.id,
+            'status': 'invalid'
+        }
+        storage_id = 'test-storage-5534'
+
+        response = self.client.put(reverse('video-object', kwargs={'storage_id':storage_id}),
+                HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY,
+                data=json.dumps(body),
+                content_type="application/json")
+
+        self.assertEqual(response.status_code, 204)
+
+        last_photo = album.get_photos().last()
+        self.assertEqual(last_photo.storage_id, storage_id)
+        self.assertEqual(last_photo.media_type, Photo.MEDIA_TYPE_VIDEO)
+        self.assertEqual(Video.objects.get(storage_id=last_photo.storage_id).status, Video.STATUS_INVALID)
+
+    def test_video_upload_ready(self):
+        amanda = User.objects.get(nickname='amanda')
+        album = Album.objects.get(pk=8)
+
+        body = {
+            'author_id': amanda.id,
+            'album_id': album.id,
+            'status': 'ready',
+            'duration': 40
+        }
+        storage_id = 'test-storage-5534'
+
+        response = self.client.put(reverse('video-object', kwargs={'storage_id':storage_id}),
+                HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY,
+                data=json.dumps(body),
+                content_type="application/json")
+
+        self.assertEqual(response.status_code, 204)
+
+        last_photo = album.get_photos().last()
+        self.assertEqual(last_photo.storage_id, storage_id)
+        self.assertEqual(last_photo.media_type, Photo.MEDIA_TYPE_VIDEO)
+        self.assertEqual(Video.objects.get(storage_id=last_photo.storage_id).status, Video.STATUS_READY)
+        self.assertEqual(Video.objects.get(storage_id=last_photo.storage_id).duration, 40)

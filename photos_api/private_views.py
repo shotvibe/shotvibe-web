@@ -9,8 +9,11 @@ from rest_framework.response import Response
 from photos_api.permissions import IsAllowedPrivateAPI
 from photos_api.serializers import PhotoUploadInitSerializer, PhotoServerRegisterSerializer
 from phone_auth.authentication import TokenAuthentication
-from photos.models import PendingPhoto, Photo
+from phone_auth.models import User
+from photos.models import Album, PendingPhoto, Photo, Video
 from photos import photo_operations
+from photos_api.private_serializers import VideoObjectSerializer
+
 
 @api_view(['POST'])
 @permission_classes((IsAllowedPrivateAPI, ))
@@ -67,6 +70,48 @@ def photo_processing_done(request, storage_id):
     pending_photo.set_processing_done(now)
 
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['PUT'])
+@permission_classes((IsAllowedPrivateAPI, ))
+def video_object(request, storage_id):
+    serializer = VideoObjectSerializer(data=request.DATA)
+
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    author_id = serializer.object['author_id']
+    album_id = serializer.object['album_id']
+    status_ = serializer.object['status']
+
+    try:
+        author = User.objects.get(pk=author_id)
+    except User.DoesNotExist:
+        return Response('Invalid user id: ' + str(author_id), status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        album = Album.objects.get(pk=album_id)
+    except Album.DoesNotExist:
+        return Response('Invalid album id: ' + str(album_id), status=status.HTTP_400_BAD_REQUEST)
+
+    # TODO Verify that the author is allowed to add a video into album
+
+    now = timezone.now()
+
+    if status_ == 'processing':
+        Video.objects.set_processing(storage_id, author, album, now)
+    elif status_ == 'ready':
+        duration = serializer.object.get('duration')
+        if duration is None:
+            return Response('Missing required field "duration"', status=status.HTTP_400_BAD_REQUEST)
+        Video.objects.set_ready(storage_id, author, album, duration, now)
+    elif status_ == 'invalid':
+        Video.objects.set_invalid(storage_id, author, album, now)
+    else:
+        raise RuntimeError('Unknown status: ' + status_)
+
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 @api_view(['POST'])
 @permission_classes((IsAllowedPrivateAPI, ))
