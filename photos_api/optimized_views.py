@@ -105,30 +105,36 @@ def get_album_photos_payload(user_id, album_id):
 
     photos = collections.OrderedDict()
     for row in cursor.fetchall():
-        photo_id = row[0]
-        if row[4]:
-            my_glance_score_delta = row[4]
+        (row_photo_id,
+        row_photo_subdomain,
+        row_photo_date_created,
+        row_photo_global_glance_score,
+        row_photo_my_glance_score,
+        row_author_id,
+        row_author_nickname,
+        row_author_avatar_file) = row
+
+        if row_photo_my_glance_score:
+            my_glance_score_delta = row_photo_my_glance_score
         else:
             my_glance_score_delta = 0
 
-        subdomain = row[1]
-
         # Manually create a Photo instance so we can use it's helper methods
-        photo = Photo(photo_id=photo_id, subdomain=subdomain)
+        photo = Photo(photo_id=row_photo_id, subdomain=row_photo_subdomain)
 
-        photos[photo_id] = {
-            'photo_id': photo_id,
+        photos[row_photo_id] = {
+            'photo_id': row_photo_id,
             'photo_url': photo.get_photo_url(),
-            'date_created': row[2],
+            'date_created': row_photo_date_created,
             'author': {
-                'id': row[5],
-                'nickname': row[6],
-                'avatar_url': avatar_url_from_avatar_file_data(row[7])
+                'id': row_author_id,
+                'nickname': row_author_nickname,
+                'avatar_url': avatar_url_from_avatar_file_data(row_author_avatar_file)
             },
             'comments': [], # Will be filled in later
             'user_tags': [], # Not used yet, will be left empty
             'glances': [], # Deprecated, will be left empty
-            'global_glance_score': row[3],
+            'global_glance_score': row_photo_global_glance_score,
             'my_glance_score_delta': my_glance_score_delta
         }
 
