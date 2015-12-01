@@ -3,7 +3,7 @@ import collections
 from django.db import connection
 
 from phone_auth.models import User, avatar_url_from_avatar_file_data
-from photos.models import Photo, AlbumMember
+from photos.models import Photo, Video, AlbumMember
 from photos_api.serializers import album_name_or_members
 
 def get_album_members_payload(album_id):
@@ -65,18 +65,26 @@ def get_album_photos_payload(user_id, album_id):
     cursor.execute(
         """
         SELECT photo_id0,
+               photo_media_type0,
                photo_subdomain0,
                photo_date_created0,
+               video_status0,
+               video_storage_id0,
+               video_duration0,
                photo_global_glance_score0,
                photo_my_glance_score0,
                author_id0,
                author_nickname0,
                author_avatar_file0
         FROM (SELECT p.photo_id as photo_id0,
+                     p.media_type as photo_media_type0,
                      p.subdomain as photo_subdomain0,
                      p.date_created as photo_date_created0,
                      p.album_id as album_id0,
                      p.album_index as album_index0,
+                     photos_video.status as video_status0,
+                     photos_video.storage_id as video_storage_id0,
+                     photos_video.duration as video_duration0,
                      phone_auth_user.id as author_id0,
                      phone_auth_user.nickname as author_nickname0,
                      phone_auth_user.avatar_file as author_avatar_file0,
@@ -97,7 +105,9 @@ def get_album_photos_payload(user_id, album_id):
                             author_id=%s) as photo_my_glance_score0
               FROM photos_photo p
               LEFT OUTER JOIN phone_auth_user
-              ON p.author_id=phone_auth_user.id) as T1
+              ON p.author_id=phone_auth_user.id
+              LEFT OUTER JOIN photos_video
+              ON p.storage_id=photos_video.storage_id) as T1
         WHERE album_id0=%s
         ORDER BY album_index0
         """,
@@ -106,8 +116,12 @@ def get_album_photos_payload(user_id, album_id):
     photos = collections.OrderedDict()
     for row in cursor.fetchall():
         (row_photo_id,
+        row_media_type,
         row_photo_subdomain,
         row_photo_date_created,
+        row_video_status,
+        row_video_storage_id,
+        row_video_duration,
         row_photo_global_glance_score,
         row_photo_my_glance_score,
         row_author_id,
@@ -120,10 +134,11 @@ def get_album_photos_payload(user_id, album_id):
             my_glance_score_delta = 0
 
         # Manually create a Photo instance so we can use it's helper methods
-        photo = Photo(photo_id=row_photo_id, subdomain=row_photo_subdomain)
+        photo = Photo(photo_id=row_photo_id, subdomain=row_photo_subdomain, media_type=row_media_type)
 
         photos[row_photo_id] = {
             'photo_id': row_photo_id,
+            'media_type': photo.get_media_type_display(),
             'photo_url': photo.get_photo_url(),
             'date_created': row_photo_date_created,
             'author': {
@@ -137,6 +152,13 @@ def get_album_photos_payload(user_id, album_id):
             'global_glance_score': row_photo_global_glance_score,
             'my_glance_score_delta': my_glance_score_delta
         }
+        if photo.is_video():
+            # Manually create a Video instance so we can use it's helper methods
+            video = Video(status=row_video_status)
+            photos[row_photo_id]['video_status'] = video.get_status_display()
+            photos[row_photo_id]['video_url'] = Video.get_video_url(row_video_storage_id)
+            photos[row_photo_id]['video_thumbnail_url'] = Video.get_video_thumbnail_url(row_video_storage_id)
+            photos[row_photo_id]['video_duration'] = row_video_duration
 
     cursor = connection.cursor()
     cursor.execute(

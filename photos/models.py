@@ -486,10 +486,10 @@ class Photo(models.Model):
         return self.get_video().status == Video.STATUS_INVALID
 
     def get_video_url(self):
-        return 'https://test-videos1.s3.amazonaws.com/' + self.get_video().storage_id + '.mp4'
+        return Video.get_video_url(self.get_video().storage_id)
 
     def get_video_thumbnail_url(self):
-        return 'https://test-videos1.s3.amazonaws.com/' + self.get_video().storage_id + '-00001.png'
+        return Video.get_video_thumbnail_url(self.get_video().storage_id)
 
     def get_video_duration(self):
         return self.get_video().duration
@@ -643,6 +643,14 @@ class Video(models.Model):
     duration = models.IntegerField()
 
     objects = VideoManager()
+
+    @staticmethod
+    def get_video_url(storage_id):
+        return 'https://test-videos1.s3.amazonaws.com/' + storage_id + '.mp4'
+
+    @staticmethod
+    def get_video_thumbnail_url(storage_id):
+        return 'https://test-videos1.s3.amazonaws.com/' + storage_id + '-00001.png'
 
 
 class PhotoComment(models.Model):

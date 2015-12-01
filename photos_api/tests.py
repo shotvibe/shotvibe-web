@@ -743,6 +743,59 @@ class PublicAlbumTest(BaseTestCase):
         self.assertEqual(album_response_json['name'], 'Public Feed')
 
 
+class PhotoVideoTest(TestCase):
+    urls = 'photos_api.urls'
+
+    def setUp(self):
+        self.arnold = User.objects.create_user('arnold', password='mypass')
+        self.party_album = Album.objects.create_album(self.arnold, 'Party', datetime.datetime(2000, 1, 1, tzinfo=timezone.utc))
+
+        Photo.objects.create(
+                photo_id = 'test-photo-id-1',
+                media_type = Photo.MEDIA_TYPE_PHOTO,
+                storage_id = 'test-storage-id-1',
+                subdomain = 'test-subdomain',
+                date_created = datetime.datetime(2000, 1, 2, tzinfo=timezone.utc),
+                author = self.arnold,
+                album = self.party_album,
+                album_index = 0)
+
+        Photo.objects.create(
+                photo_id = 'test-video-id-1',
+                media_type = Photo.MEDIA_TYPE_VIDEO,
+                storage_id = 'test-storage-id-2',
+                subdomain = 'test-subdomain',
+                date_created = datetime.datetime(2000, 1, 2, tzinfo=timezone.utc),
+                author = self.arnold,
+                album = self.party_album,
+                album_index = 1)
+
+        Video.objects.create(
+                storage_id = 'test-storage-id-2',
+                status = Video.STATUS_READY,
+                duration = 10
+        )
+
+        self.client.login(username=str(self.arnold.id), password='mypass')
+
+    def test_album_view(self):
+        response = self.client.get(reverse('album-detail', kwargs={'pk': self.party_album.id}))
+        response_json = json.loads(response.content)
+
+        photo0_json = response_json['photos'][0]
+        photo1_json = response_json['photos'][1]
+
+        self.assertEqual(photo0_json['photo_id'], 'test-photo-id-1')
+        self.assertEqual(photo0_json['media_type'], 'photo')
+
+        self.assertEqual(photo1_json['photo_id'], 'test-video-id-1')
+        self.assertEqual(photo1_json['media_type'], 'video')
+        self.assertEqual(photo1_json['video_status'], 'ready')
+        self.assertEqual(photo1_json['video_duration'], 10)
+        self.assertEqual(photo1_json['video_url'], Video.get_video_url('test-storage-id-2'))
+        self.assertEqual(photo1_json['video_thumbnail_url'], Video.get_video_thumbnail_url('test-storage-id-2'))
+
+
 class PhotoCommentsTest(TestCase):
     urls = 'photos_api.urls'
 
