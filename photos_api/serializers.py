@@ -79,12 +79,13 @@ class GlanceSerializer(serializers.ModelSerializer):
 class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photo
-        fields = ('photo_id', 'photo_url', 'date_created', 'author', 'comments', 'user_tags', 'global_glance_score', 'my_glance_score_delta', 'glances')
+        fields = ('photo_id', 'media_type', 'photo_url', 'date_created', 'author', 'comments', 'user_tags', 'global_glance_score', 'my_glance_score_delta', 'glances')
 
     def __init__(self, request_user=None, *args, **kwargs):
         self.request_user = request_user
         super(PhotoSerializer, self).__init__(*args, **kwargs)
 
+    media_type = serializers.CharField(source='get_media_type_display')
     photo_url = serializers.CharField(source='get_photo_url')
     author = UserSerializer(source='author')
     global_glance_score = serializers.IntegerField(source='get_global_glance_score')
