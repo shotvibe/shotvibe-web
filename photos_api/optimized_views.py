@@ -60,7 +60,19 @@ def get_album_members_payload(album_id):
 
     return members
 
-def get_album_photos_payload(user_id, album_id):
+def get_album_photos_payload(user_id, album_id, only_newest=None):
+    if only_newest:
+        order_limit_clause = \
+           """
+           ORDER BY album_index0 DESC
+           LIMIT {0}
+           """.format(only_newest)
+    else:
+        order_limit_clause = \
+           """
+           ORDER BY album_index0
+           """
+
     cursor = connection.cursor()
     cursor.execute(
         """
@@ -109,8 +121,7 @@ def get_album_photos_payload(user_id, album_id):
               LEFT OUTER JOIN photos_video
               ON p.storage_id=photos_video.storage_id) as T1
         WHERE album_id0=%s
-        ORDER BY album_index0
-        """,
+        """ + order_limit_clause,
         [user_id, album_id])
 
     photos = collections.OrderedDict()
@@ -182,16 +193,20 @@ def get_album_photos_payload(user_id, album_id):
 
     for row in cursor.fetchall():
         photo_id = row[0]
-        photos[photo_id]['comments'].append({
-            'author': {
-                'id': row[1],
-                'nickname': row[2],
-                'avatar_url': avatar_url_from_avatar_file_data(row[3]),
-            },
-            'date_created': row[4],
-            'client_msg_id': row[5],
-            'comment': row[6],
-        })
+        try:
+            photos[photo_id]['comments'].append({
+                'author': {
+                    'id': row[1],
+                    'nickname': row[2],
+                    'avatar_url': avatar_url_from_avatar_file_data(row[3]),
+                },
+                'date_created': row[4],
+                'client_msg_id': row[5],
+                'comment': row[6],
+            })
+        except KeyError:
+            # Ignore comments on photos that we are not interested in
+            pass
 
     return photos.values()
 
@@ -229,3 +244,84 @@ def get_album_detail_payload(user, album):
         'photos': photos
     }
     return payload
+
+
+def get_album_list_payload(user_id):
+    cursor = connection.cursor()
+    cursor.execute(
+        """
+        SELECT album_id0,
+               album_name0,
+               album_date_created0,
+               album_last_updated0,
+               album_revision_number0,
+               album_last_access0,
+               album_num_new_photos0,
+               album_creator_id0,
+               album_creator_nickname0,
+               album_creator_avatar_file0
+        FROM (SELECT am.album_id as album_id0,
+                     am.last_access as album_last_access0,
+                     (CASE WHEN am.last_access IS NULL
+                           THEN (SELECT COUNT(*)
+                                 FROM photos_photo
+                                 WHERE photos_photo.album_id = am.album_id AND
+                                       photos_photo.author_id != %s)
+                           ELSE (SELECT COUNT(*)
+                                 FROM photos_photo
+                                 WHERE photos_photo.album_id = am.album_id AND
+                                       photos_photo.author_id != %s AND
+                                       photos_photo.date_created > datetime(am.last_access, '0.1 second'))
+                           END) as album_num_new_photos0
+              FROM photos_album_members am
+              WHERE am.user_id = %s) as T1,
+             (SELECT a.id as album_id1,
+                     a.name as album_name0,
+                     a.date_created as album_date_created0,
+                     a.last_updated as album_last_updated0,
+                     a.revision_number as album_revision_number0,
+                     a.creator_id as album_creator_id0,
+                     phone_auth_user.nickname as album_creator_nickname0,
+                     phone_auth_user.avatar_file as album_creator_avatar_file0
+              FROM photos_album a
+              LEFT OUTER JOIN phone_auth_user
+              ON a.creator_id = phone_auth_user.id) as T2
+        WHERE album_id0 = album_id1
+        """,
+        [user_id, user_id, user_id])
+
+    albums = collections.OrderedDict()
+    for row in cursor.fetchall():
+        (row_album_id,
+        row_album_name,
+        row_album_date_created,
+        row_album_last_updated,
+        row_album_revision_number,
+        row_album_last_access,
+        row_album_num_new_photos,
+        row_album_creator_id,
+        row_album_creator_nickname,
+        row_album_creator_avatar_file) = row
+
+        albums[row_album_id] = {
+            'id': row_album_id,
+            'name': row_album_name, # TODO If no name then return name as list of members
+            'creator': {
+                'id': row_album_creator_id,
+                'nickname': row_album_creator_nickname,
+                'avatar_url': avatar_url_from_avatar_file_data(row_album_creator_avatar_file)
+            },
+            'date_created': row_album_date_created,
+            'last_updated': row_album_last_updated,
+            'etag': u'{0}'.format(row_album_revision_number), # See: photos.models.Album.get_etag
+
+            # TODO: This is not optimized, we should do a single SQL query to
+            # get all photos of all albums, instead of a separate query per
+            # album:
+            'latest_photos': get_album_photos_payload(user_id, row_album_id, only_newest=2),
+
+            'num_new_photos': row_album_num_new_photos,
+            'last_access': row_album_last_access
+        }
+
+    return albums.values()
