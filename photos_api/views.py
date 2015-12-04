@@ -409,7 +409,7 @@ class UserAvatarDetail(views.APIView):
 
 
 @supports_last_modified
-class Albums(generics.ListAPIView):
+class Albums(GenericAPIView):
     """
     This Resource supports the "If-Modified-Since" HTTP header.
 
