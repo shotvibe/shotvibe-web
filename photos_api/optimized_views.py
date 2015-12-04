@@ -247,6 +247,17 @@ def get_album_detail_payload(user, album):
 
 
 def get_album_list_payload(user_id):
+    if connection.vendor == 'sqlite':
+        am_last_access_offset = \
+            """
+            datetime(am.last_access, '0.1 second')
+            """
+    else:
+        am_last_access_offset = \
+            """
+            (am.last_access + INTERVAL '0.001 second')
+            """
+
     cursor = connection.cursor()
     cursor.execute(
         """
@@ -271,7 +282,7 @@ def get_album_list_payload(user_id):
                                  FROM photos_photo
                                  WHERE photos_photo.album_id = am.album_id AND
                                        photos_photo.author_id != %s AND
-                                       photos_photo.date_created > datetime(am.last_access, '0.1 second'))
+                                       photos_photo.date_created > """ + am_last_access_offset + """)
                            END) as album_num_new_photos0
               FROM photos_album_members am
               WHERE am.user_id = %s) as T1,
