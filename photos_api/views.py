@@ -409,7 +409,7 @@ class UserAvatarDetail(views.APIView):
 
 
 @supports_last_modified
-class Albums(generics.ListAPIView):
+class Albums(GenericAPIView):
     """
     This Resource supports the "If-Modified-Since" HTTP header.
 
@@ -431,6 +431,7 @@ class Albums(generics.ListAPIView):
 
         return super(Albums, self).initial(request, *args, **kwargs)
 
+    # TODO This could use an optimized query
     def last_modified(self, request):
         if not self.albums:
             return None
@@ -440,14 +441,9 @@ class Albums(generics.ListAPIView):
         else:
             return max([m.album.last_updated for m in self.albums])
 
-    def get_serializer_class(self):
-        if self.is_staff:
-            return AlbumNameSerializer
-        else:
-            return AlbumMemberNameSerializer
-
-    def get_queryset(self):
-        return self.albums
+    def get(self, request):
+        payload = optimized_views.get_album_list_payload(request.user.id)
+        return Response(payload, content_type='application/json')
 
     def post(self, request):
         serializer = AlbumAddSerializer(data=request.DATA)

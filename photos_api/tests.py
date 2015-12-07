@@ -73,8 +73,8 @@ class UserTest(BaseTestCase):
         all_albums = self.get_response_json('/albums/')
         self.assertEqual(len(all_albums), 5)
 
-        first_album_url = all_albums[0]['url']
-        first_album_response = self.client.get(first_album_url)
+        first_album_id = all_albums[0]['id']
+        first_album_response = self.client.get('/albums/' + str(first_album_id) + '/')
         self.assertEqual(first_album_response.status_code, 200)
 
     @unittest.skipIf(True, "Skipping because of hassles with managing AWS keys")
