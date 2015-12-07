@@ -316,7 +316,11 @@ def get_album_list_payload(user_id):
 
         albums[row_album_id] = {
             'id': row_album_id,
-            'name': row_album_name, # TODO If no name then return name as list of members
+
+            # TODO Could be optimized. Instead of a seperate query for each album, do
+            # one big query of all the members of all the albums:
+            'name': album_name_or_members(AlbumMember.objects.get(user__id=user_id, album__id=row_album_id)),
+
             'creator': {
                 'id': row_album_creator_id,
                 'nickname': row_album_creator_nickname,
