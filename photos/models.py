@@ -623,6 +623,9 @@ class VideoManager(models.Manager):
             video.duration = duration
             video.save(update_fields=['status', 'duration'])
             album.save_revision(now)
+
+            photo = video.get_photo()
+            device_push.broadcast_album_sync([photo.author.id], photo.album.id)
         elif video.status != Video.STATUS_READY:
             raise RuntimeError('Invalid transition from status: ' + video.status)
 
@@ -643,6 +646,9 @@ class Video(models.Model):
     duration = models.IntegerField()
 
     objects = VideoManager()
+
+    def get_photo(self):
+        return Photo.objects.get(storage_id=self.storage_id)
 
     @staticmethod
     def get_video_url(storage_id):
