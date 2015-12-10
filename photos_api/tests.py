@@ -753,6 +753,7 @@ class PhotoVideoTest(TestCase):
         Photo.objects.create(
                 photo_id = 'test-photo-id-1',
                 media_type = Photo.MEDIA_TYPE_PHOTO,
+                client_upload_id = '',
                 storage_id = 'test-storage-id-1',
                 subdomain = 'test-subdomain',
                 date_created = datetime.datetime(2000, 1, 2, tzinfo=timezone.utc),
@@ -763,6 +764,7 @@ class PhotoVideoTest(TestCase):
         Photo.objects.create(
                 photo_id = 'test-video-id-1',
                 media_type = Photo.MEDIA_TYPE_VIDEO,
+                client_upload_id = '',
                 storage_id = 'test-storage-id-2',
                 subdomain = 'test-subdomain',
                 date_created = datetime.datetime(2000, 1, 2, tzinfo=timezone.utc),
@@ -806,6 +808,7 @@ class PhotoCommentsTest(TestCase):
         Photo.objects.create(
                 photo_id = 'test-photo-id-1',
                 media_type = Photo.MEDIA_TYPE_PHOTO,
+                client_upload_id = '',
                 storage_id = 'test-storage-id-1',
                 subdomain = 'test-subdomain',
                 date_created = datetime.datetime(2000, 1, 2, tzinfo=timezone.utc),
@@ -891,6 +894,7 @@ class PhotoUserTagTest(TestCase):
         Photo.objects.create(
                 photo_id = 'test-photo-id-1',
                 media_type = Photo.MEDIA_TYPE_PHOTO,
+                client_upload_id = '',
                 storage_id = 'test-storage-id-1',
                 subdomain = 'test-subdomain',
                 date_created = datetime.datetime(2000, 1, 2, tzinfo=timezone.utc),
@@ -974,6 +978,7 @@ class PhotoGlanceScoresTest(TestCase):
         Photo.objects.create(
                 photo_id = 'test-photo-id-1',
                 media_type = Photo.MEDIA_TYPE_PHOTO,
+                client_upload_id = '',
                 storage_id = 'test-storage-id-1',
                 subdomain = 'test-subdomain',
                 date_created = datetime.datetime(2000, 1, 2, tzinfo=timezone.utc),
@@ -1055,6 +1060,7 @@ class PhotoGlanceTest(TestCase):
         Photo.objects.create(
                 photo_id = 'test-photo-id-1',
                 media_type = Photo.MEDIA_TYPE_PHOTO,
+                client_upload_id = '',
                 storage_id = 'test-storage-id-1',
                 subdomain = 'test-subdomain',
                 date_created = datetime.datetime(2000, 1, 2, tzinfo=timezone.utc),
@@ -1755,6 +1761,7 @@ class PrivateApiTestCase(BaseTestCase):
         album = Album.objects.get(pk=8)
 
         body = {
+            'client_upload_id': 'file1',
             'author_id': amanda.id,
             'album_id': album.id,
             'status': 'processing'
@@ -1778,6 +1785,7 @@ class PrivateApiTestCase(BaseTestCase):
         album = Album.objects.get(pk=8)
 
         body = {
+            'client_upload_id': 'file1',
             'author_id': amanda.id,
             'album_id': album.id,
             'status': 'invalid'
@@ -1801,6 +1809,7 @@ class PrivateApiTestCase(BaseTestCase):
         album = Album.objects.get(pk=8)
 
         body = {
+            'client_upload_id': 'file1',
             'author_id': amanda.id,
             'album_id': album.id,
             'status': 'ready',

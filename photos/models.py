@@ -411,6 +411,7 @@ class Photo(models.Model):
 
     photo_id = models.CharField(primary_key=True, max_length=128)
     media_type = models.IntegerField(choices=MEDIA_TYPE_CHOICES)
+    client_upload_id = models.CharField(max_length=128)
     storage_id = models.CharField(max_length=128, db_index=True)
     subdomain = models.CharField(max_length=64)
     date_created = models.DateTimeField(db_index=True)
@@ -567,7 +568,7 @@ class PendingPhoto(models.Model):
 
 
 class VideoManager(models.Manager):
-    def set_processing(self, storage_id, author, album, now):
+    def set_processing(self, client_upload_id, storage_id, author, album, now):
         def get_next_album_index(album):
             album_index_q = Photo.objects.filter(album=album).aggregate(models.Max('album_index'))
 
@@ -583,6 +584,7 @@ class VideoManager(models.Manager):
                 with transaction.atomic():
                     next_album_index = get_next_album_index(album)
                     p, created = Photo.objects.get_or_create(
+                        client_upload_id = client_upload_id,
                         storage_id=storage_id,
                         defaults={
                             'photo_id': Photo.generate_photo_id(),
@@ -605,8 +607,8 @@ class VideoManager(models.Manager):
                 duration = 0)
             album.save_revision(now)
 
-    def set_invalid(self, storage_id, author, album, now):
-        self.set_processing(storage_id, author, album, now)
+    def set_invalid(self, client_upload_id, storage_id, author, album, now):
+        self.set_processing(client_upload_id, storage_id, author, album, now)
         video = Video.objects.get(storage_id=storage_id)
         if video.status == Video.STATUS_PROCESSING:
             video.status = Video.STATUS_INVALID
@@ -615,8 +617,8 @@ class VideoManager(models.Manager):
         elif video.status != Video.STATUS_INVALID:
             raise RuntimeError('Invalid transition from status: ' + video.status)
 
-    def set_ready(self, storage_id, author, album, duration, now):
-        self.set_processing(storage_id, author, album, now)
+    def set_ready(self, client_upload_id, storage_id, author, album, duration, now):
+        self.set_processing(client_upload_id, storage_id, author, album, now)
         video = Video.objects.get(storage_id=storage_id)
         if video.status == Video.STATUS_PROCESSING:
             video.status = Video.STATUS_READY

@@ -1259,6 +1259,7 @@
     "model": "photos.photo", 
     "fields": {
         "media_type": 1, 
+        "client_upload_id": "",
         "album": 1, 
         "author": 14, 
         "subdomain": "photos02", 
@@ -1271,6 +1272,7 @@
     "model": "photos.photo", 
     "fields": {
         "media_type": 1, 
+        "client_upload_id": "",
         "album": 7, 
         "author": 8, 
         "subdomain": "photos04", 
@@ -1283,6 +1285,7 @@
     "model": "photos.photo", 
     "fields": {
         "media_type": 1, 
+        "client_upload_id": "",
         "album": 4, 
         "author": 9, 
         "subdomain": "photos01", 
@@ -1295,6 +1298,7 @@
     "model": "photos.photo", 
     "fields": {
         "media_type": 1, 
+        "client_upload_id": "",
         "album": 6, 
         "author": 14, 
         "subdomain": "photos02", 
@@ -1307,6 +1311,7 @@
     "model": "photos.photo", 
     "fields": {
         "media_type": 1, 
+        "client_upload_id": "",
         "album": 7, 
         "author": 3, 
         "subdomain": "photos01", 
@@ -1319,6 +1324,7 @@
     "model": "photos.photo", 
     "fields": {
         "media_type": 1, 
+        "client_upload_id": "",
         "album": 7, 
         "author": 13, 
         "subdomain": "photos04", 
@@ -1331,6 +1337,7 @@
     "model": "photos.photo", 
     "fields": {
         "media_type": 1, 
+        "client_upload_id": "",
         "album": 5, 
         "author": 5, 
         "subdomain": "photos03", 
@@ -1343,6 +1350,7 @@
     "model": "photos.photo", 
     "fields": {
         "media_type": 1, 
+        "client_upload_id": "",
         "album": 10, 
         "author": 10, 
         "subdomain": "photos04", 
@@ -1355,6 +1363,7 @@
     "model": "photos.photo", 
     "fields": {
         "media_type": 1, 
+        "client_upload_id": "",
         "album": 9, 
         "author": 6, 
         "subdomain": "photos04", 
@@ -1367,6 +1376,7 @@
     "model": "photos.photo", 
     "fields": {
         "media_type": 1, 
+        "client_upload_id": "",
         "album": 2, 
         "author": 14, 
         "subdomain": "photos03", 
@@ -1379,6 +1389,7 @@
     "model": "photos.photo", 
     "fields": {
         "media_type": 1, 
+        "client_upload_id": "",
         "album": 10, 
         "author": 9, 
         "subdomain": "photos02", 
@@ -1391,6 +1402,7 @@
     "model": "photos.photo", 
     "fields": {
         "media_type": 1, 
+        "client_upload_id": "",
         "album": 8, 
         "author": 1, 
         "subdomain": "photos02", 
@@ -1403,6 +1415,7 @@
     "model": "photos.photo", 
     "fields": {
         "media_type": 1, 
+        "client_upload_id": "",
         "album": 3, 
         "author": 11, 
         "subdomain": "photos01", 
@@ -1415,6 +1428,7 @@
     "model": "photos.photo", 
     "fields": {
         "media_type": 1, 
+        "client_upload_id": "",
         "album": 10, 
         "author": 11, 
         "subdomain": "photos04", 
@@ -1427,6 +1441,7 @@
     "model": "photos.photo", 
     "fields": {
         "media_type": 1, 
+        "client_upload_id": "",
         "album": 8, 
         "author": 17, 
         "subdomain": "photos01", 
@@ -1439,6 +1454,7 @@
     "model": "photos.photo", 
     "fields": {
         "media_type": 1, 
+        "client_upload_id": "",
         "album": 8, 
         "author": 5, 
         "subdomain": "photos04", 
@@ -1451,6 +1467,7 @@
     "model": "photos.photo", 
     "fields": {
         "media_type": 1, 
+        "client_upload_id": "",
         "album": 1, 
         "author": 15, 
         "subdomain": "photos04", 
@@ -1463,6 +1480,7 @@
     "model": "photos.photo", 
     "fields": {
         "media_type": 1, 
+        "client_upload_id": "",
         "album": 7, 
         "author": 4, 
         "subdomain": "photos03", 
@@ -1475,6 +1493,7 @@
     "model": "photos.photo", 
     "fields": {
         "media_type": 1, 
+        "client_upload_id": "",
         "album": 5, 
         "author": 11, 
         "subdomain": "photos01", 
@@ -1487,6 +1506,7 @@
     "model": "photos.photo", 
     "fields": {
         "media_type": 1, 
+        "client_upload_id": "",
         "album": 1, 
         "author": 17, 
         "subdomain": "photos03", 
