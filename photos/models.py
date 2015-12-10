@@ -646,11 +646,11 @@ class Video(models.Model):
 
     @staticmethod
     def get_video_url(storage_id):
-        return 'https://test-videos1.s3.amazonaws.com/' + storage_id + '.mp4'
+        return 'https://d20n6du31fmlm3.cloudfront.net/' + storage_id + '.mp4'
 
     @staticmethod
     def get_video_thumbnail_url(storage_id):
-        return 'https://test-videos1.s3.amazonaws.com/' + storage_id + '-00001.jpg'
+        return 'https://d20n6du31fmlm3.cloudfront.net/' + storage_id + '-00001.jpg'
 
 
 class PhotoComment(models.Model):
