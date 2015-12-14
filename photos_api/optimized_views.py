@@ -78,6 +78,7 @@ def get_album_photos_payload(user_id, album_id, only_newest=None):
         """
         SELECT photo_id0,
                photo_media_type0,
+               photo_client_upload_id0,
                photo_subdomain0,
                photo_date_created0,
                video_status0,
@@ -90,6 +91,7 @@ def get_album_photos_payload(user_id, album_id, only_newest=None):
                author_avatar_file0
         FROM (SELECT p.photo_id as photo_id0,
                      p.media_type as photo_media_type0,
+                     p.client_upload_id as photo_client_upload_id0,
                      p.subdomain as photo_subdomain0,
                      p.date_created as photo_date_created0,
                      p.album_id as album_id0,
@@ -128,6 +130,7 @@ def get_album_photos_payload(user_id, album_id, only_newest=None):
     for row in cursor.fetchall():
         (row_photo_id,
         row_media_type,
+        row_client_upload_id,
         row_photo_subdomain,
         row_photo_date_created,
         row_video_status,
@@ -150,6 +153,7 @@ def get_album_photos_payload(user_id, album_id, only_newest=None):
         photos[row_photo_id] = {
             'photo_id': row_photo_id,
             'media_type': photo.get_media_type_display(),
+            'client_upload_id': row_client_upload_id,
             'photo_url': photo.get_photo_url(),
             'date_created': row_photo_date_created,
             'author': {
