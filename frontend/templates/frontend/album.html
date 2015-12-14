@@ -69,7 +69,8 @@ See:
   http://docs.aws.amazon.com/AWSJavaScriptSDK/guide/browser-examples.html
 -->
 <input type="file" id="file-chooser" />
-<button id="upload-button">Upload to S3</button>
+<button id="upload-button-photo">Upload Photo</button>
+<button id="upload-button-video">Upload Video</button>
 <div id="results"></div>
 
 <script type="text/javascript">
@@ -82,15 +83,20 @@ See:
   var bucket = new AWS.S3({params: {Bucket: 'glance-uploads'}});
 
   var fileChooser = document.getElementById('file-chooser');
-  var button = document.getElementById('upload-button');
+  var buttonPhoto = document.getElementById('upload-button-photo');
+  var buttonVideo = document.getElementById('upload-button-video');
   var results = document.getElementById('results');
-  button.addEventListener('click', function() {
+
+  buttonPhoto.addEventListener('click', function() { uploadFile('photos'); });
+  buttonVideo.addEventListener('click', function() { uploadFile('videos'); });
+
+  function uploadFile(prefix) {
     var file = fileChooser.files[0];
     if (file) {
       results.innerHTML = 'Uploading...';
 
       var uniqueName = getUniqueName();
-      var key = 'videos/' + {{ user.id }} + '/' + {{ album.id }} + '/' + uniqueName + '.mp4';
+      var key = prefix + '/' + {{ user.id }} + '/' + {{ album.id }} + '/' + uniqueName + '.mp4';
 
       var params = {Key: key, ContentType: file.type, Body: file};
       bucket.upload(params, function (err, data) {
@@ -100,7 +106,7 @@ See:
     } else {
       results.innerHTML = 'Nothing to upload.';
     }
-  }, false);
+  }
 
   // From:
   //   http://stackoverflow.com/a/10073788
