@@ -81,6 +81,7 @@ def video_object(request, storage_id):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     author_id = serializer.object['author_id']
+    client_upload_id = serializer.object['client_upload_id']
     album_id = serializer.object['album_id']
     status_ = serializer.object['status']
 
@@ -99,14 +100,14 @@ def video_object(request, storage_id):
     now = timezone.now()
 
     if status_ == 'processing':
-        Video.objects.set_processing(storage_id, author, album, now)
+        Video.objects.set_processing(client_upload_id, storage_id, author, album, now)
     elif status_ == 'ready':
         duration = serializer.object.get('duration')
         if duration is None:
             return Response('Missing required field "duration"', status=status.HTTP_400_BAD_REQUEST)
-        Video.objects.set_ready(storage_id, author, album, duration, now)
+        Video.objects.set_ready(client_upload_id, storage_id, author, album, duration, now)
     elif status_ == 'invalid':
-        Video.objects.set_invalid(storage_id, author, album, now)
+        Video.objects.set_invalid(client_upload_id, storage_id, author, album, now)
     else:
         raise RuntimeError('Unknown status: ' + status_)
 

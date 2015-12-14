@@ -4,6 +4,7 @@ from photos.models import Video
 
 
 class VideoObjectSerializer(serializers.Serializer):
+    client_upload_id = serializers.CharField()
     author_id = serializers.IntegerField()
     album_id = serializers.IntegerField()
     status = serializers.ChoiceField(choices=(
