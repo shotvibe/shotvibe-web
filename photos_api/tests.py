@@ -1829,3 +1829,26 @@ class PrivateApiTestCase(BaseTestCase):
         self.assertEqual(last_photo.media_type, Photo.MEDIA_TYPE_VIDEO)
         self.assertEqual(Video.objects.get(storage_id=last_photo.storage_id).status, Video.STATUS_READY)
         self.assertEqual(Video.objects.get(storage_id=last_photo.storage_id).duration, 40)
+
+    def test_photo_upload_ready(self):
+        amanda = User.objects.get(nickname='amanda')
+        album = Album.objects.get(pk=8)
+
+        body = {
+            'client_upload_id': 'file1',
+            'author_id': amanda.id,
+            'album_id': album.id,
+            'status': 'ready',
+        }
+        storage_id = 'test-storage-5534'
+
+        response = self.client.put(reverse('photo-object', kwargs={'storage_id':storage_id}),
+                HTTP_AUTHORIZATION='Key ' + settings.PRIVATE_API_KEY,
+                data=json.dumps(body),
+                content_type="application/json")
+
+        self.assertEqual(response.status_code, 204)
+
+        last_photo = album.get_photos().last()
+        self.assertEqual(last_photo.storage_id, storage_id)
+        self.assertEqual(last_photo.media_type, Photo.MEDIA_TYPE_PHOTO)

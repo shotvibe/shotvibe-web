@@ -18,6 +18,8 @@ from photos.models import Album
 from photos.models import PendingPhoto
 from photos.models import Photo
 from photos.models import PhotoServer
+from photos_api.signals import photos_added_to_album
+from photos_api.device_push import in_testing_mode
 
 
 def choose_random_subdomain():
@@ -383,6 +385,62 @@ def copy_photos_to_album(author, photo_ids, album_id, date_created):
         thread.daemon = False
         thread.start()
         thread.join_with_exception()
+
+def add_photo(client_upload_id, storage_id, author, album, now):
+    def get_next_album_index(album):
+        album_index_q = Photo.objects.filter(album=album).aggregate(Max('album_index'))
+
+        max_album_index = album_index_q['album_index__max']
+        if max_album_index is None:
+            return 0
+        else:
+            return max_album_index + 1
+
+    success = False
+    while not success:
+        try:
+            with transaction.atomic():
+                next_album_index = get_next_album_index(album)
+                p, created = Photo.objects.get_or_create(
+                    storage_id=storage_id,
+                    defaults={
+                        'photo_id': Photo.generate_photo_id(),
+                        'media_type': Photo.MEDIA_TYPE_PHOTO,
+                        'client_upload_id': client_upload_id,
+                        'subdomain': choose_random_subdomain(),
+                        'date_created': now,
+                        'author': author,
+                        'album': album,
+                        'album_index': next_album_index
+                    })
+        except IntegrityError:
+            # This will happen if there is a collision with a duplicate
+            # 'album_index' from a concurrent request
+            success = False
+        else:
+            success = True
+    if created:
+        if not in_testing_mode():
+            # Update the photo servers:
+            for photo_server in PhotoServer.objects.filter(subdomain=p.subdomain, unreachable=False):
+                # TODO We should use concurrent requests for this
+
+                num_retries = 5
+                initial_retry_time = 4
+
+                try:
+                    request_with_n_retries(num_retries, initial_retry_time,
+                            lambda: photo_server_set_photos(photo_server.photos_update_url, photo_server.auth_key, [p]))
+                except requests.exceptions.RequestException:
+                    # TODO Log this
+                    photo_server.set_unreachable()
+
+        album.save_revision(now)
+
+        photos_added_to_album.send(sender=None,
+                                   photos=[p.photo_id],
+                                   by_user=author,
+                                   to_album=album)
 
 
 def is_postgresql(conn):
