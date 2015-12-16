@@ -13,3 +13,13 @@ class VideoObjectSerializer(serializers.Serializer):
         ('invalid', 'invalid'),
     ))
     duration = serializers.IntegerField(required=False)
+
+class PhotoObjectSerializer(serializers.Serializer):
+    client_upload_id = serializers.CharField()
+    author_id = serializers.IntegerField()
+    album_id = serializers.IntegerField()
+    status = serializers.ChoiceField(choices=(
+        ('processing', 'processing'),
+        ('ready', 'ready'),
+        ('invalid', 'invalid'),
+    ))
