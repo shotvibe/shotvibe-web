@@ -187,6 +187,10 @@ class User(django.contrib.auth.models.AbstractBaseUser, django.contrib.auth.mode
 
     def increment_user_glance_score(self, delta):
         User.objects.filter(id=self.id).update(user_glance_score=models.F('user_glance_score') + delta)
+        updated_glance_score = User.objects.get(pk=self.id).user_glance_score
+
+        from photos_api import device_push
+        device_push.broadcast_user_glance_score_update(self.id, updated_glance_score)
 
 
 class UserEmail(models.Model):
