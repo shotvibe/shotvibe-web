@@ -344,6 +344,27 @@ def broadcast_photo_user_tagged(tagged_user_id, album_id, photo_id, album_name):
     send_message_or_log_errors(rq)
 
 
+def broadcast_user_glance_score_update(user_id, user_glance_score):
+    payload = {
+            'type': 'user_glance_score_update',
+            'user_glance_score': user_glance_score
+        }
+
+    rq = {
+            'user_ids': [str(user_id)],
+            'gcm': {
+                'data': {
+                    'd': json.dumps(payload)
+                    }
+                },
+            'apns': {
+                'aps': {},
+                'd': payload
+                }
+            }
+    send_message_or_log_errors(rq)
+
+
 def broadcast_photo_glance(author_id, glance_user_name, album_id, album_name):
     payload = {
             'type': 'photo_glance',
