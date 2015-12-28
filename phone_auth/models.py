@@ -304,6 +304,9 @@ class PhoneNumberManager(models.Manager):
 
         auth_token = AuthToken.objects.create_auth_token(user, device_description, timezone.now())
 
+        import welcome_album
+        welcome_album.create_welcome_album(user, timezone.now())
+
         # TODO maybe confirm_obj.delete(), or maybe better to wait for it to be
         # garbage collected automatically
 
