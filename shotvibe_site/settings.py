@@ -103,6 +103,10 @@ ALL_PHOTO_SUBDOMAINS = (
 # This should be set to the album that will be used as the global "Public Feed"
 PUBLIC_ALBUM_ID = 1000
 
+# This should be set to the album that will be used as a template for the
+# welcome album
+WELCOME_ALBUM_ID = 1001
+
 ROOT_URLCONF = 'shotvibe_site.urls'
 
 SUBDOMAIN_URLCONFS = {
@@ -143,6 +147,7 @@ INSTALLED_APPS = (
     'photos_api',
     'affiliates',
     'slideshow',
+    'welcome_album',
 )
 
 LOGIN_REDIRECT_URL = '/'
