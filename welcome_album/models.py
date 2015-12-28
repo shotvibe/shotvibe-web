@@ -10,6 +10,9 @@ class ScheduledWelcomeAlbumJobManager(models.Manager):
         return ScheduledWelcomeAlbumJob.objects.filter(scheduled_job_time__lte=time)
 
     def schedule_job(self, new_user, current_time):
+        if not settings.WELCOME_ALBUM_ID:
+            return
+
         ScheduledWelcomeAlbumJob.objects.create(
                 scheduled_job_time = current_time + WELCOME_ALBUM_DELAY,
                 new_user = new_user)
