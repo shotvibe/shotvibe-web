@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import transaction
+import django.db
 
 from photos import photo_operations
 from photos.models import Album
