@@ -42,19 +42,27 @@ def get_album_members_payload(album_id):
 
     members = []
     for row in cursor.fetchall():
-        if row[5] > 0:
+        (row_user_id,
+        row_user_nickname,
+        row_user_avatar_file,
+        row_member_album_admin,
+        row_member_added_by_user_id,
+        row_user_phone_verified,
+        row_user_phone_link_visited) = row
+
+        if row_user_phone_verified > 0:
             invite_status = User.STATUS_JOINED
-        elif row[6] > 0:
+        elif row_user_phone_link_visited > 0:
             invite_status = User.STATUS_INVITATION_VIEWED
         else:
             invite_status = User.STATUS_SMS_SENT
 
         members.append({
-            'id': row[0],
-            'nickname': row[1],
-            'avatar_url': avatar_url_from_avatar_file_data(row[2]),
-            'album_admin': row[3],
-            'added_by_user_id': row[4],
+            'id': row_user_id,
+            'nickname': row_user_nickname,
+            'avatar_url': avatar_url_from_avatar_file_data(row_user_avatar_file),
+            'album_admin': row_member_album_admin,
+            'added_by_user_id': row_member_added_by_user_id,
             'invite_status': invite_status
         })
 
@@ -196,17 +204,25 @@ def get_album_photos_payload(user_id, album_id, only_newest=None):
         [album_id])
 
     for row in cursor.fetchall():
-        photo_id = row[0]
+        (row_photo_id,
+        row_photo_author_user_id,
+        row_photo_author_user_nickname,
+        row_photo_author_user_avatar_file,
+        row_photocomment_date_created,
+        row_photocomment_client_msg_id,
+        row_photocomment_comment_text) = row
+
+        photo_id = row_photo_id
         try:
             photos[photo_id]['comments'].append({
                 'author': {
-                    'id': row[1],
-                    'nickname': row[2],
-                    'avatar_url': avatar_url_from_avatar_file_data(row[3]),
+                    'id': row_photo_author_user_id,
+                    'nickname': row_photo_author_user_nickname,
+                    'avatar_url': avatar_url_from_avatar_file_data(row_photo_author_user_avatar_file),
                 },
-                'date_created': row[4],
-                'client_msg_id': row[5],
-                'comment': row[6],
+                'date_created': row_photocomment_date_created,
+                'client_msg_id': row_photocomment_client_msg_id,
+                'comment': row_photocomment_comment_text,
             })
         except KeyError:
             # Ignore comments on photos that we are not interested in
