@@ -116,6 +116,8 @@ class User(django.contrib.auth.models.AbstractBaseUser, django.contrib.auth.mode
                     'Unselect this instead of deleting accounts.')
     )
 
+    last_online = models.DateTimeField(default=timezone.now)
+
     avatar_file = models.CharField(max_length=128,
                                    validators=[validate_avatar_file_data],
                                    default=random_default_avatar_file_data)

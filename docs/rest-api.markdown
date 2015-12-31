@@ -295,6 +295,7 @@ Allow: HEAD, GET, PATCH, PUT, OPTIONS
     "id": 2,
     "url": "https://api.shotvibe.com/users/2/",
     "nickname": "amanda",
+    "last_online": "2009-10-26T20:53:49Z",
     "avatar_url": "https://shotvibe-avatars-01.s3.amazonaws.com/default-avatar-0064.jpg"
 }
 ```
@@ -413,6 +414,7 @@ Example response:
                 "id": 8,
                 "url": "https://api.shotvibe.com/users/8/",
                 "nickname": "george",
+                "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
             },
             "date_created": "2009-10-26T20:53:49Z",
@@ -429,6 +431,7 @@ Example response:
                         "id": 8,
                         "url": "https://api.shotvibe.com/users/8/",
                         "nickname": "george",
+                        "last_online": "2009-10-26T20:53:49Z",
                         "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
                     }
                 }
@@ -442,6 +445,7 @@ Example response:
                 "id": 8,
                 "url": "https://api.shotvibe.com/users/8/",
                 "nickname": "george",
+                "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
             },
             "date_created": "2008-10-26T20:53:49Z",
@@ -458,6 +462,7 @@ Example response:
                         "id": 12,
                         "url": "https://api.shotvibe.com/users/12/",
                         "nickname": "kevin",
+                        "last_online": "2009-10-26T20:53:49Z",
                         "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
                     }
                 },
@@ -469,6 +474,7 @@ Example response:
                         "id": 670666295,
                         "url": "https://api.shotvibe.com/users/670666295/",
                         "nickname": "x",
+                        "last_online": "2009-10-26T20:53:49Z",
                         "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
                     }
                 }
@@ -482,6 +488,7 @@ Example response:
                 "id": 8,
                 "url": "https://api.shotvibe.com/users/8/",
                 "nickname": "george",
+                "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
             },
             "date_created": "2010-10-26T20:53:49Z",
@@ -498,6 +505,7 @@ Example response:
                         "id": 17,
                         "url": "https://api.shotvibe.com/users/17/",
                         "nickname": "paula",
+                        "last_online": "2009-10-26T20:53:49Z",
                         "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
                     }
                 }
@@ -511,6 +519,7 @@ Example response:
                 "id": 8,
                 "url": "https://api.shotvibe.com/users/8/",
                 "nickname": "george",
+                "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
             },
             "date_created": "2009-07-26T20:53:49Z",
@@ -527,6 +536,7 @@ Example response:
                         "id": 1791562666,
                         "url": "https://api.shotvibe.com/users/1791562666/",
                         "nickname": "admin",
+                        "last_online": "2009-10-26T20:53:49Z",
                         "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
                     }
                 },
@@ -538,6 +548,7 @@ Example response:
                         "id": 1791562666,
                         "url": "https://api.shotvibe.com/users/1791562666/",
                         "nickname": "admin",
+                        "last_online": "2009-10-26T20:53:49Z",
                         "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
                     }
                 }
@@ -607,6 +618,7 @@ Example response:
             "id": 8,
             "url": "https://api.shotvibe.com/users/8/",
             "nickname": "george",
+            "last_online": "2009-10-26T20:53:49Z",
             "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
         },
         "date_created": "2009-10-26T20:53:49Z",
@@ -618,6 +630,7 @@ Example response:
                 "id": 1,
                 "url": "https://api.shotvibe.com/users/1/",
                 "nickname": "admin",
+                "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": true,
                 "added_by_user_id": 1,
@@ -627,6 +640,7 @@ Example response:
                 "id": 2,
                 "url": "https://api.shotvibe.com/users/2/",
                 "nickname": "amanda",
+                "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
                 "added_by_user_id": 1,
@@ -636,6 +650,7 @@ Example response:
                 "id": 5,
                 "url": "https://api.shotvibe.com/users/5/",
                 "nickname": "daniel",
+                "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
                 "added_by_user_id": 1,
@@ -645,6 +660,7 @@ Example response:
                 "id": 6,
                 "url": "https://api.shotvibe.com/users/6/",
                 "nickname": "emma",
+                "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
                 "added_by_user_id": 1,
@@ -654,6 +670,7 @@ Example response:
                 "id": 9,
                 "url": "https://api.shotvibe.com/users/9/",
                 "nickname": "helen",
+                "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
                 "added_by_user_id": 1,
@@ -663,6 +680,7 @@ Example response:
                 "id": 11,
                 "url": "https://api.shotvibe.com/users/11/",
                 "nickname": "jackie",
+                "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
                 "added_by_user_id": 1,
@@ -672,6 +690,7 @@ Example response:
                 "id": 12,
                 "url": "https://api.shotvibe.com/users/12/",
                 "nickname": "kevin",
+                "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
                 "added_by_user_id": 1,
@@ -681,6 +700,7 @@ Example response:
                 "id": 13,
                 "url": "https://api.shotvibe.com/users/13/",
                 "nickname": "lauren",
+                "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
                 "added_by_user_id": 1,
@@ -690,6 +710,7 @@ Example response:
                 "id": 14,
                 "url": "https://api.shotvibe.com/users/14/",
                 "nickname": "mark",
+                "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
                 "added_by_user_id": 1,
@@ -699,6 +720,7 @@ Example response:
                 "id": 15,
                 "url": "https://api.shotvibe.com/users/15/",
                 "nickname": "nancy",
+                "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
                 "added_by_user_id": 1,
@@ -708,6 +730,7 @@ Example response:
                 "id": 17,
                 "url": "https://api.shotvibe.com/users/17/",
                 "nickname": "paula",
+                "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
                 "added_by_user_id": 1,
@@ -717,6 +740,7 @@ Example response:
                 "id": 670666294,
                 "url": "https://api.shotvibe.com/users/670666294/",
                 "nickname": "x",
+                "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
                 "added_by_user_id": 1,
@@ -726,6 +750,7 @@ Example response:
                 "id": 670666295,
                 "url": "https://api.shotvibe.com/users/670666295/",
                 "nickname": "x",
+                "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
                 "added_by_user_id": 1,
@@ -735,6 +760,7 @@ Example response:
                 "id": 670666296,
                 "url": "https://api.shotvibe.com/users/670666296/",
                 "nickname": "x",
+                "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
                 "added_by_user_id": 1,
@@ -744,6 +770,7 @@ Example response:
                 "id": 670666297,
                 "url": "https://api.shotvibe.com/users/670666297/",
                 "nickname": "x",
+                "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
                 "added_by_user_id": 1,
@@ -753,6 +780,7 @@ Example response:
                 "id": 1791562667,
                 "url": "https://api.shotvibe.com/users/1791562667/",
                 "nickname": "testuser",
+                "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
                 "added_by_user_id": 1,
@@ -762,6 +790,7 @@ Example response:
                 "id": 1791562669,
                 "url": "https://api.shotvibe.com/users/1791562669/",
                 "nickname": "benny",
+                "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
                 "album_admin": false,
                 "added_by_user_id": 1,
@@ -777,6 +806,7 @@ Example response:
                     "id": 670666295,
                     "url": "https://api.shotvibe.com/users/670666295/",
                     "nickname": "x",
+                    "last_online": "2009-10-26T20:53:49Z",
                     "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
                 },
                 "comments": [],
@@ -793,6 +823,7 @@ Example response:
                     "id": 12,
                     "url": "https://api.shotvibe.com/users/12/",
                     "nickname": "kevin",
+                    "last_online": "2009-10-26T20:53:49Z",
                     "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
                 },
                 "comments": [
@@ -800,6 +831,7 @@ Example response:
                         "author": {
                             "id": 670666295,
                             "nickname": "x",
+                            "last_online": "2009-10-26T20:53:49Z",
                             "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
                         },
                         "date_created": "2009-11-12T20:20:03Z",
@@ -812,6 +844,7 @@ Example response:
                         "tagged_user": {
                             "id": 670666295,
                             "nickname": "x",
+                            "last_online": "2009-10-26T20:53:49Z",
                             "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
                         },
                         "tag_coord_x": 0.56,
@@ -825,6 +858,7 @@ Example response:
                         "author": {
                             "id": 670666295,
                             "nickname": "x",
+                            "last_online": "2009-10-26T20:53:49Z",
                             "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
                         },
                         "emoticon_name": "tango_smile.png"
@@ -839,6 +873,7 @@ Example response:
                     "id": 8,
                     "url": "https://api.shotvibe.com/users/8/",
                     "nickname": "george",
+                    "last_online": "2009-10-26T20:53:49Z",
                     "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
                 },
                 "comments": [],
@@ -1310,6 +1345,7 @@ Allow: HEAD, GET, OPTIONS
         "id": 2,
         "url": "https://api.shotvibe.com/users/2/",
         "nickname": "amanda",
+        "last_online": "2009-10-26T20:53:49Z",
         "avatar_url": "https://shotvibe-avatars-01.s3.amazonaws.com/default-avatar-0064.jpg"
     }
     "phone_number": "+12127181111"
