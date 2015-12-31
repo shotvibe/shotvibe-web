@@ -297,15 +297,16 @@ class PhoneNumberManager(models.Manager):
 
         # Confirmation successful
 
-        confirm_obj.phone_number.verified = True
-        confirm_obj.phone_number.save(update_fields=['verified'])
-
         user = confirm_obj.phone_number.user
 
-        auth_token = AuthToken.objects.create_auth_token(user, device_description, timezone.now())
+        if not confirm_obj.phone_number.verified:
+            confirm_obj.phone_number.verified = True
+            confirm_obj.phone_number.save(update_fields=['verified'])
 
-        from welcome_album.models import ScheduledWelcomeAlbumJob
-        ScheduledWelcomeAlbumJob.objects.schedule_job(user, timezone.now())
+            from welcome_album.models import ScheduledWelcomeAlbumJob
+            ScheduledWelcomeAlbumJob.objects.schedule_job(user, timezone.now())
+
+        auth_token = AuthToken.objects.create_auth_token(user, device_description, timezone.now())
 
         # TODO maybe confirm_obj.delete(), or maybe better to wait for it to be
         # garbage collected automatically
