@@ -1,5 +1,8 @@
+import unittest
+
 import datetime
 
+from django.conf import settings
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils.timezone import utc
@@ -18,10 +21,12 @@ class WelcomeAlbumTest(TestCase):
 
         self.welcome_album = Album.objects.create_album(self.amanda, 'Welcome', datetime.datetime(2000, 01, 01, tzinfo=utc))
 
+    @unittest.skipIf(not settings.USING_LOCAL_PHOTOS, "Skipping because test is broken when run with transactions")
     def test_create_welcome_album(self):
         with override_settings(WELCOME_ALBUM_ID=self.welcome_album.id):
             welcome_album.create_welcome_album(self.bob, datetime.datetime(2000, 01, 02, 0, 0, 0, tzinfo=utc))
 
+    @unittest.skipIf(not settings.USING_LOCAL_PHOTOS, "Skipping because test is broken when run with transactions")
     def test_scheduled_jobs(self):
         with override_settings(WELCOME_ALBUM_ID=self.welcome_album.id):
             ScheduledWelcomeAlbumJob.objects.schedule_job(self.bob, datetime.datetime(2000, 01, 02, 0, 0, 0, tzinfo=utc))
