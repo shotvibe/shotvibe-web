@@ -251,7 +251,7 @@ def get_album_detail_payload(user, album):
     creator = {
         'id': album.creator.id,
         'nickname': album.creator.nickname,
-        'nickname': album.creator.last_online,
+        'last_online': album.creator.last_online,
         'avatar_url': album.creator.get_avatar_url()
     }
 
