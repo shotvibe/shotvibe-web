@@ -146,7 +146,7 @@ class UserAdmin(auth.admin.UserAdmin):
 
     fieldsets = (
         (None, {'fields': ('password',)}),
-        ('Personal info', {'fields': ('nickname', 'avatar_full', 'primary_email', 'user_glance_score')}),
+        ('Personal info', {'fields': ('nickname', 'avatar_full', 'primary_email', 'user_glance_score', 'last_online')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser',
                                        'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
@@ -159,7 +159,7 @@ class UserAdmin(auth.admin.UserAdmin):
     )
     form = UserChangeForm
     add_form = UserCreationForm
-    list_display = ('id', 'avatar', 'nickname', 'primary_email', 'first_phone_number', 'first_phone_number_verified', 'invite_link_visited', 'is_staff', 'user_glance_score')
+    list_display = ('id', 'avatar', 'nickname', 'primary_email', 'first_phone_number', 'first_phone_number_verified', 'invite_link_visited', 'is_staff', 'user_glance_score', 'last_online')
     list_display_links = list_display
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
     search_fields = ('id', 'nickname', 'phonenumber__phone_number', 'primary_email__email',)
