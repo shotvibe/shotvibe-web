@@ -14,6 +14,7 @@ def get_album_members_payload(album_id):
                user_nickname0,
                user_last_online0,
                user_avatar_file0,
+               user_glance_score0,
                member_album_admin0,
                member_added_by_user_id0,
                user_phone_verified0,
@@ -22,6 +23,7 @@ def get_album_members_payload(album_id):
                      u.nickname as user_nickname0,
                      u.last_online as user_last_online0,
                      u.avatar_file as user_avatar_file0,
+                     u.user_glance_score as user_glance_score0,
                      (SELECT COUNT(*)
                       FROM phone_auth_phonenumber
                       WHERE user_id=u.id AND
@@ -48,6 +50,7 @@ def get_album_members_payload(album_id):
         row_user_nickname,
         row_user_last_online,
         row_user_avatar_file,
+        row_user_glance_score,
         row_member_album_admin,
         row_member_added_by_user_id,
         row_user_phone_verified,
@@ -65,6 +68,7 @@ def get_album_members_payload(album_id):
             'nickname': row_user_nickname,
             'last_online': row_user_last_online,
             'avatar_url': avatar_url_from_avatar_file_data(row_user_avatar_file),
+            'user_glance_score': row_user_glance_score,
             'album_admin': row_member_album_admin,
             'added_by_user_id': row_member_added_by_user_id,
             'invite_status': invite_status
@@ -101,7 +105,8 @@ def get_album_photos_payload(user_id, album_id, only_newest=None):
                author_id0,
                author_nickname0,
                author_last_online0,
-               author_avatar_file0
+               author_avatar_file0,
+               author_user_glance_score0
         FROM (SELECT p.photo_id as photo_id0,
                      p.media_type as photo_media_type0,
                      p.client_upload_id as photo_client_upload_id0,
@@ -116,6 +121,7 @@ def get_album_photos_payload(user_id, album_id, only_newest=None):
                      phone_auth_user.nickname as author_nickname0,
                      phone_auth_user.last_online as author_last_online0,
                      phone_auth_user.avatar_file as author_avatar_file0,
+                     phone_auth_user.user_glance_score as author_user_glance_score0,
                      (CASE WHEN p.copied_from_photo_id IS NULL
                            THEN (SELECT COALESCE(SUM(photo_glance_score), 0) + p.photo_glance_score
                                  FROM photos_photo
@@ -155,7 +161,8 @@ def get_album_photos_payload(user_id, album_id, only_newest=None):
         row_author_id,
         row_author_nickname,
         row_author_last_online,
-        row_author_avatar_file) = row
+        row_author_avatar_file,
+        row_author_user_glance_score) = row
 
         if row_photo_my_glance_score:
             my_glance_score_delta = row_photo_my_glance_score
@@ -175,7 +182,8 @@ def get_album_photos_payload(user_id, album_id, only_newest=None):
                 'id': row_author_id,
                 'nickname': row_author_nickname,
                 'last_online': row_author_last_online,
-                'avatar_url': avatar_url_from_avatar_file_data(row_author_avatar_file)
+                'avatar_url': avatar_url_from_avatar_file_data(row_author_avatar_file),
+                'user_glance_score': row_author_user_glance_score
             },
             'comments': [], # Will be filled in later
             'user_tags': [], # Not used yet, will be left empty
@@ -199,6 +207,7 @@ def get_album_photos_payload(user_id, album_id, only_newest=None):
                phone_auth_user.nickname,
                phone_auth_user.last_online,
                phone_auth_user.avatar_file,
+               phone_auth_user.user_glance_score,
                photos_photocomment.date_created,
                photos_photocomment.client_msg_id,
                photos_photocomment.comment_text
@@ -218,6 +227,7 @@ def get_album_photos_payload(user_id, album_id, only_newest=None):
         row_photo_author_user_nickname,
         row_photo_author_user_last_online,
         row_photo_author_user_avatar_file,
+        row_photo_author_user_user_glance_score,
         row_photocomment_date_created,
         row_photocomment_client_msg_id,
         row_photocomment_comment_text) = row
@@ -230,6 +240,7 @@ def get_album_photos_payload(user_id, album_id, only_newest=None):
                     'nickname': row_photo_author_user_nickname,
                     'last_online': row_photo_author_user_last_online,
                     'avatar_url': avatar_url_from_avatar_file_data(row_photo_author_user_avatar_file),
+                    'user_glance_score': row_photo_author_user_user_glance_score
                 },
                 'date_created': row_photocomment_date_created,
                 'client_msg_id': row_photocomment_client_msg_id,
@@ -252,7 +263,8 @@ def get_album_detail_payload(user, album):
         'id': album.creator.id,
         'nickname': album.creator.nickname,
         'last_online': album.creator.last_online,
-        'avatar_url': album.creator.get_avatar_url()
+        'avatar_url': album.creator.get_avatar_url(),
+        'user_glance_score': album.creator.user_glance_score
     }
 
     if album_member:
@@ -303,7 +315,8 @@ def get_album_list_payload(user_id):
                album_creator_id0,
                album_creator_nickname0,
                album_creator_last_online0,
-               album_creator_avatar_file0
+               album_creator_avatar_file0,
+               album_creator_user_glance_score0
         FROM (SELECT am.album_id as album_id0,
                      am.last_access as album_last_access0,
                      (CASE WHEN am.last_access IS NULL
@@ -327,7 +340,8 @@ def get_album_list_payload(user_id):
                      a.creator_id as album_creator_id0,
                      phone_auth_user.nickname as album_creator_nickname0,
                      phone_auth_user.last_online as album_creator_last_online0,
-                     phone_auth_user.avatar_file as album_creator_avatar_file0
+                     phone_auth_user.avatar_file as album_creator_avatar_file0,
+                     phone_auth_user.user_glance_score as album_creator_user_glance_score0
               FROM photos_album a
               LEFT OUTER JOIN phone_auth_user
               ON a.creator_id = phone_auth_user.id) as T2
@@ -347,7 +361,8 @@ def get_album_list_payload(user_id):
         row_album_creator_id,
         row_album_creator_nickname,
         row_album_creator_last_online,
-        row_album_creator_avatar_file) = row
+        row_album_creator_avatar_file,
+        row_album_creator_user_glance_score) = row
 
         albums[row_album_id] = {
             'id': row_album_id,
@@ -360,7 +375,8 @@ def get_album_list_payload(user_id):
                 'id': row_album_creator_id,
                 'nickname': row_album_creator_nickname,
                 'last_online': row_album_creator_last_online,
-                'avatar_url': avatar_url_from_avatar_file_data(row_album_creator_avatar_file)
+                'avatar_url': avatar_url_from_avatar_file_data(row_album_creator_avatar_file),
+                'user_glance_score': row_album_creator_user_glance_score
             },
             'date_created': row_album_date_created,
             'last_updated': row_album_last_updated,
