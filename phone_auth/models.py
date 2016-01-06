@@ -194,6 +194,9 @@ class User(django.contrib.auth.models.AbstractBaseUser, django.contrib.auth.mode
         from photos_api import device_push
         device_push.broadcast_user_glance_score_update(self.id, updated_glance_score)
 
+    def set_last_online(self, now):
+        User.objects.filter(pk=self.id).update(last_online=now)
+
 
 class UserEmail(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, db_index=True)
