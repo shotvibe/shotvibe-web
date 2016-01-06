@@ -296,7 +296,8 @@ Allow: HEAD, GET, PATCH, PUT, OPTIONS
     "url": "https://api.shotvibe.com/users/2/",
     "nickname": "amanda",
     "last_online": "2009-10-26T20:53:49Z",
-    "avatar_url": "https://shotvibe-avatars-01.s3.amazonaws.com/default-avatar-0064.jpg"
+    "avatar_url": "https://shotvibe-avatars-01.s3.amazonaws.com/default-avatar-0064.jpg",
+    "user_glance_score": 25
 }
 ```
 
@@ -415,7 +416,8 @@ Example response:
                 "url": "https://api.shotvibe.com/users/8/",
                 "nickname": "george",
                 "last_online": "2009-10-26T20:53:49Z",
-                "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                "user_glance_score": 25
             },
             "date_created": "2009-10-26T20:53:49Z",
             "last_updated": "2009-11-12T20:20:03Z",
@@ -432,7 +434,8 @@ Example response:
                         "url": "https://api.shotvibe.com/users/8/",
                         "nickname": "george",
                         "last_online": "2009-10-26T20:53:49Z",
-                        "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                        "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                        "user_glance_score": 25
                     }
                 }
             ]
@@ -446,7 +449,8 @@ Example response:
                 "url": "https://api.shotvibe.com/users/8/",
                 "nickname": "george",
                 "last_online": "2009-10-26T20:53:49Z",
-                "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                "user_glance_score": 25
             },
             "date_created": "2008-10-26T20:53:49Z",
             "last_updated": "2009-08-30T08:29:34Z",
@@ -463,7 +467,8 @@ Example response:
                         "url": "https://api.shotvibe.com/users/12/",
                         "nickname": "kevin",
                         "last_online": "2009-10-26T20:53:49Z",
-                        "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                        "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                        "user_glance_score": 25
                     }
                 },
                 {
@@ -475,7 +480,8 @@ Example response:
                         "url": "https://api.shotvibe.com/users/670666295/",
                         "nickname": "x",
                         "last_online": "2009-10-26T20:53:49Z",
-                        "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                        "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                        "user_glance_score": 25
                     }
                 }
             ]
@@ -489,7 +495,8 @@ Example response:
                 "url": "https://api.shotvibe.com/users/8/",
                 "nickname": "george",
                 "last_online": "2009-10-26T20:53:49Z",
-                "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                "user_glance_score": 25
             },
             "date_created": "2010-10-26T20:53:49Z",
             "last_updated": "2013-02-10T18:57:15.155Z",
@@ -506,7 +513,8 @@ Example response:
                         "url": "https://api.shotvibe.com/users/17/",
                         "nickname": "paula",
                         "last_online": "2009-10-26T20:53:49Z",
-                        "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                        "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                        "user_glance_score": 25
                     }
                 }
             ]
@@ -520,7 +528,8 @@ Example response:
                 "url": "https://api.shotvibe.com/users/8/",
                 "nickname": "george",
                 "last_online": "2009-10-26T20:53:49Z",
-                "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                "user_glance_score": 25
             },
             "date_created": "2009-07-26T20:53:49Z",
             "last_updated": "2009-08-14T13:27:43Z",
@@ -537,7 +546,8 @@ Example response:
                         "url": "https://api.shotvibe.com/users/1791562666/",
                         "nickname": "admin",
                         "last_online": "2009-10-26T20:53:49Z",
-                        "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                        "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                        "user_glance_score": 25
                     }
                 },
                 {
@@ -549,7 +559,8 @@ Example response:
                         "url": "https://api.shotvibe.com/users/1791562666/",
                         "nickname": "admin",
                         "last_online": "2009-10-26T20:53:49Z",
-                        "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                        "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                        "user_glance_score": 25
                     }
                 }
             ]
@@ -619,7 +630,8 @@ Example response:
             "url": "https://api.shotvibe.com/users/8/",
             "nickname": "george",
             "last_online": "2009-10-26T20:53:49Z",
-            "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+            "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+            "user_glance_score": 25
         },
         "date_created": "2009-10-26T20:53:49Z",
         "last_updated": "2009-11-12T20:20:03Z",
@@ -632,6 +644,7 @@ Example response:
                 "nickname": "admin",
                 "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                "user_glance_score": 25
                 "album_admin": true,
                 "added_by_user_id": 1,
                 "invite_status": "joined"
@@ -642,6 +655,7 @@ Example response:
                 "nickname": "amanda",
                 "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                "user_glance_score": 25
                 "album_admin": false,
                 "added_by_user_id": 1,
                 "invite_status": "joined"
@@ -652,6 +666,7 @@ Example response:
                 "nickname": "daniel",
                 "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                "user_glance_score": 25
                 "album_admin": false,
                 "added_by_user_id": 1,
                 "invite_status": "joined"
@@ -662,6 +677,7 @@ Example response:
                 "nickname": "emma",
                 "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                "user_glance_score": 25
                 "album_admin": false,
                 "added_by_user_id": 1,
                 "invite_status": "joined"
@@ -672,6 +688,7 @@ Example response:
                 "nickname": "helen",
                 "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                "user_glance_score": 25
                 "album_admin": false,
                 "added_by_user_id": 1,
                 "invite_status": "joined"
@@ -682,6 +699,7 @@ Example response:
                 "nickname": "jackie",
                 "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                "user_glance_score": 25
                 "album_admin": false,
                 "added_by_user_id": 1,
                 "invite_status": "joined"
@@ -692,6 +710,7 @@ Example response:
                 "nickname": "kevin",
                 "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                "user_glance_score": 25
                 "album_admin": false,
                 "added_by_user_id": 1,
                 "invite_status": "joined"
@@ -702,6 +721,7 @@ Example response:
                 "nickname": "lauren",
                 "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                "user_glance_score": 25
                 "album_admin": false,
                 "added_by_user_id": 1,
                 "invite_status": "joined"
@@ -712,6 +732,7 @@ Example response:
                 "nickname": "mark",
                 "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                "user_glance_score": 25
                 "album_admin": false,
                 "added_by_user_id": 1,
                 "invite_status": "joined"
@@ -722,6 +743,7 @@ Example response:
                 "nickname": "nancy",
                 "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                "user_glance_score": 25
                 "album_admin": false,
                 "added_by_user_id": 1,
                 "invite_status": "joined"
@@ -732,6 +754,7 @@ Example response:
                 "nickname": "paula",
                 "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                "user_glance_score": 25
                 "album_admin": false,
                 "added_by_user_id": 1,
                 "invite_status": "joined"
@@ -742,6 +765,7 @@ Example response:
                 "nickname": "x",
                 "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                "user_glance_score": 25
                 "album_admin": false,
                 "added_by_user_id": 1,
                 "invite_status": "sms_sent"
@@ -752,6 +776,7 @@ Example response:
                 "nickname": "x",
                 "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                "user_glance_score": 25
                 "album_admin": false,
                 "added_by_user_id": 1,
                 "invite_status": "sms_sent"
@@ -762,6 +787,7 @@ Example response:
                 "nickname": "x",
                 "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                "user_glance_score": 25
                 "album_admin": false,
                 "added_by_user_id": 1,
                 "invite_status": "invitation_viewed"
@@ -772,6 +798,7 @@ Example response:
                 "nickname": "x",
                 "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                "user_glance_score": 25
                 "album_admin": false,
                 "added_by_user_id": 1,
                 "invite_status": "sms_sent"
@@ -782,6 +809,7 @@ Example response:
                 "nickname": "testuser",
                 "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                "user_glance_score": 25
                 "album_admin": false,
                 "added_by_user_id": 1,
                 "invite_status": "invitation_viewed"
@@ -792,6 +820,7 @@ Example response:
                 "nickname": "benny",
                 "last_online": "2009-10-26T20:53:49Z",
                 "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                "user_glance_score": 25
                 "album_admin": false,
                 "added_by_user_id": 1,
                 "invite_status": "sms_sent"
@@ -807,7 +836,8 @@ Example response:
                     "url": "https://api.shotvibe.com/users/670666295/",
                     "nickname": "x",
                     "last_online": "2009-10-26T20:53:49Z",
-                    "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                    "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                    "user_glance_score": 25
                 },
                 "comments": [],
                 "user_tags": [],
@@ -824,7 +854,8 @@ Example response:
                     "url": "https://api.shotvibe.com/users/12/",
                     "nickname": "kevin",
                     "last_online": "2009-10-26T20:53:49Z",
-                    "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                    "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                    "user_glance_score": 25
                 },
                 "comments": [
                     {
@@ -832,7 +863,8 @@ Example response:
                             "id": 670666295,
                             "nickname": "x",
                             "last_online": "2009-10-26T20:53:49Z",
-                            "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                            "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                            "user_glance_score": 25
                         },
                         "date_created": "2009-11-12T20:20:03Z",
                         "client_msg_id": 1418582165811,
@@ -845,7 +877,8 @@ Example response:
                             "id": 670666295,
                             "nickname": "x",
                             "last_online": "2009-10-26T20:53:49Z",
-                            "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                            "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                            "user_glance_score": 25
                         },
                         "tag_coord_x": 0.56,
                         "tag_coord_y": 0.62
@@ -859,7 +892,8 @@ Example response:
                             "id": 670666295,
                             "nickname": "x",
                             "last_online": "2009-10-26T20:53:49Z",
-                            "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                            "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                            "user_glance_score": 25
                         },
                         "emoticon_name": "tango_smile.png"
                     }
@@ -874,7 +908,8 @@ Example response:
                     "url": "https://api.shotvibe.com/users/8/",
                     "nickname": "george",
                     "last_online": "2009-10-26T20:53:49Z",
-                    "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png"
+                    "avatar_url": "https://static.shotvibe.com/frontend/img/ndt.png",
+                    "user_glance_score": 25
                 },
                 "comments": [],
                 "user_tags": [],
@@ -1346,7 +1381,8 @@ Allow: HEAD, GET, OPTIONS
         "url": "https://api.shotvibe.com/users/2/",
         "nickname": "amanda",
         "last_online": "2009-10-26T20:53:49Z",
-        "avatar_url": "https://shotvibe-avatars-01.s3.amazonaws.com/default-avatar-0064.jpg"
+        "avatar_url": "https://shotvibe-avatars-01.s3.amazonaws.com/default-avatar-0064.jpg",
+        "user_glance_score": 25
     }
     "phone_number": "+12127181111"
 }
