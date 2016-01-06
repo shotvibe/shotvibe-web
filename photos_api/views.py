@@ -468,6 +468,10 @@ class DeletePhotosView(mixins.DestroyModelMixin, generics.MultipleObjectAPIView)
         for photo in self.object_list:
 
             if photo.author == self.request.user:
+                # This matches the number of points that the user received when
+                # he added the photo
+                photo.author.increment_user_glance_score(-3)
+
                 album = photo.album or None
                 photo.delete()
 
