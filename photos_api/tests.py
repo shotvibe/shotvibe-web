@@ -1507,6 +1507,29 @@ class MembersTests(BaseTestCase):
         album_after_response = self.client.get(reverse('album-detail', kwargs={'pk':9}))
         self.assertEqual(album_after_response.status_code, httplib.FORBIDDEN)
 
+    def test_album_remove_member(self):
+        # Currently logged in user is amanda, she will be removed from the album
+
+        amanda = auth.get_user_model().objects.get(nickname="amanda")
+        barney = auth.get_user_model().objects.get(nickname="barney")
+
+        # Make sure amanda and barney are in album members
+        album_before_response = self.client.get(reverse('album-detail', kwargs={'pk':4}))
+        members_before = json.loads(album_before_response.content)['members']
+        self.assertTrue(amanda.nickname in [m['nickname'] for m in members_before])
+        self.assertTrue(barney.nickname in [m['nickname'] for m in members_before])
+
+        # Send album remove member request
+        leave_album_response = self.client.delete(reverse('album-member-user', kwargs={'pk':4, 'user_id':barney.id}))
+        # Response should be 204 No Content
+        self.assertEqual(leave_album_response.status_code, httplib.NO_CONTENT)
+
+        # Make sure barney is no longer an album member
+        album_after_response = self.client.get(reverse('album-detail', kwargs={'pk':4}))
+        members_after = json.loads(album_after_response.content)['members']
+        self.assertTrue(amanda.nickname in [m['nickname'] for m in members_after])
+        self.assertFalse(barney.nickname in [m['nickname'] for m in members_after])
+
 
 @mark_sms_test_case
 class ScheduledSMSTest(BaseTestCase):

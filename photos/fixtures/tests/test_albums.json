@@ -654,7 +654,7 @@
     "model": "photos.albummember", 
     "fields": {
         "album": 4, 
-        "album_admin": false,
+        "album_admin": true,
         "added_by_user": 11, 
         "datetime_added": "2009-09-23T05:55:44Z", 
         "user": 2

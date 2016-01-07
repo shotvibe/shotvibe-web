@@ -126,6 +126,10 @@ Used to change the name of an album.
 
 Used to leave an album.
 
+### DELETE /albums/{aid}/members/{uid}/
+
+Used to remove a member from an album.
+
 ### POST /albums/{aid}/view/
 
 Used to mark an album as viewed.
@@ -1274,6 +1278,20 @@ The response will be 204 No Content.
 Used to leave an album.
 
 `aid` is the album that the user wishes to leave.
+
+The request body should be empty.
+
+The response will be 204 No Content.
+
+### DELETE /albums/{aid}/members/{uid}/
+
+Used to remove a member from an album.
+
+The calling user must be an admin of the album.
+
+`aid` is the album that the user wishes to eject another member from.
+
+`uid` is the user id of the user who should be removed.
 
 The request body should be empty.
 
