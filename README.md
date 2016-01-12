@@ -65,3 +65,10 @@ Now you can login to the admin panel with your web browser at the URL:
 
 Once inside, you can add an email address for your superuser, and then next
 time use the email address as the Id for the login.
+
+## Deploying to Production
+
+    $ git clone git@github.com:shotvibe/shotvibe-web.git
+    $ git clone git@github.com:shotvibe/shotvibe-puppet.git
+    $ cd shotvibe-web
+    $ ../shotvibe-puppet/modules/shotvibe_web/scripts/remote_deploy.sh shotvibe.com
