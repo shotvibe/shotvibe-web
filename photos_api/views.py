@@ -46,7 +46,7 @@ from photos.image_uploads import process_file_upload
 from photos.models import Album, PendingPhoto, AlbumMember, Photo, PhotoComment, \
     PhotoUserTag, PhotoGlance
 from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
-    UserSerializer,CompetitionUserSerializer, AlbumUpdateSerializer, AlbumAddSerializer, \
+    UserSerializer, AlbumUpdateSerializer, AlbumAddSerializer, \
     QueryPhonesRequestSerializer, DeletePhotosSerializer, \
     AlbumMemberNameSerializer, AlbumMemberSerializer, AlbumViewSerializer, \
     AlbumNameChangeSerializer, AlbumMembersSerializer, \
