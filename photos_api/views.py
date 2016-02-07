@@ -22,7 +22,8 @@ from photos_api.permissions import IsUserInAlbum, UserDetailsPagePermission, \
     IsSameUserOrStaff
 from photos_api.parsers import PhotoUploadParser
 from photos_api import device_push, is_phone_number_mobile
-from phone_auth.models import AnonymousPhoneNumber, random_default_avatar_file_data, User, PhoneContact, PhoneNumber
+from phone_auth.models import AnonymousPhoneNumber, random_default_avatar_file_data, User, PhoneContact, PhoneNumber, \
+    UserGlanceScoreSnapshot
 from photos_api.signals import photos_added_to_album, member_leave_album
 from photos_api import optimized_views
 
@@ -36,6 +37,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework import status
 from rest_framework import views
 
+import datetime
 import requests
 
 import phonenumbers
@@ -322,6 +324,33 @@ class UserList(generics.ListCreateAPIView):
     """
     model = auth.get_user_model()
     serializer_class = UserSerializer
+
+
+class CompetitionUserList(generics.ListAPIView):
+    def get(self, request):
+        """
+        Use the GET parameter `num_users` to specify how many users
+        """
+        num_users = int(request.GET.get('num_users', 100))
+
+        now = timezone.now()
+        week_start_day = (now - datetime.timedelta(days=now.weekday())).date()
+        week_start = week_start_day
+        start_date = UserGlanceScoreSnapshot.objects.get_closest_snapshot(week_start)
+        score_deltas = UserGlanceScoreSnapshot.objects.get_score_delta(start_date)
+
+        result = []
+        count = 0
+        for s in score_deltas:
+            user = s['user']
+            s['user'] = UserSerializer(user).data
+            if s['user']['invite_status'] == 'joined':
+                result.append(s)
+                count += 1
+                if count == num_users:
+                    break
+
+        return Response(result)
 
 
 class UserDetail(generics.RetrieveUpdateAPIView):

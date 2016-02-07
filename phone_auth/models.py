@@ -198,6 +198,48 @@ class User(django.contrib.auth.models.AbstractBaseUser, django.contrib.auth.mode
         User.objects.filter(pk=self.id).update(last_online=now)
 
 
+class UserGlanceScoreSnapshotManager(models.Manager):
+    def take_snapshot(self, current_time):
+        for user in User.objects.all():
+            UserGlanceScoreSnapshot.objects.create(
+                user = user,
+                user_glance_score = user.user_glance_score,
+                snap_date = current_time
+            )
+
+    def get_closest_snapshot(self, date):
+        snap = UserGlanceScoreSnapshot.objects.filter(snap_date__gte=date)[0]
+        return snap.snap_date
+
+    def get_score_delta(self, start_date):
+        start_snaps = UserGlanceScoreSnapshot.objects.filter(snap_date=start_date)
+        start_snaps_dict = {}
+        for s in start_snaps:
+            start_snaps_dict[s.user.id] = s.user_glance_score
+
+        results = []
+        for user in User.objects.all():
+            start_score = start_snaps_dict.get(user.id, 0)
+            score_delta = user.user_glance_score - start_score
+            results.append({
+                'user': user,
+                'score_delta': score_delta
+            })
+
+        results.sort(key=lambda result: result['score_delta'])
+        results.reverse()
+
+        return results
+
+
+class UserGlanceScoreSnapshot(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, db_index=True)
+    user_glance_score = models.IntegerField()
+    snap_date = models.DateTimeField(db_index=True)
+
+    objects = UserGlanceScoreSnapshotManager()
+
+
 class UserEmail(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, db_index=True)
     email = models.EmailField(unique=True)
@@ -278,7 +320,7 @@ class PhoneNumberManager(models.Manager):
                 date_created = timezone.now()
                 )
 
-        send_sms(phone_number.phone_number, 'ShotVibe SMS Verification Code: ' + confirmation_code)
+        # send_sms(phone_number.phone_number, 'ShotVibe SMS Verification Code: ' + confirmation_code)
 
         return confirmation_key
 
