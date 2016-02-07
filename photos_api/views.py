@@ -327,8 +327,6 @@ class UserList(generics.ListCreateAPIView):
 
 
 class CompetitionUserList(generics.ListAPIView):
-    serializer_class = CompetitionUserSerializer
-
     def get(self, request):
         """
         Use the GET parameter `num_users` to specify how many users
