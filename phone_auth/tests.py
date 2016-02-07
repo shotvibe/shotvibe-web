@@ -7,7 +7,8 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.utils.timezone import utc
 
-from phone_auth.models import AuthToken, User, PhoneNumber, PhoneNumberConfirmSMSCode, PhoneNumberLinkCode
+from phone_auth.models import AuthToken, User, PhoneNumber, PhoneNumberConfirmSMSCode, PhoneNumberLinkCode, \
+    UserGlanceScoreSnapshot
 from phone_auth.views import app_init
 from photos.models import Album, AlbumMember
 from frontend.mobile_views import invite_page
@@ -441,3 +442,58 @@ class InviteAuthorizationTests(TestCase):
         self.assertEqual(r.status_code, 200)
         post_count = AlbumMember.objects.filter(album=event.album).count()
         self.assertEqual(pre_count + 1, post_count)
+
+class UserGlanceScoreSnapshotTests(TestCase):
+    fixtures = ['tests/test_users']
+
+    def test_create_snapshot(self):
+        now = datetime.datetime(2010, 1, 2, tzinfo=utc)
+        amanda = auth.get_user_model().objects.get(pk=2)
+
+        UserGlanceScoreSnapshot.objects.take_snapshot(now)
+
+        self.assertEqual(UserGlanceScoreSnapshot.objects.get(user=amanda).user_glance_score, amanda.user_glance_score)
+
+    def test_get_score_delta_no_snapshot(self):
+        start = datetime.datetime(2010, 1, 1, tzinfo=utc)
+        now = datetime.datetime(2010, 1, 2, tzinfo=utc)
+
+        score_deltas = UserGlanceScoreSnapshot.objects.get_score_delta(start)
+
+        amanda = auth.get_user_model().objects.get(pk=2)
+
+        amanda_result = None
+        for r in score_deltas:
+            if r['user'] == amanda:
+                amanda_result = r
+
+        self.assertIsNotNone(amanda_result)
+        self.assertEqual(amanda_result['score_delta'], amanda.user_glance_score)
+
+    def test_get_score_delta(self):
+        amanda = auth.get_user_model().objects.get(pk=2)
+        barney = auth.get_user_model().objects.get(pk=3)
+
+        amanda_initial_score = amanda.user_glance_score
+        barney_initial_score = barney.user_glance_score
+        self.assertEqual(amanda_initial_score, barney_initial_score)
+
+        amanda.increment_user_glance_score(5)
+
+        start = datetime.datetime(2010, 1, 1, tzinfo=utc)
+        UserGlanceScoreSnapshot.objects.take_snapshot(start)
+
+        score_deltas = UserGlanceScoreSnapshot.objects.get_score_delta(start)
+        self.assertEqual(len(score_deltas), User.objects.count())
+        for r in score_deltas:
+            self.assertEqual(r['score_delta'], 0)
+
+
+        barney.increment_user_glance_score(-2)
+        score_deltas = UserGlanceScoreSnapshot.objects.get_score_delta(start)
+        self.assertEqual(len(score_deltas), User.objects.count())
+        for r in score_deltas:
+            if r['user'] == barney:
+                self.assertEqual(r['score_delta'], -2)
+
+        self.assertEqual(score_deltas[-1]['user'], barney)
