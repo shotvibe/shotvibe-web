@@ -136,7 +136,7 @@ def broadcast_photos_added_to_album(album_id, author_id, album_name, author_name
             'author_avatar_url': author_avatar_url,
             'album_name': album_name,
             'num_photos': num_photos,
-            'photo_id' : album_photo.photo_id
+            'photo_id' : album_photo
         }
 
     # Send broadcast to all other users
