@@ -3,6 +3,10 @@ from photos_api import device_push
 from photos_api import signals
 
 
+
+
+
+
 def send_push_on_photos_added_to_album(sender, **kwargs):
     """When new photos added to the album then send push notifications
     to all album members"""
@@ -11,12 +15,15 @@ def send_push_on_photos_added_to_album(sender, **kwargs):
     user = kwargs.get('by_user')
     album = kwargs.get('to_album')
 
+    photo = photos[0]
+
     # Send push notifications to the album members about just added photos
     membership_query = AlbumMember.objects.filter(album=album).only('user__id')
     device_push.broadcast_photos_added_to_album(
         album_id=album.id,
         author_id=user.id,
         album_name=album.name,
+        album_photo=photo,
         author_name=user.nickname,
         author_avatar_url=user.get_avatar_url(),
         num_photos=len(photos),
