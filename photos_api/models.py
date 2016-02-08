@@ -23,11 +23,12 @@ def send_push_on_photos_added_to_album(sender, **kwargs):
         album_id=album.id,
         author_id=user.id,
         album_name=album.name,
-        album_photo=photo,
         author_name=user.nickname,
         author_avatar_url=user.get_avatar_url(),
         num_photos=len(photos),
-        user_ids=[membership.user.id for membership in membership_query])
+        user_ids=[membership.user.id for membership in membership_query],
+        album_photo=photo)
+
 
     # #70 3)
     device_push.broadcast_album_sync(user.id, album.id)
