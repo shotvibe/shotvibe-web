@@ -23,3 +23,4 @@ class PhotoObjectSerializer(serializers.Serializer):
         ('ready', 'ready'),
         ('invalid', 'invalid'),
     ))
+    youtube_id = serializers.CharField()

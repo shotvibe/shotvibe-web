@@ -33,6 +33,7 @@ urlpatterns = patterns('',
     url(r'^photos/(?P<photo_id>[\w-]+)/user_tags/(?P<tagged_user_id>\d+)/$', views.PhotoUserTagView.as_view(), name='photo-user-tag'),
     url(r'^photos/(?P<photo_id>[\w-]+)/glance_scores/(?P<author_id>\d+)/', views.PhotoGlanceScoreView.as_view(), name='photo-glance-score'),
     url(r'^query_phone_numbers/$', views.QueryPhoneNumbers.as_view(),
+    # url(r'^upload_youtube/$', views.UploadYouTube.as_view(),
         name='query-phone-numbers')
 )
 

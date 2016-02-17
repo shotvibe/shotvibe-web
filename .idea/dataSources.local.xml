@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="dataSourceStorageLocal">
+    <data-source name="PostgreSQL - glance@localhost" uuid="49967e52-4203-4531-a731-84ca0ff8662b">
+      <secret-storage>master_key</secret-storage>
+      <user-name>postgres</user-name>
+      <schema-pattern>glance.*</schema-pattern>
+      <default-schemas>glance.public</default-schemas>
+    </data-source>
+    <data-source name="default" uuid="c2329a69-3371-4be9-b55f-877050d86b1c">
+      <auth-required>false</auth-required>
+    </data-source>
+  </component>
+</project>

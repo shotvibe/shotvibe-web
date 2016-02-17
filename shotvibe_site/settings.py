@@ -1,6 +1,6 @@
 # Django settings for shotvibe_site project.
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -92,7 +92,7 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-USING_LOCAL_PHOTOS = False
+USING_LOCAL_PHOTOS = True
 
 ALL_PHOTO_SUBDOMAINS = (
     'photos01',

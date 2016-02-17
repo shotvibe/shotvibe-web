@@ -93,6 +93,7 @@ def get_album_photos_payload(user_id, album_id, only_newest=None):
     cursor.execute(
         """
         SELECT photo_id0,
+               photo_youtube_id0,
                photo_media_type0,
                photo_client_upload_id0,
                photo_subdomain0,
@@ -108,6 +109,7 @@ def get_album_photos_payload(user_id, album_id, only_newest=None):
                author_avatar_file0,
                author_user_glance_score0
         FROM (SELECT p.photo_id as photo_id0,
+                     p.youtube_id as photo_youtube_id0,
                      p.media_type as photo_media_type0,
                      p.client_upload_id as photo_client_upload_id0,
                      p.subdomain as photo_subdomain0,
@@ -149,6 +151,7 @@ def get_album_photos_payload(user_id, album_id, only_newest=None):
     photos = collections.OrderedDict()
     for row in cursor.fetchall():
         (row_photo_id,
+        row_youtube_id,
         row_media_type,
         row_client_upload_id,
         row_photo_subdomain,
@@ -174,6 +177,7 @@ def get_album_photos_payload(user_id, album_id, only_newest=None):
 
         photos[row_photo_id] = {
             'photo_id': row_photo_id,
+            'youtube_id': row_youtube_id,
             'media_type': photo.get_media_type_display(),
             'client_upload_id': row_client_upload_id,
             'photo_url': photo.get_photo_url(),

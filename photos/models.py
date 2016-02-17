@@ -136,12 +136,12 @@ class Album(models.Model):
                 'album_admin': False
                 })
 
-            if phone_number.verified:
-                if member_created:
-                    members_added_to_album.send(sender=None, member_users=[phone_number.user], by_user=inviter, to_album=self.album)
-            else:
-                if send_invite_callable:
-                    send_invite_callable(inviter, phone_number, self.current_date)
+            # if phone_number.verified:
+            #     if member_created:
+            #         members_added_to_album.send(sender=None, member_users=[phone_number.user], by_user=inviter, to_album=self.album)
+            # else:
+            #     if send_invite_callable:
+            #         send_invite_callable(inviter, phone_number, self.current_date)
 
             return phone_number
 
@@ -404,9 +404,11 @@ class Photo(models.Model):
 
     MEDIA_TYPE_PHOTO = 1
     MEDIA_TYPE_VIDEO = 2
+    MEDIA_TYPE_YOUTUBE = 3
     MEDIA_TYPE_CHOICES = (
         (MEDIA_TYPE_PHOTO, 'photo'),
         (MEDIA_TYPE_VIDEO, 'video'),
+        (MEDIA_TYPE_YOUTUBE, 'youtube'),
     )
 
     photo_id = models.CharField(primary_key=True, max_length=128)
@@ -420,6 +422,7 @@ class Photo(models.Model):
     album_index = models.PositiveIntegerField(db_index=True)
     photo_glance_score = models.IntegerField(default=0)
     copied_from_photo = models.ForeignKey('self', null=True, blank=True)
+    youtube_id = models.CharField(max_length=64,null=True, blank=True)
 
     objects = PhotoManager()
 
@@ -442,11 +445,17 @@ class Photo(models.Model):
     def is_video(self):
         return self.media_type == Photo.MEDIA_TYPE_VIDEO
 
+    def is_youtube(self):
+        return self.media_type == Photo.MEDIA_TYPE_YOUTUBE
+
     def get_photo_url(self):
         if settings.USING_LOCAL_PHOTOS:
             return '/photos/' + self.subdomain + '/' + self.photo_id + '.jpg'
         else:
             return settings.PHOTO_SERVER_URL_FORMAT_STR.format(self.subdomain, self.photo_id + '.jpg')
+
+    def get_youtube_id(self):
+        return self.youtube_id
 
     def get_photo_url_no_ext(self):
         """

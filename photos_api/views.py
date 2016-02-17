@@ -572,12 +572,12 @@ def photos_upload_request(request, format=None):
 
 
 class PhotoUpload(views.APIView):
-    permission_classes = (IsAuthenticated,)
+    # permission_classes = (IsAuthenticated,)
 
     parser_classes = (PhotoUploadParser,)
 
     @transaction.non_atomic_requests
-    @csrf_exempt
+    # @csrf_exempt
     def dispatch(self, *args, **kwargs):
         return super(PhotoUpload, self).dispatch(*args, **kwargs)
 
