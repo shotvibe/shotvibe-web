@@ -320,7 +320,7 @@ class PhoneNumberManager(models.Manager):
                 date_created = timezone.now()
                 )
 
-        #send_sms(phone_number.phone_number, 'Your Glance Verification Code: ' + confirmation_code)
+        send_sms(phone_number.phone_number, 'Your Glance Verification Code: ' + confirmation_code)
 
         return confirmation_key
 

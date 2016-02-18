@@ -136,12 +136,12 @@ class Album(models.Model):
                 'album_admin': False
                 })
 
-            # if phone_number.verified:
-            #     if member_created:
-            #         members_added_to_album.send(sender=None, member_users=[phone_number.user], by_user=inviter, to_album=self.album)
-            # else:
-            #     if send_invite_callable:
-            #         send_invite_callable(inviter, phone_number, self.current_date)
+            if phone_number.verified:
+                if member_created:
+                    members_added_to_album.send(sender=None, member_users=[phone_number.user], by_user=inviter, to_album=self.album)
+            else:
+                if send_invite_callable:
+                    send_invite_callable(inviter, phone_number, self.current_date)
 
             return phone_number
 

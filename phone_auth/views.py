@@ -244,6 +244,6 @@ class RequestSMS(APIView):
         template = "Welcome to Glance! Click here and start enjoying sharing albums with your friends: %s"
         sms_text = template % reverse('get_app', subdomain='www', scheme='https')
 
-        #send_sms(phone_number_str, sms_text)
+        send_sms(phone_number_str, sms_text)
 
         return Response(status=204)
