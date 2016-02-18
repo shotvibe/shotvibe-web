@@ -411,8 +411,7 @@ def add_photo(client_upload_id, storage_id, author, album, now):
                         'date_created': now,
                         'author': author,
                         'album': album,
-                        'album_index': next_album_index,
-                        'youtube_id' : youtube_id
+                        'album_index': next_album_index
                     })
         except IntegrityError:
             # This will happen if there is a collision with a duplicate
