@@ -12,6 +12,7 @@ urlpatterns = patterns('',
     url(r'^gcm/devices/(?P<device_id>[\w-]+)/$', device_push.GcmDevice.as_view(), name='gcm-device'), # Deprecated
     url(r'^register_device_push/$', device_push.register_device_push, name='register-device-push'),
     url(r'^albums/$', views.Albums.as_view(), name='album-list'),
+    url(r'^youtube_upload/(?P<storage_id>[\w-]+)/', views.youtube_upload, name='youtube-upload'),
     url(r'^albums/(?P<pk>\d+)/$', views.AlbumDetail.as_view(), name='album-detail'),
     url(r'^albums/(?P<pk>\d+)/name/$', views.AlbumNameView.as_view(), name='album-name'),
     url(r'^albums/(?P<pk>\d+)/members/$', views.AlbumMembersView.as_view(), name='album-members'),

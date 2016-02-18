@@ -24,6 +24,7 @@ from photos_api.parsers import PhotoUploadParser
 from photos_api import device_push, is_phone_number_mobile
 from phone_auth.models import AnonymousPhoneNumber, random_default_avatar_file_data, User, PhoneContact, PhoneNumber, \
     UserGlanceScoreSnapshot
+from photos_api.private_serializers import PhotoObjectSerializer
 from photos_api.signals import photos_added_to_album, member_leave_album
 from photos_api import optimized_views
 
@@ -58,6 +59,53 @@ from photos_api.check_modified import supports_last_modified, supports_etag
 import invites_manager
 from photos import photo_operations
 
+@api_view(['PUT'])
+# @permission_classes((IsAllowedPrivateAPI, ))
+def youtube_upload(request, storage_id):
+    serializer = PhotoObjectSerializer(data=request.DATA)
+
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    author_id = serializer.object['author_id']
+    client_upload_id = serializer.object['client_upload_id']
+    album_id = serializer.object['album_id']
+    status_ = serializer.object['status']
+
+    youtube = False
+
+    if client_upload_id == 'youtube':
+        youtube_id = serializer.object['youtube_id']
+        youtube = True
+
+    try:
+        author = User.objects.get(pk=author_id)
+    except User.DoesNotExist:
+        return Response('Invalid user id: ' + str(author_id), status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        album = Album.objects.get(pk=album_id)
+    except Album.DoesNotExist:
+        return Response('Invalid album id: ' + str(album_id), status=status.HTTP_400_BAD_REQUEST)
+
+    # TODO Verify that the author is allowed to add a video into album
+
+    now = timezone.now()
+
+    if status_ == 'processing':
+        raise RuntimeError('"processing" status not yet implemented')
+    elif status_ == 'ready':
+        if youtube == True:
+            photo_operations.add_youtube_photo(client_upload_id, storage_id, author, album, now, youtube_id)
+        else:
+            photo_operations.add_photo(client_upload_id, storage_id, author, album, now)
+
+    elif status_ == 'invalid':
+        raise RuntimeError('"invalid" status not yet implemented')
+    else:
+        raise RuntimeError('Unknown status: ' + status_)
+
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 @api_view(['GET'])
 def api_root(request, format=None):
@@ -572,12 +620,12 @@ def photos_upload_request(request, format=None):
 
 
 class PhotoUpload(views.APIView):
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     parser_classes = (PhotoUploadParser,)
 
     @transaction.non_atomic_requests
-    # @csrf_exempt
+    @csrf_exempt
     def dispatch(self, *args, **kwargs):
         return super(PhotoUpload, self).dispatch(*args, **kwargs)
 

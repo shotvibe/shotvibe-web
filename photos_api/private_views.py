@@ -115,7 +115,7 @@ def video_object(request, storage_id):
 
 
 @api_view(['PUT'])
-# @permission_classes((IsAllowedPrivateAPI, ))
+@permission_classes((IsAllowedPrivateAPI, ))
 def photo_object(request, storage_id):
     serializer = PhotoObjectSerializer(data=request.DATA)
 
@@ -126,12 +126,6 @@ def photo_object(request, storage_id):
     client_upload_id = serializer.object['client_upload_id']
     album_id = serializer.object['album_id']
     status_ = serializer.object['status']
-
-    youtube = False
-
-    if client_upload_id == 'youtube':
-        youtube_id = serializer.object['youtube_id']
-        youtube = True
 
     try:
         author = User.objects.get(pk=author_id)
@@ -150,11 +144,7 @@ def photo_object(request, storage_id):
     if status_ == 'processing':
         raise RuntimeError('"processing" status not yet implemented')
     elif status_ == 'ready':
-        if youtube == True:
-            photo_operations.add_youtube_photo(client_upload_id, storage_id, author, album, now, youtube_id)
-        else:
-            photo_operations.add_photo(client_upload_id, storage_id, author, album, now)
-
+        photo_operations.add_photo(client_upload_id, storage_id, author, album, now)
     elif status_ == 'invalid':
         raise RuntimeError('"invalid" status not yet implemented')
     else:
