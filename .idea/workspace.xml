@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cab9d246-59d4-44e7-98a2-ac27b1ced72d" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/photos/migrations/0022_auto__add_field_photo_youtube_id.py" afterPath="$PROJECT_DIR$/photos/migrations/0022_auto__add_field_photo_youtube_id.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/photos_api/private_serializers.py" afterPath="$PROJECT_DIR$/photos_api/private_serializers.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/photos_api/private_views.py" afterPath="$PROJECT_DIR$/photos_api/private_views.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/photos/models.py" afterPath="$PROJECT_DIR$/photos/models.py" />
     </list>
     <ignored path="shotvibe-web.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -52,14 +50,24 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="private_views.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="private_views.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/photos_api/private_views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.8747913">
+            <state vertical-scroll-proportion="-18.714285">
               <caret line="171" column="0" selection-start-line="171" selection-start-column="0" selection-end-line="171" selection-end-column="0" />
               <folding>
                 <element signature="e#0#46#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/photos_api/models.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="47" column="40" selection-start-line="47" selection-start-column="39" selection-end-line="47" selection-end-column="40" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -76,6 +84,21 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="photos_photo" pinned="false" current-in-tab="true">
+        <entry file="dbDummy://dbtable:/65aeceff/c2329a69-3371-4be9-b55f-877050d86b1c/photos_photo">
+          <provider editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+          <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
+            <state>
+              <filtering enabled="true" />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="0022_auto__add_field_photo_youtube_id.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/photos/migrations/0022_auto__add_field_photo_youtube_id.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -86,11 +109,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="private_urls.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/photos_api/private_urls.py">
+      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/photos/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="9" column="3" selection-start-line="9" selection-start-column="3" selection-end-line="9" selection-end-column="99" />
+            <state vertical-scroll-proportion="-16.75">
+              <caret line="424" column="72" selection-start-line="424" selection-start-column="72" selection-end-line="424" selection-end-column="72" />
               <folding />
             </state>
           </provider>
@@ -128,16 +151,6 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/phone_auth/models.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-4.571429">
-              <caret line="322" column="8" selection-start-line="322" selection-start-column="8" selection-end-line="322" selection-end-column="8" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="tests.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/photos_api/tests.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -146,16 +159,6 @@
               <folding>
                 <element signature="e#0#15#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/photos/models.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-7.25">
-              <caret line="145" column="31" selection-start-line="145" selection-start-column="31" selection-end-line="145" selection-end-column="31" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -173,7 +176,6 @@
         <option value="$PROJECT_DIR$/photos_api/urls.py" />
         <option value="$PROJECT_DIR$/phone_auth/views.py" />
         <option value="$PROJECT_DIR$/shotvibe_site/settings.py" />
-        <option value="$PROJECT_DIR$/photos/models.py" />
         <option value="$PROJECT_DIR$/phone_auth/models.py" />
         <option value="$PROJECT_DIR$/photos/photo_operations.py" />
         <option value="$PROJECT_DIR$/photos_api/serializers.py" />
@@ -181,6 +183,7 @@
         <option value="$PROJECT_DIR$/photos/migrations/0022_auto__add_field_photo_youtube_id.py" />
         <option value="$PROJECT_DIR$/photos_api/private_serializers.py" />
         <option value="$PROJECT_DIR$/photos_api/private_views.py" />
+        <option value="$PROJECT_DIR$/photos/models.py" />
       </list>
     </option>
   </component>
@@ -550,10 +553,10 @@
     <frame x="65" y="24" width="959" height="744" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32612967" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32568806" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32874617" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32721713" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.18538713" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18538713" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16575791" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.30428135" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -769,13 +772,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/photos_api/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-3.935484">
-          <caret line="47" column="40" selection-start-line="47" selection-start-column="39" selection-end-line="47" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/initial_data.json">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -828,19 +824,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="dbDummy://dbtable:/65aeceff/c2329a69-3371-4be9-b55f-877050d86b1c/photos_photo">
-      <provider editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
-        <state>
-          <filtering enabled="true" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/local_settings.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.03504673">
@@ -886,14 +869,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="18" column="67" selection-start-line="18" selection-start-column="67" selection-end-line="18" selection-end-column="67" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/photos/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-7.25">
-          <caret line="145" column="31" selection-start-line="145" selection-start-column="31" selection-end-line="145" selection-end-column="31" />
           <folding />
         </state>
       </provider>
@@ -970,11 +945,40 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/photos_api/private_views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.8747913">
+        <state vertical-scroll-proportion="-18.714285">
           <caret line="171" column="0" selection-start-line="171" selection-start-column="0" selection-end-line="171" selection-end-column="0" />
           <folding>
             <element signature="e#0#46#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/photos_api/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="47" column="40" selection-start-line="47" selection-start-column="39" selection-end-line="47" selection-end-column="40" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/photos/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-16.75">
+          <caret line="424" column="72" selection-start-line="424" selection-start-column="72" selection-end-line="424" selection-end-column="72" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="dbDummy://dbtable:/65aeceff/c2329a69-3371-4be9-b55f-877050d86b1c/photos_photo">
+      <provider editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
+        <state>
+          <filtering enabled="true" />
         </state>
       </provider>
     </entry>
