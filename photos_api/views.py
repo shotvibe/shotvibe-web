@@ -53,7 +53,7 @@ from photos_api.serializers import AlbumNameSerializer, AlbumSerializer, \
     AlbumNameChangeSerializer, AlbumMembersSerializer, \
     PhotoCommentSerializer, PhotoUserTagSerializer, PhotoGlanceScoreSerializer, \
     PhotoGlanceSerializer, UserGlanceScoreSerializer, \
-    AlbumMemberPhoneNumberSerializer
+    AlbumMemberPhoneNumberSerializer, YouTubeUploadSerializer
 from photos_api.check_modified import supports_last_modified, supports_etag
 
 import invites_manager
@@ -62,7 +62,7 @@ from photos import photo_operations
 @api_view(['PUT'])
 # @permission_classes((IsAllowedPrivateAPI, ))
 def youtube_upload(request, storage_id):
-    serializer = PhotoObjectSerializer(data=request.DATA)
+    serializer = YouTubeUploadSerializer(data=request.DATA)
 
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

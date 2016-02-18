@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cab9d246-59d4-44e7-98a2-ac27b1ced72d" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/photos/photo_operations.py" afterPath="$PROJECT_DIR$/photos/photo_operations.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/photos_api/private_views.py" afterPath="$PROJECT_DIR$/photos_api/private_views.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/photos_api/private_serializers.py" afterPath="$PROJECT_DIR$/photos_api/private_serializers.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/photos_api/serializers.py" afterPath="$PROJECT_DIR$/photos_api/serializers.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/photos_api/views.py" afterPath="$PROJECT_DIR$/photos_api/views.py" />
     </list>
     <ignored path="shotvibe-web.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -63,11 +64,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="views.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="views.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/photos_api/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-9.571428">
-              <caret line="60" column="0" selection-start-line="60" selection-start-column="0" selection-end-line="60" selection-end-column="0" />
+            <state vertical-scroll-proportion="1.3772955">
+              <caret line="55" column="61" selection-start-line="55" selection-start-column="61" selection-end-line="55" selection-end-column="61" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -85,24 +86,34 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="views.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/phone_auth/views.py">
+      <file leaf-file-name="photo_operations.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/photos/photo_operations.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-3.5714285">
-              <caret line="235" column="10" selection-start-line="235" selection-start-column="10" selection-end-line="235" selection-end-column="10" />
-              <folding>
-                <element signature="e#0#15#0" expanded="true" />
-              </folding>
+            <state vertical-scroll-proportion="0.0">
+              <caret line="413" column="55" selection-start-line="413" selection-start-column="55" selection-end-line="413" selection-end-column="55" />
+              <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="photo_operations.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/photos/photo_operations.py">
+      <file leaf-file-name="private_serializers.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/photos_api/private_serializers.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.90430623">
-              <caret line="413" column="55" selection-start-line="413" selection-start-column="55" selection-end-line="413" selection-end-column="55" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="24" column="6" selection-start-line="24" selection-start-column="6" selection-end-line="24" selection-end-column="6" />
               <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="serializers.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/photos_api/serializers.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="27" column="29" selection-start-line="27" selection-start-column="6" selection-end-line="27" selection-end-column="29" />
+              <folding>
+                <element signature="e#0#55#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -157,17 +168,18 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/photos_api/private_serializers.py" />
         <option value="$PROJECT_DIR$/photos_api/optimized_views.py" />
         <option value="$PROJECT_DIR$/local_settings.py" />
         <option value="$PROJECT_DIR$/photos_api/urls.py" />
-        <option value="$PROJECT_DIR$/photos_api/views.py" />
         <option value="$PROJECT_DIR$/phone_auth/views.py" />
         <option value="$PROJECT_DIR$/shotvibe_site/settings.py" />
         <option value="$PROJECT_DIR$/photos/models.py" />
         <option value="$PROJECT_DIR$/phone_auth/models.py" />
         <option value="$PROJECT_DIR$/photos_api/private_views.py" />
         <option value="$PROJECT_DIR$/photos/photo_operations.py" />
+        <option value="$PROJECT_DIR$/photos_api/private_serializers.py" />
+        <option value="$PROJECT_DIR$/photos_api/serializers.py" />
+        <option value="$PROJECT_DIR$/photos_api/views.py" />
       </list>
     </option>
   </component>
@@ -798,13 +810,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/photos_api/private_serializers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.4915254">
-          <caret line="16" column="6" selection-start-line="16" selection-start-column="6" selection-end-line="16" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/c2329a69-3371-4be9-b55f-877050d86b1c/console.sql">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -918,16 +923,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/photos_api/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-9.571428">
-          <caret line="60" column="0" selection-start-line="60" selection-start-column="0" selection-end-line="60" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/photos_api/private_views.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-37.464287">
@@ -940,9 +935,37 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/photos/photo_operations.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.90430623">
+        <state vertical-scroll-proportion="0.0">
           <caret line="413" column="55" selection-start-line="413" selection-start-column="55" selection-end-line="413" selection-end-column="55" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/photos_api/private_serializers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="24" column="6" selection-start-line="24" selection-start-column="6" selection-end-line="24" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/photos_api/serializers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="27" column="29" selection-start-line="27" selection-start-column="6" selection-end-line="27" selection-end-column="29" />
+          <folding>
+            <element signature="e#0#55#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/photos_api/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="1.3772955">
+          <caret line="55" column="61" selection-start-line="55" selection-start-column="61" selection-end-line="55" selection-end-column="61" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
