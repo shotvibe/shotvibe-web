@@ -422,7 +422,7 @@ class Photo(models.Model):
     album_index = models.PositiveIntegerField(db_index=True)
     photo_glance_score = models.IntegerField(default=0)
     copied_from_photo = models.ForeignKey('self', null=True, blank=True)
-    youtube_id = models.CharField(max_length=64, null=False, blank=False, default="none")
+   # youtube_id = models.CharField(max_length=64, null=False, blank=False, default="none")
 
     objects = PhotoManager()
 
