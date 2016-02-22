@@ -124,6 +124,8 @@ class User(django.contrib.auth.models.AbstractBaseUser, django.contrib.auth.mode
 
     user_glance_score = models.IntegerField(default=25)
 
+    # hidden_photos = models.CharField(default='{}',)
+
     objects = UserManager()
 
     USERNAME_FIELD = 'id'
@@ -319,8 +321,8 @@ class PhoneNumberManager(models.Manager):
                 confirmation_code = confirmation_code,
                 date_created = timezone.now()
                 )
-
-        send_sms(phone_number.phone_number, 'Your Glance Verification Code: ' + confirmation_code)
+        if not settings.DEBUG:
+            send_sms(phone_number.phone_number, 'Your Glance Verification Code: ' + confirmation_code)
 
         return confirmation_key
 

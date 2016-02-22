@@ -59,9 +59,12 @@ from photos_api.check_modified import supports_last_modified, supports_etag
 import invites_manager
 from photos import photo_operations
 
+from photos.models import UserHiddenPhoto
+
 @api_view(['PUT'])
 # @permission_classes((IsAllowedPrivateAPI, ))
 def youtube_upload(request, storage_id):
+    permission_classes = (IsAuthenticated)
     serializer = YouTubeUploadSerializer(data=request.DATA)
 
     if not serializer.is_valid():
@@ -118,6 +121,8 @@ def api_root(request, format=None):
         'upload_photos_request': reverse('photos-upload-request', request=request),
     }
     return Response(response_data)
+
+
 
 
 class AlbumList(generics.ListAPIView):
@@ -559,6 +564,30 @@ class Albums(GenericAPIView):
         return Response(payload, content_type='application/json')
 
 
+class HidePhotoView(mixins.DestroyModelMixin, generics.MultipleObjectAPIView):
+    model = Photo
+    serializer_class = DeletePhotosSerializer
+
+    def post(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        for photo in self.object_list:
+            UserHiddenPhoto.objects.create(user=request.user, photo=photo)
+
+
+             # Save album revision, because we deleted photo from it.
+            photo.album.save_revision(timezone.now())
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get_queryset(self):
+        serializer = self.get_serializer(data=json.loads(self.request.body))
+        if serializer.is_valid():
+            queryset = self.model._default_manager.filter(
+                photo_id__in=serializer.data.get('photos', []))
+            return queryset
+        else:
+            return self.model._default_manager.none()
+
 class DeletePhotosView(mixins.DestroyModelMixin, generics.MultipleObjectAPIView):
     model = Photo
     serializer_class = DeletePhotosSerializer
@@ -625,7 +654,7 @@ class PhotoUpload(views.APIView):
     parser_classes = (PhotoUploadParser,)
 
     @transaction.non_atomic_requests
-    @csrf_exempt
+    # @csrf_exempt
     def dispatch(self, *args, **kwargs):
         return super(PhotoUpload, self).dispatch(*args, **kwargs)
 

@@ -164,7 +164,8 @@ class Album(models.Model):
                 commenter.increment_user_glance_score(5)
 
             album_users = self.album.get_member_users()
-            user_ids = [user.id for user in album_users if user.id != commenter.id]
+            user_ids = [user.id for user in album_users if user.id != commenter.id and \
+                        not UserHiddenPhoto.objects.is_photo_hidden(user, photo)]
 
             device_push.broadcast_photo_comment(user_ids, commenter.nickname, commenter.get_avatar_url(), photo.album.id, photo.photo_id, photo.album.name, comment_text)
 
@@ -543,6 +544,18 @@ def get_pending_photo_default_photo_id():
             continue
         photo_id_generated = True
     return photo_id
+
+
+class UserHiddenPhotoManager(models.Manager):
+    def is_photo_hidden(self, user, photo):
+        return UserHiddenPhoto.objects.filter(user=user, photo=photo).exists()
+
+
+class UserHiddenPhoto(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, db_index=True)
+    photo = models.ForeignKey(Photo, db_index=True)
+
+    objects = UserHiddenPhotoManager()
 
 class PendingPhoto(models.Model):
     photo_id = models.CharField(primary_key=True, max_length=128)

@@ -138,15 +138,18 @@ def get_album_photos_payload(user_id, album_id, only_newest=None):
                      (SELECT score_delta
                       FROM photos_photoglancescoredelta
                       WHERE photo_id=p.photo_id AND
-                            author_id=%s) as photo_my_glance_score0
+                            author_id=%s) as photo_my_glance_score0,
+                     (SELECT COUNT(*) FROM photos_userhiddenphoto
+                      WHERE photos_userhiddenphoto.photo_id=p.photo_id AND
+                            photos_userhiddenphoto.user_id=%s) as photo_hidden0
               FROM photos_photo p
               LEFT OUTER JOIN phone_auth_user
               ON p.author_id=phone_auth_user.id
               LEFT OUTER JOIN photos_video
               ON p.storage_id=photos_video.storage_id) as T1
-        WHERE album_id0=%s
+        WHERE album_id0=%s AND photo_hidden0=0
         """ + order_limit_clause,
-        [user_id, album_id])
+        [user_id, user_id ,album_id])
 
     photos = collections.OrderedDict()
     for row in cursor.fetchall():
