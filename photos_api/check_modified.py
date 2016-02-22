@@ -118,16 +118,13 @@ def supports_etag(View):
             # Get the appropriate handler method
             if request.method.lower() in self.http_method_names:
                 resource_etag = self.get_etag(request, *args, **kwargs)
-                not_modified_response = get_not_modified_response(resource_etag)
-                if not_modified_response:
-                    response = not_modified_response
-                else:
-                    handler = getattr(self, request.method.lower(),
-                                      self.http_method_not_allowed)
 
-                    # The ETag header is added!
-                    response = handler(request, *args, **kwargs)
-                    response['ETag'] = quote_etag(resource_etag)
+                handler = getattr(self, request.method.lower(),
+                                  self.http_method_not_allowed)
+
+                # The ETag header is added!
+                response = handler(request, *args, **kwargs)
+                response['ETag'] = quote_etag(resource_etag)
             else:
                 handler = self.http_method_not_allowed
                 response = handler(request, *args, **kwargs)

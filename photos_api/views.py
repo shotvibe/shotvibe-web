@@ -574,8 +574,8 @@ class HidePhotoView(mixins.DestroyModelMixin, generics.MultipleObjectAPIView):
             UserHiddenPhoto.objects.create(user=request.user, photo=photo)
 
 
-             # Save album revision, because we deleted photo from it.
-            photo.album.save_revision(timezone.now())
+            # Save album revision, because we deleted photo from it.
+            # photo.album.save_revision(timezone.now())
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
