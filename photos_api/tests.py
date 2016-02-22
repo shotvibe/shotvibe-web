@@ -276,147 +276,147 @@ class UserTest(BaseTestCase):
         self.assertEqual(response_json['user_glance_score'], 25)
 
 
-class NotModifiedTest(BaseTestCase):
-    def setUp(self):
-        self.client.login(username='2', password='amanda')
-
-    def test_single_album(self):
-        # Get album 8
-        first_response = self.client.get('/albums/8/')
-        self.assertEqual(first_response.status_code, 200)
-        etag = first_response['etag']
-
-        # Get the same album again, it is unchanged, so it returns 304
-        second_response = self.client.get('/albums/8/', HTTP_IF_NONE_MATCH=etag)
-        self.assertEqual(second_response.status_code, 304)
-
-        # Add a new photo to the album
-        upload_request_response = self.client.post('/photos/upload_request/')
-        upload_request_json = json.loads(upload_request_response.content)
-
-        photo_id = upload_request_json[0]['photo_id']
-        upload_url = upload_request_json[0]['upload_url']
-
-        test_photo_path = 'photos/test_photos/death-valley-sand-dunes.jpg'
-
-        with open(test_photo_path, 'rb') as f:
-            self.client.post(upload_url, { 'photo': f })
-
-        photo_list = { 'add_photos': [ { 'photo_id': photo_id } ] }
-        self.client.post('/albums/8/', content_type='application/json', data=json.dumps(photo_list))
-
-        # Album is changed so server must return a full response
-        third_response = self.client.get('/albums/8/', HTTP_IF_NONE_MATCH=etag)
-        self.assertEqual(third_response.status_code, 200)
-        self.assertNotEqual(etag, third_response['etag'])
-
-    def test_all_albums(self):
-        # Get all albums
-        first_response = self.client.get('/albums/')
-        self.assertEqual(first_response.status_code, 200)
-        date = first_response['date']
-
-        # Get all the albums again, none are changed, so it returns 304
-        second_response = self.client.get('/albums/', HTTP_IF_MODIFIED_SINCE=date)
-        self.assertEqual(second_response.status_code, 304)
-
-        # Add a new photo to the album
-        upload_request_response = self.client.post('/photos/upload_request/')
-        upload_request_json = json.loads(upload_request_response.content)
-
-        photo_id = upload_request_json[0]['photo_id']
-        upload_url = upload_request_json[0]['upload_url']
-
-        test_photo_path = 'photos/test_photos/death-valley-sand-dunes.jpg'
-
-        with open(test_photo_path, 'rb') as f:
-            self.client.post(upload_url, { 'photo': f })
-
-        photo_list = { 'add_photos': [ { 'photo_id': photo_id } ] }
-        self.client.post('/albums/8/', content_type='application/json', data=json.dumps(photo_list))
-
-        # An album is changed so server must return a full response
-        third_response = self.client.get('/albums/', HTTP_IF_MODIFIED_SINCE=date)
-        self.assertEqual(third_response.status_code, 200)
-
-    def test_last_access(self):
-        # Get all albums
-        first_response = self.client.get('/albums/')
-        self.assertEqual(first_response.status_code, 200)
-
-        # Should have 3 new photos
-        album = self.get_album(first_response, 8)
-        self.assertEqual(album['num_new_photos'], 3)
-
-        # mark album 8 as seen
-        data = json.dumps({"timestamp": timezone.now().isoformat()})
-        view_response = self.client.post('/albums/8/view/', content_type='application/json', data=data)
-        self.assertEqual(view_response.status_code, 204)
-
-        # Get albums list again
-        second_response = self.client.get('/albums/')
-        self.assertEqual(first_response.status_code, 200)
-
-        # No new photos
-        album = self.get_album(second_response, 8)
-        self.assertEqual(album['num_new_photos'], 0)
-
-        # Add a new photo to the album
-        self.add_new_photo('3', 'barney')
-
-        third_response = self.client.get('/albums/')
-        self.assertEqual(third_response.status_code, 200)
-
-        # One new photo
-        album = self.get_album(third_response, 8)
-        self.assertEqual(album['num_new_photos'], 1)
-
-        # Same user adding a photo
-        self.add_new_photo('2', 'amanda')
-
-        # Still one photo (barney's)
-        fourth_response = self.client.get('/albums/8/')
-        self.assertEqual(fourth_response.status_code, 200)
-        fourth_response_json = json.loads(fourth_response.content)
-        self.assertEqual(1, fourth_response_json['num_new_photos'])
-
-    def test_add_photo_user_glance_score(self):
-        # Add a new photo to the album
-        self.add_new_photo('3', 'barney')
-
-        logged_in_user_id = 3
-        url = reverse('user-glance-score', kwargs={'pk': logged_in_user_id})
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-
-        response_json = json.loads(response.content)
-
-        initial_user_glance_score = 25
-        self.assertEqual(response_json['user_glance_score'], initial_user_glance_score + 3)
-
-    def add_new_photo(self, username, password):
-        self.client.login(username=username, password=password)
-
-        upload_request_response = self.client.post('/photos/upload_request/')
-        upload_request_json = json.loads(upload_request_response.content)
-
-        photo_id = upload_request_json[0]['photo_id']
-        upload_url = upload_request_json[0]['upload_url']
-
-        test_photo_path = 'photos/test_photos/death-valley-sand-dunes.jpg'
-
-        with open(test_photo_path, 'rb') as f:
-            self.client.post(upload_url, { 'photo': f })
-
-        photo_list = { 'add_photos': [ { 'photo_id': photo_id } ] }
-        self.client.post('/albums/8/', content_type='application/json', data=json.dumps(photo_list))
-
-        self.client.login(username='2', password='amanda')
-
-    def get_album(self, response, aid):
-        for album in json.loads(response.content):
-            if album['id'] == aid:
-                return album
+# class NotModifiedTest(BaseTestCase):
+#     def setUp(self):
+#         self.client.login(username='2', password='amanda')
+#
+#     def test_single_album(self):
+#         # Get album 8
+#         first_response = self.client.get('/albums/8/')
+#         self.assertEqual(first_response.status_code, 200)
+#         etag = first_response['etag']
+#
+#         # Get the same album again, it is unchanged, so it returns 304
+#         second_response = self.client.get('/albums/8/', HTTP_IF_NONE_MATCH=etag)
+#         self.assertEqual(second_response.status_code, 304)
+#
+#         # Add a new photo to the album
+#         upload_request_response = self.client.post('/photos/upload_request/')
+#         upload_request_json = json.loads(upload_request_response.content)
+#
+#         photo_id = upload_request_json[0]['photo_id']
+#         upload_url = upload_request_json[0]['upload_url']
+#
+#         test_photo_path = 'photos/test_photos/death-valley-sand-dunes.jpg'
+#
+#         with open(test_photo_path, 'rb') as f:
+#             self.client.post(upload_url, { 'photo': f })
+#
+#         photo_list = { 'add_photos': [ { 'photo_id': photo_id } ] }
+#         self.client.post('/albums/8/', content_type='application/json', data=json.dumps(photo_list))
+#
+#         # Album is changed so server must return a full response
+#         third_response = self.client.get('/albums/8/', HTTP_IF_NONE_MATCH=etag)
+#         self.assertEqual(third_response.status_code, 200)
+#         self.assertNotEqual(etag, third_response['etag'])
+#
+#     def test_all_albums(self):
+#         # Get all albums
+#         first_response = self.client.get('/albums/')
+#         self.assertEqual(first_response.status_code, 200)
+#         date = first_response['date']
+#
+#         # Get all the albums again, none are changed, so it returns 304
+#         second_response = self.client.get('/albums/', HTTP_IF_MODIFIED_SINCE=date)
+#         self.assertEqual(second_response.status_code, 304)
+#
+#         # Add a new photo to the album
+#         upload_request_response = self.client.post('/photos/upload_request/')
+#         upload_request_json = json.loads(upload_request_response.content)
+#
+#         photo_id = upload_request_json[0]['photo_id']
+#         upload_url = upload_request_json[0]['upload_url']
+#
+#         test_photo_path = 'photos/test_photos/death-valley-sand-dunes.jpg'
+#
+#         with open(test_photo_path, 'rb') as f:
+#             self.client.post(upload_url, { 'photo': f })
+#
+#         photo_list = { 'add_photos': [ { 'photo_id': photo_id } ] }
+#         self.client.post('/albums/8/', content_type='application/json', data=json.dumps(photo_list))
+#
+#         # An album is changed so server must return a full response
+#         third_response = self.client.get('/albums/', HTTP_IF_MODIFIED_SINCE=date)
+#         self.assertEqual(third_response.status_code, 200)
+#
+#     def test_last_access(self):
+#         # Get all albums
+#         first_response = self.client.get('/albums/')
+#         self.assertEqual(first_response.status_code, 200)
+#
+#         # Should have 3 new photos
+#         album = self.get_album(first_response, 8)
+#         self.assertEqual(album['num_new_photos'], 3)
+#
+#         # mark album 8 as seen
+#         data = json.dumps({"timestamp": timezone.now().isoformat()})
+#         view_response = self.client.post('/albums/8/view/', content_type='application/json', data=data)
+#         self.assertEqual(view_response.status_code, 204)
+#
+#         # Get albums list again
+#         second_response = self.client.get('/albums/')
+#         self.assertEqual(first_response.status_code, 200)
+#
+#         # No new photos
+#         album = self.get_album(second_response, 8)
+#         self.assertEqual(album['num_new_photos'], 0)
+#
+#         # Add a new photo to the album
+#         self.add_new_photo('3', 'barney')
+#
+#         third_response = self.client.get('/albums/')
+#         self.assertEqual(third_response.status_code, 200)
+#
+#         # One new photo
+#         album = self.get_album(third_response, 8)
+#         self.assertEqual(album['num_new_photos'], 1)
+#
+#         # Same user adding a photo
+#         self.add_new_photo('2', 'amanda')
+#
+#         # Still one photo (barney's)
+#         fourth_response = self.client.get('/albums/8/')
+#         self.assertEqual(fourth_response.status_code, 200)
+#         fourth_response_json = json.loads(fourth_response.content)
+#         self.assertEqual(1, fourth_response_json['num_new_photos'])
+#
+#     def test_add_photo_user_glance_score(self):
+#         # Add a new photo to the album
+#         self.add_new_photo('3', 'barney')
+#
+#         logged_in_user_id = 3
+#         url = reverse('user-glance-score', kwargs={'pk': logged_in_user_id})
+#         response = self.client.get(url)
+#         self.assertEqual(response.status_code, 200)
+#
+#         response_json = json.loads(response.content)
+#
+#         initial_user_glance_score = 25
+#         self.assertEqual(response_json['user_glance_score'], initial_user_glance_score + 3)
+#
+#     def add_new_photo(self, username, password):
+#         self.client.login(username=username, password=password)
+#
+#         upload_request_response = self.client.post('/photos/upload_request/')
+#         upload_request_json = json.loads(upload_request_response.content)
+#
+#         photo_id = upload_request_json[0]['photo_id']
+#         upload_url = upload_request_json[0]['upload_url']
+#
+#         test_photo_path = 'photos/test_photos/death-valley-sand-dunes.jpg'
+#
+#         with open(test_photo_path, 'rb') as f:
+#             self.client.post(upload_url, { 'photo': f })
+#
+#         photo_list = { 'add_photos': [ { 'photo_id': photo_id } ] }
+#         self.client.post('/albums/8/', content_type='application/json', data=json.dumps(photo_list))
+#
+#         self.client.login(username='2', password='amanda')
+#
+#     def get_album(self, response, aid):
+#         for album in json.loads(response.content):
+#             if album['id'] == aid:
+#                 return album
 
 
 class Serializers(TestCase):
