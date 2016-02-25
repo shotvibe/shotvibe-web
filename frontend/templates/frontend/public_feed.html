@@ -1,0 +1,63 @@
+{% extends "frontend/base.html" %}
+
+{% load static from staticfiles %}
+
+{% block title %}ShotVibe - Public Feed{% endblock %}
+
+{% block content %}
+<div class="row">
+  <ul class="breadcrumb">
+    <li><a href="{% url "frontend.views.index" %}">Home</a> <span class="divider">/</span></li>
+    <li class="active">Public Feed</li>
+  </ul>
+</div>
+
+<div class="row">
+  <h3>Public Feed</h3>
+</div>
+
+<div class="row">
+  <div class="span9">
+    <table>
+      <tr>
+        <th>Rank</th>
+        <th>Photo</th>
+        <th>Num Copies</th>
+        <th>Total Photo Score</th>
+        <th>Age (seconds)</th>
+      </tr>
+      {% for photo in photos %}
+      <tr>
+        <td>
+          {{ forloop.counter }}
+        </td>
+        <td>
+        {% if photo.is_photo %}
+          <img src="{{ photo.get_photo_url_no_ext }}_thumb75.jpg" alt="">
+        {% elif photo.is_video %}
+          {% if photo.is_video_processing %}
+            <img src="https://upload.wikimedia.org/wikipedia/commons/d/de/Ajax-loader.gif" width="140" height="140" alt="">
+          {% elif photo.is_video_invalid %}
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Counter_Vandalism_Unit.svg/64px-Counter_Vandalism_Unit.svg.png" width="140" height="140" alt="">
+          {% elif photo.is_video_ready %}
+            <video src="{{ photo.get_video_url }}" width="140" height="140" controls>
+          {% endif %}
+        {% endif %}
+        </td>
+        <td>
+          {{ photo.num_copies }}
+        </td>
+        <td>
+          {{ photo.total_photo_score }}
+        </td>
+        <td>
+          {{ photo.age }}
+          <meter min="0" max="86400" high="86399" value="{{ photo.age }}"></meter>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+
+{% endblock %}
