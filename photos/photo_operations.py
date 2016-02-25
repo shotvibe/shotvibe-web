@@ -224,20 +224,7 @@ class AddPendingPhotosToAlbumAction(ExThread):
                 else:
                     success = True
 
-            for subdomain, photos in added_photos.iteritems():
-                for photo_server in PhotoServer.objects.filter(subdomain=subdomain, unreachable=False):
-                    # TODO We should use concurrent requests for this
-
-                    num_retries = 5
-                    initial_retry_time = 4
-
-                    try:
-                        request_with_n_retries(num_retries, initial_retry_time,
-                                lambda: photo_server_set_photos(photo_server.photos_update_url, photo_server.auth_key, photos))
-                    except requests.exceptions.RequestException:
-                        # TODO Log this
-                        photo_server.set_unreachable()
-
+            update_all_photo_servers(added_photos)
 
             album = Album.objects.get(pk=self.album_id)
             album.save_revision(self.date_created, True)
@@ -321,20 +308,7 @@ class CopyPhotosToAlbumAction(ExThread):
                 else:
                     success = True
 
-            for subdomain, photos in added_photos.iteritems():
-                for photo_server in PhotoServer.objects.filter(subdomain=subdomain, unreachable=False):
-                    # TODO We should use concurrent requests for this
-
-                    num_retries = 5
-                    initial_retry_time = 4
-
-                    try:
-                        request_with_n_retries(num_retries, initial_retry_time,
-                                lambda: photo_server_set_photos(photo_server.photos_update_url, photo_server.auth_key, photos))
-                    except requests.exceptions.RequestException:
-                        # TODO Log this
-                        photo_server.set_unreachable()
-
+            update_all_photo_servers(added_photos)
 
             album = Album.objects.get(pk=self.album_id)
             album.save_revision(self.date_created, True)
@@ -552,3 +526,18 @@ def photo_server_set_photos(photos_update_url, photo_server_auth_key, photos):
 def photo_server_delete_photos(photos_update_url, photo_server_auth_key, photo_ids):
     # TODO ...
     pass
+
+def update_all_photo_servers(added_photos):
+    for subdomain, photos in added_photos.iteritems():
+        for photo_server in PhotoServer.objects.filter(subdomain=subdomain, unreachable=False):
+            # TODO We should use concurrent requests for this
+
+            num_retries = 5
+            initial_retry_time = 4
+
+            try:
+                request_with_n_retries(num_retries, initial_retry_time,
+                        lambda: photo_server_set_photos(photo_server.photos_update_url, photo_server.auth_key, photos))
+            except requests.exceptions.RequestException:
+                # TODO Log this
+                photo_server.set_unreachable()
