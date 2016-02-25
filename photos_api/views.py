@@ -238,8 +238,8 @@ class AlbumNameView(GenericAPIView):
         return Response(responseSerializer.data)
 
     def put(self, request, *args, **kwargs):
-        if request.user != self.album.creator:
-            return Response(status=403)
+        # if request.user != self.album.creator:
+        #     return Response(status=403)
 
         serializer = self.get_serializer(data=request.DATA, files=request.FILES)
         if serializer.is_valid():
