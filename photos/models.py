@@ -58,10 +58,11 @@ class Album(models.Model):
 
     objects = AlbumManager()
 
-    def save_revision(self, revision_date):
-        self.last_updated = revision_date
+    def save_revision(self, revision_date, update_last_updated=False):
+        if update_last_updated:
+            self.last_updated = revision_date
+            self.save(update_fields=['last_updated'])
         Album.objects.filter(pk=self.id).update(revision_number=models.F('revision_number')+1)
-        self.save(update_fields=['last_updated'])
 
     @staticmethod
     def default_sms_message_formatter(link_code):
@@ -80,15 +81,16 @@ class Album(models.Model):
                 m.add_user_id(802)
 
         """
-        def __init__(self, album, current_date):
+        def __init__(self, album, current_date, update_last_updated):
             self.album = album
             self.current_date = current_date
+            self.update_last_updated = update_last_updated
 
         def __enter__(self):
             return self
 
         def __exit__(self, type, value, traceback):
-            self.album.save_revision(self.current_date)
+            self.album.save_revision(self.current_date, self.update_last_updated)
 
         def add_user_id(self, inviter, user_id):
             """
@@ -231,8 +233,8 @@ class Album(models.Model):
             device_push.broadcast_photo_glance(photo.author.id, glancer.nickname, photo.album.id, photo.album.name)
 
 
-    def modify(self, current_date):
-        return Album.ModificationContext(self, current_date)
+    def modify(self, current_date, update_last_updated=False):
+        return Album.ModificationContext(self, current_date, update_last_updated)
 
     def add_members(self, inviter, member_identifiers, date_added, sms_message_formatter, sms_analytics_event_name='New User SMS Invite Sent', sms_analytics_event_properties={}):
         """
@@ -646,7 +648,7 @@ class VideoManager(models.Manager):
             video.status = Video.STATUS_READY
             video.duration = duration
             video.save(update_fields=['status', 'duration'])
-            album.save_revision(now)
+            album.save_revision(now,True)
 
             photo = video.get_photo()
 

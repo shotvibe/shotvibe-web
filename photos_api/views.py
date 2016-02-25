@@ -700,7 +700,7 @@ class PhotoCommentView(GenericAPIView):
 
         serializer = self.get_serializer(data=request.DATA, files=request.FILES)
         if serializer.is_valid():
-            with self.photo.album.modify(timezone.now()) as m:
+            with self.photo.album.modify(timezone.now(), True) as m:
                 m.comment_on_photo(self.photo, request.user, self.client_msg_id, serializer.object['comment'])
 
             return Response(status=status.HTTP_204_NO_CONTENT)

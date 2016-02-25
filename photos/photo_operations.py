@@ -240,7 +240,7 @@ class AddPendingPhotosToAlbumAction(ExThread):
 
 
             album = Album.objects.get(pk=self.album_id)
-            album.save_revision(self.date_created)
+            album.save_revision(self.date_created, True)
 
 
 class CopyPhotosToAlbumAction(ExThread):
@@ -337,7 +337,7 @@ class CopyPhotosToAlbumAction(ExThread):
 
 
             album = Album.objects.get(pk=self.album_id)
-            album.save_revision(self.date_created)
+            album.save_revision(self.date_created, True)
 
 
 def request_with_n_retries(num_retries, initial_retry_time, action):
@@ -435,7 +435,7 @@ def add_photo(client_upload_id, storage_id, author, album, now):
                     # TODO Log this
                     photo_server.set_unreachable()
 
-        album.save_revision(now)
+        album.save_revision(now,True)
 
         photos_added_to_album.send(sender=None,
                                    photos=[p.photo_id],
@@ -492,7 +492,7 @@ def add_youtube_photo(client_upload_id, storage_id, author, album, now,youtube_i
                     # TODO Log this
                     photo_server.set_unreachable()
 
-        album.save_revision(now)
+        album.save_revision(now, True)
 
         photos_added_to_album.send(sender=None,
                                    photos=[p.photo_id],
