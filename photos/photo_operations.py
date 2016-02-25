@@ -1,5 +1,4 @@
 import Queue
-import random
 import sys
 import threading
 import time
@@ -20,11 +19,6 @@ from photos.models import Photo
 from photos.models import PhotoServer
 from photos_api.signals import photos_added_to_album
 from photos_api.device_push import in_testing_mode
-
-
-def choose_random_subdomain():
-    return random.choice(settings.ALL_PHOTO_SUBDOMAINS)
-
 
 # TODO This module should use be updated to use real background tasks instead
 # of a background thread
@@ -142,7 +136,7 @@ class AddPendingPhotosToAlbumAction(ExThread):
             else:
                 try:
                     with transaction.atomic():
-                        chosen_subdomain = choose_random_subdomain()
+                        chosen_subdomain = Photo.choose_random_subdomain()
                         p = Photo.objects.create(
                             photo_id=photo_id,
                             media_type = Photo.MEDIA_TYPE_PHOTO,
@@ -224,20 +218,7 @@ class AddPendingPhotosToAlbumAction(ExThread):
                 else:
                     success = True
 
-            for subdomain, photos in added_photos.iteritems():
-                for photo_server in PhotoServer.objects.filter(subdomain=subdomain, unreachable=False):
-                    # TODO We should use concurrent requests for this
-
-                    num_retries = 5
-                    initial_retry_time = 4
-
-                    try:
-                        request_with_n_retries(num_retries, initial_retry_time,
-                                lambda: photo_server_set_photos(photo_server.photos_update_url, photo_server.auth_key, photos))
-                    except requests.exceptions.RequestException:
-                        # TODO Log this
-                        photo_server.set_unreachable()
-
+            update_all_photo_servers(added_photos)
 
             album = Album.objects.get(pk=self.album_id)
             album.save_revision(self.date_created, True)
@@ -278,19 +259,8 @@ class CopyPhotosToAlbumAction(ExThread):
                         album=album,
                         storage_id=photo.storage_id,
                         author=self.author).exists():
-                    chosen_subdomain = choose_random_subdomain()
-                    p = Photo.objects.create(
-                        photo_id=Photo.generate_photo_id(),
-                        media_type = photo.media_type,
-                        client_upload_id = '',
-                        storage_id = photo.storage_id,
-                        subdomain = chosen_subdomain,
-                        date_created = self.date_created,
-                        author=self.author,
-                        album=album,
-                        album_index = next_album_index,
-                        copied_from_photo_id = photo.get_original_photo(),
-                    )
+                    p = photo.create_copy(self.author, album, next_album_index, self.date_created)
+                    chosen_subdomain = p.subdomain
                     if chosen_subdomain in added_photos:
                         added_photos[chosen_subdomain].append(p)
                     else:
@@ -321,20 +291,7 @@ class CopyPhotosToAlbumAction(ExThread):
                 else:
                     success = True
 
-            for subdomain, photos in added_photos.iteritems():
-                for photo_server in PhotoServer.objects.filter(subdomain=subdomain, unreachable=False):
-                    # TODO We should use concurrent requests for this
-
-                    num_retries = 5
-                    initial_retry_time = 4
-
-                    try:
-                        request_with_n_retries(num_retries, initial_retry_time,
-                                lambda: photo_server_set_photos(photo_server.photos_update_url, photo_server.auth_key, photos))
-                    except requests.exceptions.RequestException:
-                        # TODO Log this
-                        photo_server.set_unreachable()
-
+            update_all_photo_servers(added_photos)
 
             album = Album.objects.get(pk=self.album_id)
             album.save_revision(self.date_created, True)
@@ -407,7 +364,7 @@ def add_photo(client_upload_id, storage_id, author, album, now):
                         'photo_id': Photo.generate_photo_id(),
                         'media_type': Photo.MEDIA_TYPE_PHOTO,
                         'client_upload_id': client_upload_id,
-                        'subdomain': choose_random_subdomain(),
+                        'subdomain': Photo.choose_random_subdomain(),
                         'date_created': now,
                         'author': author,
                         'album': album,
@@ -463,7 +420,7 @@ def add_youtube_photo(client_upload_id, storage_id, author, album, now,youtube_i
                         'photo_id': Photo.generate_photo_id(),
                         'media_type': Photo.MEDIA_TYPE_YOUTUBE,
                         'client_upload_id': client_upload_id,
-                        'subdomain': choose_random_subdomain(),
+                        'subdomain': Photo.choose_random_subdomain(),
                         'date_created': now,
                         'author': author,
                         'album': album,
@@ -552,3 +509,18 @@ def photo_server_set_photos(photos_update_url, photo_server_auth_key, photos):
 def photo_server_delete_photos(photos_update_url, photo_server_auth_key, photo_ids):
     # TODO ...
     pass
+
+def update_all_photo_servers(added_photos):
+    for subdomain, photos in added_photos.iteritems():
+        for photo_server in PhotoServer.objects.filter(subdomain=subdomain, unreachable=False):
+            # TODO We should use concurrent requests for this
+
+            num_retries = 5
+            initial_retry_time = 4
+
+            try:
+                request_with_n_retries(num_retries, initial_retry_time,
+                        lambda: photo_server_set_photos(photo_server.photos_update_url, photo_server.auth_key, photos))
+            except requests.exceptions.RequestException:
+                # TODO Log this
+                photo_server.set_unreachable()

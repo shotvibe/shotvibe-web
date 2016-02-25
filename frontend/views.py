@@ -15,6 +15,7 @@ from phone_auth.models import AuthToken
 from photos.models import Album, Photo
 from photos import image_uploads
 from photos import photo_operations
+from photos.public_feed import compute_public_feed
 from photos_api.serializers import MemberIdentifier
 from photos_api.signals import photos_added_to_album
 from phone_auth import aws_sts
@@ -172,3 +173,12 @@ def album_members(request, album_pk):
             'others': others
             }
     return render_to_response('frontend/album_members.html', data, context_instance=RequestContext(request))
+
+def public_feed(request):
+    now = timezone.now()
+    photos = compute_public_feed(now)
+
+    data = {
+            'photos': photos
+            }
+    return render_to_response('frontend/public_feed.html', data, context_instance=RequestContext(request))

@@ -442,6 +442,10 @@ class Photo(models.Model):
         key_bitsize = 256
         return ''.join(["{0:02x}".format(ord(c)) for c in os.urandom(key_bitsize / 8)])
 
+    @staticmethod
+    def choose_random_subdomain():
+        return random.choice(settings.ALL_PHOTO_SUBDOMAINS)
+
     def is_photo(self):
         return self.media_type == Photo.MEDIA_TYPE_PHOTO
 
@@ -534,6 +538,28 @@ class Photo(models.Model):
 
     def get_glances(self):
         return self.photoglance_set.order_by('date_created')
+
+    def create_copy(self, author, album, album_index, now):
+        """
+        Creates a new Photo object, copied from this one
+
+        author: Author of new photo
+        album: Album to put new photo in
+        album_index: must be unique among the album, should be the next highest number
+        now: time of date_created for new photo
+        """
+        return Photo.objects.create(
+                photo_id=Photo.generate_photo_id(),
+                media_type = self.media_type,
+                client_upload_id = '',
+                storage_id = self.storage_id,
+                subdomain = Photo.choose_random_subdomain(),
+                date_created = now,
+                author = author,
+                album = album,
+                album_index = album_index,
+                copied_from_photo_id = self.get_original_photo()
+                )
 
 
 def get_pending_photo_default_photo_id():
