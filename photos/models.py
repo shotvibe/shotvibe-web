@@ -662,7 +662,7 @@ class VideoManager(models.Manager):
                 author_avatar_url=photo.author.get_avatar_url(),
                 num_photos=1,
                 user_ids=[membership.user.id for membership in membership_query],
-                album_photo=photo)
+                album_photo=photo.photo_id)
 
 
             device_push.broadcast_album_sync([photo.author.id], photo.album.id)
