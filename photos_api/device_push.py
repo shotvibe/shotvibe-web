@@ -127,7 +127,6 @@ def send_message_or_log_errors(msg):
 #
 # Individual notification types:
 #
-
 def broadcast_photos_added_to_album(album_id, author_id, album_name, author_name, author_avatar_url, num_photos, user_ids,album_photo):
     payload = {
             'type': 'photos_added',
@@ -157,6 +156,43 @@ def broadcast_photos_added_to_album(album_id, author_id, album_name, author_name
             'apns' : {
                 'aps' : {
                     'alert' : author_name + ' added ' + str(num_photos) + ' photos to the group ' + album_name,
+                    'sound': 'push.mp3',
+                    'badge': 1
+                    },
+                'd': payload
+                }
+            }
+    send_message_or_log_errors(rq)
+
+def broadcast_videos_added_to_album(album_id, author_id, album_name, author_name, author_avatar_url, num_photos, user_ids,album_photo):
+    payload = {
+            'type': 'photos_added',
+            'album_id': album_id,
+            'author': author_name,
+            'author_avatar_url': author_avatar_url,
+            'album_name': album_name,
+            'num_photos': 0,
+            'photo_id' : album_photo
+        }
+
+    # Send broadcast to all other users
+    rq = {
+            'user_ids' : [str(id) for id in user_ids if id != author_id],
+            'gcm' : {
+                'data' : {
+                    'd': json.dumps(payload),
+
+                    # Deprecated data:
+                    'type' : 'photos_added',
+                    'album_id' : str(album_id),
+                    'author' : author_name,
+                    'album_name' : album_name,
+                    'num_photos' : str(num_photos)
+                    }
+                },
+            'apns' : {
+                'aps' : {
+                    'alert' : author_name + ' added a video to the group ' + album_name,
                     'sound': 'push.mp3',
                     'badge': 1
                     },

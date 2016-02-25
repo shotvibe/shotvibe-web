@@ -649,7 +649,26 @@ class VideoManager(models.Manager):
             album.save_revision(now)
 
             photo = video.get_photo()
+
+
+
+            # Send push notifications to the album members about just added photos
+            membership_query = AlbumMember.objects.filter(album=album).only('user__id')
+            device_push.broadcast_videos_added_to_album(
+                album_id=album.id,
+                author_id=photo.author.id,
+                album_name=album.name,
+                author_name=photo.author.nickname,
+                author_avatar_url=photo.author.get_avatar_url(),
+                num_photos=1,
+                user_ids=[membership.user.id for membership in membership_query],
+                album_photo=photo)
+
+
             device_push.broadcast_album_sync([photo.author.id], photo.album.id)
+            #device_push.broadcast_video_added_to_album(photo.album.id,[photo.author.id], photo.album.name, photo.author.creator.name, photo.author.get_avatar_url(),)
+            #(, author_avatar_url, num_photos, user//_ids,album_photo
+
         elif video.status != Video.STATUS_READY:
             raise RuntimeError('Invalid transition from status: ' + video.status)
 
