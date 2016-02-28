@@ -425,3 +425,30 @@ def broadcast_photo_glance(author_id, glance_user_name, album_id, album_name):
                 }
             }
     send_message_or_log_errors(rq)
+
+
+def broadcast_photo_in_public_feed(user_ids, media_type, photo_id):
+    payload = {
+            'type': 'photo_in_public_feed',
+            'media_type': media_type,
+            'photo_id': photo_id
+        }
+
+    alert_text = u"\u2B50\u2B50 Your " + media_type + u" has made it into the public feed! 250 points! Keep glancing \u2B50\u2B50"
+    rq = {
+            'user_ids': [str(id) for id in user_ids],
+            'gcm': {
+                'data': {
+                    'd': json.dumps(payload)
+                    }
+                },
+            'apns': {
+                'aps': {
+                    'alert': alert_text,
+                    'sound': 'push.mp3',
+                    'badge': 1
+                    },
+                'd': payload
+                }
+            }
+    send_message_or_log_errors(rq)
