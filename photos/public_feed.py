@@ -57,7 +57,7 @@ def compute_public_feed(now):
         # TODO:
         return y
 
-    photos = [p for p in original_photos]
+    photos = [p for p in original_photos if total_photo_score[p.photo_id] >= PUBLIC_FEED_SCORE_THRESHOLD]
 
     for p in photos:
         p.num_copies = num_copies[p.photo_id]
