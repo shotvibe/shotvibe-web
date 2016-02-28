@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from photos.models import Album, Photo
 from photos import photo_operations
+from photos_api import device_push
 
 #PUBLIC_FEED_TIME_THRESHOLD = datetime.timedelta(days=3)
 PUBLIC_FEED_TIME_THRESHOLD = datetime.timedelta(days=90)
@@ -130,9 +131,11 @@ def set_public_feed(new_photos, now):
             else:
                 added_photos[chosen_subdomain] = [new_photo]
 
-            # TODO: A new Photo made it into the public feed!
-            # 1. Update the score of the user who uploaded the photo
-            # 2. Send push notification to the user
+            # A new Photo made it into the public feed!
+
+            p.author.increment_user_glance_score(250)
+
+            device_push.broadcast_photo_in_public_feed([p.author.id], p.get_media_type_display(), p.photo_id)
 
         i += 1
 
